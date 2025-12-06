@@ -35,3 +35,6 @@ npm run dev # запуск сервера
 npm install -g npm
 npx create-react-app .
 npm start
+
+# Установка библиотек для взаимодействия Django и React 
+python -m pip install django-cors-headers # в \backend
