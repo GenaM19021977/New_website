@@ -1,6 +1,6 @@
 python -m pip install virtualenv # создание виртуального окружения
 python -m venv venv
-venv\scripts\activate
+.\venv\Scripts\Activate.ps1
 
 # Установка библиотек
 python.exe -m pip install --upgrade pip
@@ -11,3 +11,9 @@ python -m pip install djangorestframework # для работы с API
 # Создание проекта на Django
 django-admin startproject electric_boiler
 python manage.py startapp products
+
+# Применение миграций и запуск
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
