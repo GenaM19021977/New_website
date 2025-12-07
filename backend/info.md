@@ -60,3 +60,9 @@ python -m pip install django-cors-headers # в \backend
 2. Установить библиотеку `pip install beautifulsoup4` - для парсинга HTML-контента
 3. Установить библиотеку `pip install requests` - для HTTP-запросов при парсинге
 4. Установить библиотеку `pip install lxml` - для быстрого парсинга XML/HTML
+
+Подключение к базе данных PostgreSQL
+5. Установить библиотеку `pip install psycopg2-binary` - драйвер для подключения к PostgreSQL
+6. Установить библиотеку `pip install django-environ` - для работы с переменными окружения
+7. Создать базу данных PostgreSQL для проекта
+8. Настроить подключение к БД в settings.py через переменные окружения
