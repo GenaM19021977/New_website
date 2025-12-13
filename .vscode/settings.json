@@ -18,5 +18,6 @@
     },
     "[plaintext]": {
         "editor.defaultFormatter": null
-    }
+    },
+    "editor.formatOnSave": true
 }

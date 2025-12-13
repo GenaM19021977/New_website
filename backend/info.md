@@ -54,6 +54,8 @@ python -m pip install django-cors-headers # в \backend
 # 3. Ручная активация (если нужно):
 #    .\venv\Scripts\Activate.ps1
 
+# Выполнил пцнкты плана
+
 # установил доп библиотеки
 Установка библиотек для парсинга данных
 1. Установить библиотеку `pip install selenium` - для автоматизации браузера и парсинга динамических страниц
@@ -66,3 +68,20 @@ python -m pip install django-cors-headers # в \backend
 6. Установить библиотеку `pip install django-environ` - для работы с переменными окружения
 7. Создать базу данных PostgreSQL для проекта
 8. Настроить подключение к БД в settings.py через переменные окружения
+
+## Этап 3: Настройка безопасности и переменных окружения
+9. Установить библиотеку `pip install python-decouple` - альтернатива для работы с .env файлами
+10. Создать файл `.env` в папке backend с секретными ключами (SECRET_KEY, DB настройки)
+11. Создать файл `.env.example` как шаблон для других разработчиков
+12. Обновить settings.py для чтения переменных из .env файла
+
+## Этап 4: Аутентификация и авторизация пользователей
+13. Установить библиотеку `pip install djangorestframework-simplejwt` - для JWT токенов
+14. Установить библиотеку `pip install django-allauth` - для социальной аутентификации (опционально)
+На данном этапе создаем модели пользователей и суперпользователя, в settings прописали AUTH_USER_MODEL = 'products.CustomUser'
+superuser BHUgbuyii@mail.org | ZXCzxc321
+
+установка доп библиотек для пользовательского интерфейса
+npm install react-router-dom
+npm install @mui/material @emotion/react @emotion/styled #библиотека иконок пользователького интерфейса
+npm install @mui/icons-material
