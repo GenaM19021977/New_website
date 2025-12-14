@@ -85,3 +85,5 @@ superuser BHUgbuyii@mail.org | ZXCzxc321
 npm install react-router-dom
 npm install @mui/material @emotion/react @emotion/styled #библиотека иконок пользователького интерфейса
 npm install @mui/icons-material
+
+background-image: url('D:\Developer\Turiki\New_website\frontend\src\pictures\87168176238132.jpg'); # код для вставки изображения на фон страницы сайта
