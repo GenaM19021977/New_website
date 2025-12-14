@@ -7,6 +7,8 @@ from .views import *
 
 router = DefaultRouter()
 router.register('register', RegisterViewset, basename='register')
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path('login/', login_view, name='login'),
+]
 
 
