@@ -10,19 +10,20 @@ from django.contrib.auth import authenticate
 
 User = get_user_model()
 
-# создаем набор представлений для создания, редактирования и удаления пользователей
-class RegisterViewset(viewsets.ViewSet):
-    permission_classes = [permissions.AllowAny]
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
 
-    def create(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()  # Сохраняем пользователя в БД
-            return Response(serializer.data, status=201)  # 201 - статус успешного создания
-        else:
-            return Response(serializer.errors, status=400)
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def register_view(request):
+    """
+    Endpoint для регистрации пользователя
+    Принимает email и password, создает нового пользователя
+    """
+    serializer = RegisterSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()  # Сохраняем пользователя в БД
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
