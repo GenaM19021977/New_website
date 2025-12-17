@@ -44,7 +44,7 @@ export default function Navbar(props) {
         <Box sx={{ overflow: 'auto' }}>
           <List>
 
-              <ListItem key={1} disablePadding>
+              <ListItem key="home" disablePadding>
                 <ListItemButton component={Link} to="/home" selected={"/home" ===path}>
                   <ListItemIcon>
                     <HomeIcon />
@@ -53,7 +53,7 @@ export default function Navbar(props) {
                 </ListItemButton>
               </ListItem>
 
-              <ListItem key={1} disablePadding>
+              <ListItem key="about" disablePadding>
               <ListItemButton component={Link} to="/about" selected={"/about" ===path}>
                   <ListItemIcon>
                     <InfoIcon />

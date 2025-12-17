@@ -12,11 +12,18 @@ const AxiosInstance = axios.create({
 })
 
 // Добавляем interceptor для автоматического добавления токена в заголовки
+// Но не добавляем токен для публичных endpoints (register, login)
 AxiosInstance.interceptors.request.use(
     (config) => {
+        // Публичные endpoints, для которых не нужен токен
+        const publicEndpoints = ['register/', 'login/']
+        const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint))
+        
+        if (!isPublicEndpoint) {
         const token = localStorage.getItem('access_token')
         if (token) {
             config.headers.Authorization = `Bearer ${token}`
+            }
         }
         return config
     },

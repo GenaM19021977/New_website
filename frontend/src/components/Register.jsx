@@ -10,13 +10,7 @@ import { useNavigate } from 'react-router-dom'
 
 const Register = () => {
     const navigate = useNavigate()
-    const { handleSubmit, control } = useForm({
-        defaultValues: {
-            email: '',
-            password: '',
-            password2: ''
-        }
-    })
+    const { handleSubmit, control } = useForm()
 
     const submission = (data) => {
         AxiosInstance.post('register/', {
@@ -90,7 +84,15 @@ const Register = () => {
                     </Box>
 
                     <Box className={"itemBox"}>
-                        <Link to="/"> Already registered? Please login!</Link>
+                        <Link
+                            to="/"
+                            onClick={() => {
+                                sessionStorage.setItem('explicitLoginNavigation', 'true')
+                            }}
+                            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+                        >
+                            Already registered? Please login!
+                        </Link>
                     </Box>
 
 

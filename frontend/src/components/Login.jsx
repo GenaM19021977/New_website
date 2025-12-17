@@ -9,13 +9,9 @@ import AxiosInstance from './AxiosInstance'
 import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
+    
     const navigate = useNavigate()
-    const { handleSubmit, control } = useForm({
-        defaultValues: {
-            email: '',
-            password: ''
-        }
-    })
+    const { handleSubmit, control } = useForm()
 
     const submission = (data) => {
         AxiosInstance.post('login/', {
@@ -23,6 +19,8 @@ const Login = () => {
             password: data.password,
         })
             .then((response) => {
+                console.log(response)
+                localStorage.setItem('Token', response.data.token)
                 // Сохраняем токены в localStorage
                 if (response.data.access) {
                     localStorage.setItem('access_token', response.data.access)
@@ -43,7 +41,7 @@ const Login = () => {
                 <Box className={"whiteBox"}>
 
                     <Box className={"itemBox"}>
-                        <Box className={"title"}>Register or log in!</Box>
+                        <Box className={"title"}>Login for Auth App</Box>
                     </Box>
 
                     <Box className={"itemBox"}>

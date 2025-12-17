@@ -14,9 +14,15 @@ function App() {
   const noNavbar = location.pathname === "/register" || location.pathname === "/"
 
   // Перенаправляем аутентифицированных пользователей с страницы логина на главную
+  // Но не перенаправляем, если пользователь явно переходит на страницу логина
   useEffect(() => {
-    if (isAuthenticated && location.pathname === "/") {
+    const isExplicitLoginNavigation = sessionStorage.getItem('explicitLoginNavigation')
+    if (isAuthenticated && location.pathname === "/" && !isExplicitLoginNavigation) {
       navigate('/home')
+    }
+    // Очищаем флаг после использования
+    if (isExplicitLoginNavigation) {
+      sessionStorage.removeItem('explicitLoginNavigation')
     }
   }, [isAuthenticated, location.pathname, navigate])
 
@@ -24,23 +30,23 @@ function App() {
     <>
       {
         noNavbar ?
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Routes>
-
-        :
-
-        <Navbar 
-        content={
           <Routes>
-            <Route path="/home" element={<Home />} />
-            <Route path="/about" element={<About />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
-        }
-     
-      />
-      }  
+
+          :
+
+          <Navbar
+            content={
+              <Routes>
+                <Route path="/home" element={<Home />} />
+                <Route path="/about" element={<About />} />
+              </Routes>
+            }
+
+          />
+      }
     </>
   )
 }
