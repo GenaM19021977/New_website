@@ -91,4 +91,3 @@ background-image: url('D:\Developer\Turiki\New_website\frontend\src\pictures\871
 
 npm i axios # Запросы из браузера: выполняйте XMLHttpRequests непосредственно из браузера
 npm install react-hook-form # устанвливаем обработчик форм
-pip install django-rest-knox # Попробую аутентификацию чезе Knox вместо JWT
