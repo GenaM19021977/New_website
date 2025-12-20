@@ -33,7 +33,6 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 # Список разрешенных хостов для работы приложения
 # В production должен содержать реальные домены
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-
 # ==================== УСТАНОВЛЕННЫЕ ПРИЛОЖЕНИЯ ====================
 
 INSTALLED_APPS = [
