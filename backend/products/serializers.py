@@ -18,6 +18,7 @@ class LoginSerializer(serializers.Serializer):
     Используется для валидации email и password при логине.
     Не связан с моделью, так как используется только для валидации входных данных.
     """
+
     email = serializers.EmailField()  # Email должен быть валидным
     password = serializers.CharField()  # Пароль в виде строки
 

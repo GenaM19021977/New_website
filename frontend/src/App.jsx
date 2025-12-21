@@ -4,7 +4,7 @@
  * Управляет маршрутизацией и отображением компонентов.
  * Реализует логику:
  * - Автоматическое перенаправление аутентифицированных пользователей
- * - Условное отображение Navbar (скрыт на страницах логина/регистрации)
+ * - Условное отображение Header (скрыт на страницах логина/регистрации)
  * - Защита маршрутов через ProtectedRoute компонент
  */
 
@@ -13,7 +13,7 @@ import './App.css'
 import Register from './components/Register'
 import Home from './components/Home'
 import About from './components/About'
-import Navbar from './components/Navbar'
+import Header from './components/Header'
 import Login from './components/Login'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoutes'
@@ -21,15 +21,15 @@ import ProtectedRoute from './components/ProtectedRoutes'
 function App() {
   // Хук для получения текущего пути
   const location = useLocation()
-  
+
   // Хук для программной навигации
   const navigate = useNavigate()
-  
+
   // Проверка аутентификации пользователя (наличие access токена)
   const isAuthenticated = !!localStorage.getItem('access_token')
-  
-  // Определение, нужно ли скрывать Navbar (на страницах логина и регистрации)
-  const noNavbar = location.pathname === "/register" || location.pathname === "/"
+
+  // Определение, нужно ли скрывать Header (на страницах логина и регистрации)
+  const noHeader = location.pathname === "/register" || location.pathname === "/"
 
   /**
    * Эффект для автоматического перенаправления аутентифицированных пользователей
@@ -42,12 +42,12 @@ function App() {
   useEffect(() => {
     // Проверка флага явного перехода на страницу логина
     const isExplicitLoginNavigation = sessionStorage.getItem('explicitLoginNavigation')
-    
+
     // Перенаправление, если пользователь авторизован и на странице логина
     if (isAuthenticated && location.pathname === "/" && !isExplicitLoginNavigation) {
       navigate('/home')
     }
-    
+
     // Очистка флага после использования
     if (isExplicitLoginNavigation) {
       sessionStorage.removeItem('explicitLoginNavigation')
@@ -57,9 +57,9 @@ function App() {
   return (
     <>
       {
-        // Условное отображение: с Navbar или без
-        noNavbar ?
-          // Маршруты без Navbar (публичные страницы)
+        // Условное отображение: с Header или без
+        noHeader ?
+          // Маршруты без Header (публичные страницы)
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -67,15 +67,15 @@ function App() {
 
           :
 
-          // Маршруты с Navbar (защищенные страницы)
-          <Navbar
+          // Маршруты с Header (защищенные страницы)
+          <Header
             content={
               <Routes>
                 {/* Защищенные маршруты требуют аутентификации */}
-                <Route element={<ProtectedRoute/>}>
+                <Route element={<ProtectedRoute />}>
                   <Route path="/home" element={<Home />} />
                   <Route path="/about" element={<About />} />
-                </Route>               
+                </Route>
               </Routes>
             }
           />

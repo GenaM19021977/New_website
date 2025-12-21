@@ -23,6 +23,7 @@ class LoginView(viewsets.ViewSet):
     Позволяет пользователю войти в систему, используя email и password.
     При успешной аутентификации возвращает JWT токены (access и refresh).
     """
+
     permission_classes = [permissions.AllowAny]  # Доступ без аутентификации
     serializer_class = LoginSerializer
 
@@ -78,6 +79,7 @@ class RegisterView(viewsets.ViewSet):
     Endpoint: POST /register/
     Создает нового пользователя и автоматически выдает JWT токены.
     """
+
     permission_classes = [permissions.AllowAny]  # Доступ без аутентификации
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -122,6 +124,7 @@ class UserView(viewsets.ViewSet):
     Возвращает список всех зарегистрированных пользователей.
     ВНИМАНИЕ: В production следует ограничить доступ через permissions!
     """
+
     permission_classes = [permissions.AllowAny]  # Временно для разработки
     queryset = User.objects.all()
     serializer_class = RegisterSerializer  # Используется для сериализации списка
