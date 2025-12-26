@@ -66,6 +66,7 @@
 .header-middle-left {
     display: flex;
     align-items: center;
+    gap: 32px;
 }
 
 .logo {
@@ -82,12 +83,10 @@
     display: block;
 }
 
-
 .header-middle-center {
     display: flex;
     gap: 32px;
     align-items: center;
-    margin-left: 120px;
 }
 
 .header-middle-right {
@@ -278,8 +277,7 @@
 
 /* Адаптивность */
 @media (max-width: 1200px) {
-    .header-middle-center {
-        margin-left: 40px;
+    .header-middle-left {
         gap: 20px;
     }
 
@@ -306,8 +304,10 @@
         gap: 16px;
     }
 
-    .header-middle-center {
-        margin-left: 0;
+    .header-middle-left {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
     }
 
     .header-bottom {

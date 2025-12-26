@@ -50,10 +50,10 @@ export default function Header(props) {
                             className="logo-image"
                         />
                     </Link>
-                </div>
-                <div className="header-middle-center">
-                    <Link to="/new" className="header-link">Новинки</Link>
-                    <Link to="/delivery" className="header-link">Доставка</Link>
+                    <div className="header-middle-center">
+                        <Link to="/new" className="header-link">Новинки</Link>
+                        <Link to="/delivery" className="header-link">Доставка</Link>
+                    </div>
                 </div>
                 <div className="header-middle-right">
                     <div className="phone-numbers">

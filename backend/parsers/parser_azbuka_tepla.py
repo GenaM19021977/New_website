@@ -3,7 +3,7 @@ import sys
 import django
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from django.db.utils import IntegrityError
 
 # Получаем абсолютный путь к корню проекта
@@ -22,6 +22,147 @@ headers = {
 }
 
 
+def extract_country(soup):
+    """
+    Извлечение страны производства со страницы товара
+
+    Args:
+        soup: BeautifulSoup объект страницы товара
+
+    Returns:
+        str: Название страны или пустая строка
+    """
+    country = ""
+
+    # Ищем страну в описании товара (itemprop="description")
+    description_div = soup.find("div", itemprop="description")
+    if description_div:
+        description_text = description_div.get_text("\n", strip=True)
+        lines = description_text.split("\n")
+
+        # Паттерны для поиска страны производства
+        country_patterns = [
+            "Производство",
+            "Страна производства",
+            "Страна-производитель",
+            "Производитель",
+        ]
+
+        for line in lines:
+            line_lower = line.lower()
+            for pattern in country_patterns:
+                if pattern.lower() in line_lower:
+                    # Извлекаем страну (удаляем паттерн и оставляем только название)
+                    if ":" in line:
+                        country = line.split(":")[-1].strip()
+                    else:
+                        # Если нет двоеточия, берем текст после паттерна
+                        parts = line.split(pattern, 1)
+                        if len(parts) > 1:
+                            country = parts[1].strip()
+
+                    if country:
+                        # Убираем возможные лишние символы
+                        country = country.replace(".", "").strip()
+                        return country
+
+    # Также ищем в кратком описании
+    short_description = soup.find(
+        "div", class_="product-short-description"
+    ) or soup.find("div", class_="woocommerce-product-details__short-description")
+    if short_description and not country:
+        short_text = short_description.get_text("\n", strip=True)
+        for line in short_text.split("\n"):
+            line_lower = line.lower()
+            if "производство" in line_lower:
+                if ":" in line:
+                    country = line.split(":")[-1].strip()
+                else:
+                    parts = line.split("Производство", 1)
+                    if len(parts) > 1:
+                        country = parts[1].strip()
+                if country:
+                    country = country.replace(".", "").strip()
+                    return country
+
+    return country
+
+
+def extract_documentation(soup, base_url):
+    """
+    Извлечение ссылки на документацию со страницы товара
+
+    Args:
+        soup: BeautifulSoup объект страницы товара
+        base_url: Базовый URL сайта для преобразования относительных ссылок
+
+    Returns:
+        str: URL ссылки на документацию или пустая строка
+    """
+    documentation_url = ""
+
+    # Паттерны для поиска ссылок на документацию
+    doc_patterns = [
+        "инструкция",
+        "Инструкция",
+        "документация",
+        "Документация",
+        "руководство",
+        "Руководство",
+        "manual",
+        "Manual",
+    ]
+
+    # Ищем ссылки в описании товара (itemprop="description")
+    description_div = soup.find("div", itemprop="description")
+    if description_div:
+        # Ищем все ссылки в описании
+        links = description_div.find_all("a", href=True)
+        for link in links:
+            link_text = link.get_text(strip=True).lower()
+            link_href = link.get("href", "")
+
+            # Проверяем, содержит ли текст ссылки один из паттернов
+            for pattern in doc_patterns:
+                if pattern.lower() in link_text:
+                    # Проверяем, что ссылка ведет на PDF или является валидной
+                    if link_href:
+                        # Преобразуем относительную ссылку в абсолютную
+                        if link_href.startswith("/"):
+                            documentation_url = urljoin(base_url, link_href)
+                        elif link_href.startswith("http"):
+                            documentation_url = link_href
+                        else:
+                            documentation_url = urljoin(base_url, link_href)
+                        return documentation_url
+
+    # Также ищем в основном контенте страницы
+    content_areas = [
+        soup.find("div", class_="woocommerce-Tabs-panel--description"),
+        soup.find("div", class_="entry-content"),
+        soup.find("div", class_="product-short-description"),
+    ]
+
+    for content_area in content_areas:
+        if content_area and not documentation_url:
+            links = content_area.find_all("a", href=True)
+            for link in links:
+                link_text = link.get_text(strip=True).lower()
+                link_href = link.get("href", "")
+
+                for pattern in doc_patterns:
+                    if pattern.lower() in link_text and link_href:
+                        if link_href.startswith("/"):
+                            documentation_url = urljoin(base_url, link_href)
+                        elif link_href.startswith("http"):
+                            documentation_url = link_href
+                        else:
+                            documentation_url = urljoin(base_url, link_href)
+                        return documentation_url
+
+    return documentation_url
+
+
 def get_product_details(product_url):
     """
     Получение дополнительной информации со страницы товара
@@ -30,7 +171,7 @@ def get_product_details(product_url):
         product_url (str): URL страницы товара
 
     Returns:
-        dict: Словарь с данными товара (description, image_urls, specifications)
+        dict: Словарь с данными товара (description, image_urls, specifications, country, documentation)
     """
     try:
         response = requests.get(product_url, headers=headers, timeout=30)
@@ -90,17 +231,40 @@ def get_product_details(product_url):
                         key, value = line.split(":", 1)
                         specs_text += f"{key.strip()}: {value.strip()}\n"
 
+        # Извлекаем страну производства
+        country = extract_country(soup)
+
+        # Извлекаем ссылку на документацию
+        # Получаем базовый URL сайта (протокол + домен)
+        parsed_url = urlparse(product_url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        documentation = extract_documentation(soup, base_url)
+
         return {
             "description": full_description,
             "image_urls": image_urls,
             "specifications": specs_text.strip() if specs_text else "",
+            "country": country,
+            "documentation": documentation,
         }
     except requests.RequestException as e:
         print(f"Ошибка при запросе страницы товара {product_url}: {e}")
-        return {"description": "", "image_urls": [], "specifications": ""}
+        return {
+            "description": "",
+            "image_urls": [],
+            "specifications": "",
+            "country": "",
+            "documentation": "",
+        }
     except Exception as e:
         print(f"Ошибка при парсинге страницы товара {product_url}: {e}")
-        return {"description": "", "image_urls": [], "specifications": ""}
+        return {
+            "description": "",
+            "image_urls": [],
+            "specifications": "",
+            "country": "",
+            "documentation": "",
+        }
 
 
 def parse_specifications(specs_text):
@@ -178,6 +342,9 @@ def save_to_database(product_data):
             "price": product_data.get("price", ""),
             "product_url": product_data.get("product_url", ""),
             "description": product_data.get("description") or None,
+            "country": product_data.get("country") or None,  # Страна производства
+            "documentation": product_data.get("documentation")
+            or None,  # Ссылка на документацию
             **specs_dict,  # Добавляем все распарсенные характеристики
         }
 
@@ -269,6 +436,11 @@ def azbukatepla_parser():
                 print("=" * 50)
                 print(f"Название: {name}")
                 print(f"Цена: {price}")
+                print(f"Страна производства: {details.get('country', 'Не указана')}")
+                documentation_url = details.get("documentation", "")
+                print(
+                    f"Документация: {documentation_url if documentation_url else 'Не найдена'}"
+                )
                 print(f"Ссылка на товар: {product_url}")
                 print(
                     f"Описание: {details['description'][:100]}..."
@@ -295,6 +467,8 @@ def azbukatepla_parser():
                     "description": details["description"],
                     "specifications": details["specifications"],
                     "image_urls": details["image_urls"],
+                    "country": details.get("country", ""),
+                    "documentation": details.get("documentation", ""),
                 }
 
                 # Сохраняем в базу данных
