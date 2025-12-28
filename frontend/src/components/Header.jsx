@@ -7,6 +7,7 @@
  * 3. Нижняя секция - каталог, поиск, пользователь и корзина
  */
 
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -17,9 +18,27 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Footer from './Footer';
+import AuthModal from './AuthModal';
 
 export default function Header(props) {
     const { content } = props;
+
+    // Состояние для управления открытием/закрытием модального окна авторизации
+    const [authModalOpen, setAuthModalOpen] = useState(false);
+
+    /**
+     * Обработчик открытия модального окна авторизации
+     */
+    const handleOpenAuthModal = () => {
+        setAuthModalOpen(true);
+    };
+
+    /**
+     * Обработчик закрытия модального окна авторизации
+     */
+    const handleCloseAuthModal = () => {
+        setAuthModalOpen(false);
+    };
 
     return (
         <div className="header-wrapper">
@@ -86,16 +105,6 @@ export default function Header(props) {
                 </div>
 
                 <div className="header-bottom-right">
-                    <div className="user-section">
-                        <PersonIcon className="user-icon" />
-                        <div className="user-text">
-                            <span>Здравствуйте,</span>
-                            <Link to="/login" className="login-link">войдите в кабинет</Link>
-                        </div>
-                    </div>
-
-                    <div className="divider"></div>
-
                     <div className="header-icons">
                         <button className="icon-button">
                             <CompareArrowsIcon />
@@ -108,6 +117,18 @@ export default function Header(props) {
                             <span className="cart-badge">0</span>
                         </button>
                     </div>
+                    <div className="divider"></div>
+                    <div className="user-section">
+                        <PersonIcon className="user-icon" />
+                        <div className="user-text">
+                            <button
+                                className="login-link-button"
+                                onClick={handleOpenAuthModal}
+                            >
+                                <h3>Войти в кабинет</h3>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -118,6 +139,12 @@ export default function Header(props) {
 
             {/* Footer */}
             <Footer />
+
+            {/* Модальное окно авторизации/регистрации */}
+            <AuthModal
+                open={authModalOpen}
+                onClose={handleCloseAuthModal}
+            />
         </div>
     );
 }
