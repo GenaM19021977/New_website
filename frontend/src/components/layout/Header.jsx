@@ -18,6 +18,12 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Avatar from '@mui/material/Avatar';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
 import Footer from './Footer';
 import AuthModal from '../../components/modals/AuthModal';
 import ProfileModal from '../../components/modals/ProfileModal';
@@ -39,6 +45,10 @@ export default function Header(props) {
 
     // Состояние для проверки авторизации
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    // Состояние для управления адаптивным меню
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     /**
      * Функция для загрузки данных пользователя
@@ -66,6 +76,23 @@ export default function Header(props) {
             setUser(null);
         }
     };
+
+    /**
+     * Проверка размера экрана для адаптивного меню
+     * Меню появляется когда ширина экрана меньше 768px
+     */
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+
+        return () => {
+            window.removeEventListener('resize', checkScreenSize);
+        };
+    }, []);
 
     /**
      * Получение данных текущего пользователя при монтировании компонента
@@ -133,15 +160,51 @@ export default function Header(props) {
         loadUserData(); // Перезагружаем данные для получения актуального аватара
     };
 
+    /**
+     * Обработчик открытия адаптивного меню
+     */
+    const handleOpenMobileMenu = () => {
+        setMobileMenuOpen(true);
+    };
+
+    /**
+     * Обработчик закрытия адаптивного меню
+     */
+    const handleCloseMobileMenu = () => {
+        setMobileMenuOpen(false);
+    };
+
+    // Список пунктов меню для адаптивного меню
+    const menuItems = [
+        { label: 'О нас', path: ROUTES.ABOUT },
+        { label: 'Гарантия', path: ROUTES.WARRANTY },
+        { label: 'Доставка', path: ROUTES.DELIVERY },
+        { label: 'Оплата', path: ROUTES.PAYMENT },
+        { label: 'Возврат товара', path: ROUTES.RETURN },
+    ];
+
     return (
         <div className="header-wrapper">
             {/* Верхняя секция - навигация и валюта */}
             <div className="header-top">
                 <div className="header-top-left">
-                    <Link to={ROUTES.ABOUT} className="header-link">О нас</Link>
-                    <Link to="/warranty" className="header-link">Гарантия</Link>
-                    <Link to="/payment" className="header-link">Оплата</Link>
-                    <Link to="/return" className="header-link">Возврат товара</Link>
+                    {/* Иконка гамбургера для мобильных устройств */}
+                    <IconButton
+                        className="mobile-menu-button"
+                        onClick={handleOpenMobileMenu}
+                        sx={{ display: { xs: 'flex', md: 'none' } }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+
+                    {/* Обычные ссылки для десктопа */}
+                    <div className="desktop-menu">
+                        <Link to={ROUTES.ABOUT} className="header-link">О нас</Link>
+                        <Link to={ROUTES.WARRANTY} className="header-link">Гарантия</Link>
+                        <Link to={ROUTES.DELIVERY} className="header-link">Доставка</Link>
+                        <Link to={ROUTES.PAYMENT} className="header-link">Оплата</Link>
+                        <Link to={ROUTES.RETURN} className="header-link">Возврат товара</Link>
+                    </div>
                 </div>
                 <div className="header-top-right">
                     <span className="currency-selector">
@@ -150,6 +213,34 @@ export default function Header(props) {
                     </span>
                 </div>
             </div>
+
+            {/* Адаптивное меню (Drawer) */}
+            <Drawer
+                anchor="left"
+                open={mobileMenuOpen}
+                onClose={handleCloseMobileMenu}
+                sx={{
+                    display: { xs: 'block', md: 'none' },
+                    '& .MuiDrawer-paper': {
+                        width: 280,
+                        boxSizing: 'border-box',
+                    },
+                }}
+            >
+                <List>
+                    {menuItems.map((item) => (
+                        <ListItem key={item.path} disablePadding>
+                            <ListItemButton
+                                component={Link}
+                                to={item.path}
+                                onClick={handleCloseMobileMenu}
+                            >
+                                <ListItemText primary={item.label} />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                </List>
+            </Drawer>
 
             {/* Средняя секция - логотип и контакты */}
             <div className="header-middle">
@@ -163,7 +254,6 @@ export default function Header(props) {
                     </Link>
                     <div className="header-middle-center">
                         <Link to="/new" className="header-link">Новинки</Link>
-                        <Link to={ROUTES.DELIVERY} className="header-link">Доставка</Link>
                     </div>
                 </div>
                 <div className="header-middle-right">
