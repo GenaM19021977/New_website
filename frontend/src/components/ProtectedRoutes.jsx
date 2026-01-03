@@ -14,7 +14,7 @@ const ProtectedRoute = () => {
 
     // Если токен есть - отображаем защищенный контент, иначе перенаправляем на логин
     return (
-        token ? <Outlet /> : <Navigate to="/" />
+        token ? <Outlet /> : <Navigate to="/login" />
     )
 }
 
