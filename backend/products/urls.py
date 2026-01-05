@@ -14,14 +14,16 @@ router = DefaultRouter()
 
 # Регистрация ViewSets в роутере
 # POST /register/ - регистрация нового пользователя
-router.register('register', RegisterView, basename='register')
+router.register("register", RegisterView, basename="register")
 
 # POST /login/ - аутентификация пользователя
-router.register('login', LoginView, basename='login')
+router.register("login", LoginView, basename="login")
 
 # GET /users/ - получение списка пользователей
-router.register('users', UserView, basename='users')
+router.register("users", UserView, basename="users")
+
+# GET /me/ - получение данных текущего пользователя
+router.register("me", CurrentUserView, basename="current-user")
 
 # URL patterns, сгенерированные роутером
 urlpatterns = router.urls
-

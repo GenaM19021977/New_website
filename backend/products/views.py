@@ -4,11 +4,18 @@ API Views для аутентификации и управления польз
 """
 
 from rest_framework import viewsets, permissions, status
-from .serializers import LoginSerializer, RegisterSerializer, UserSerializer
+from .serializers import (
+    LoginSerializer,
+    RegisterSerializer,
+    UserSerializer,
+    UserUpdateSerializer,
+    PasswordChangeSerializer,
+)
 from .models import *
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import action
 
 
 # Получаем модель пользователя из настроек Django
@@ -143,3 +150,77 @@ class UserView(viewsets.ViewSet):
         # Сериализация списка пользователей (many=True для множественных объектов)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
+
+
+class CurrentUserView(viewsets.ViewSet):
+    """
+    ViewSet для работы с текущим авторизованным пользователем
+
+    Endpoints:
+    - GET /me/ - получение данных текущего пользователя
+    - PUT /me/update-profile/ - обновление данных текущего пользователя
+    - PATCH /me/update-profile/ - частичное обновление данных текущего пользователя
+    - POST /me/change-password/ - смена пароля
+    """
+
+    permission_classes = [permissions.IsAuthenticated]  # Требуется аутентификация
+    serializer_class = UserSerializer
+
+    def list(self, request):
+        """
+        Обработка GET запроса на получение данных текущего пользователя
+
+        Args:
+            request: HTTP запрос с JWT токеном в заголовке
+
+        Returns:
+            Response с данными текущего пользователя
+        """
+        # request.user содержит пользователя из JWT токена
+        serializer = self.serializer_class(request.user)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["put", "patch"])
+    def update_profile(self, request):
+        """
+        Обработка PUT/PATCH запроса на обновление данных пользователя
+
+        Args:
+            request: HTTP запрос с данными для обновления
+
+        Returns:
+            Response с обновленными данными пользователя
+        """
+        serializer = UserUpdateSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            # Обновляем объект пользователя из БД для получения актуальных данных
+            request.user.refresh_from_db()
+            return Response(UserSerializer(request.user).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["post"])
+    def change_password(self, request):
+        """
+        Обработка POST запроса на смену пароля
+
+        Args:
+            request: HTTP запрос с old_password, new_password, new_password2
+
+        Returns:
+            Response с подтверждением успешной смены пароля
+        """
+        serializer = PasswordChangeSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            # Проверка старого пароля
+            if not user.check_password(serializer.validated_data["old_password"]):
+                return Response(
+                    {"old_password": ["Неверный пароль"]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # Установка нового пароля
+            user.set_password(serializer.validated_data["new_password"])
+            user.save()
+            return Response({"message": "Пароль успешно изменен"})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

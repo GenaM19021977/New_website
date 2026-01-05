@@ -5,10 +5,13 @@
 - Админ-панель Django
 - API endpoints приложения products
 - JWT токен endpoints (refresh, verify)
+- Медиа файлы (для разработки)
 """
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 urlpatterns = [
@@ -23,3 +26,7 @@ urlpatterns = [
     # POST /api/token/verify/ - проверка валидности токена
     path("api/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
 ]
+
+# Обслуживание медиа файлов в режиме разработки
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

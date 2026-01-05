@@ -12,7 +12,7 @@ import { Controller } from 'react-hook-form'
 
 export default function MyPassField(props) {
   const [showPassword, setShowPassword] = React.useState(false);
-  const { label, name, control } = props
+  const { label, name, control, rules } = props
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -28,6 +28,7 @@ export default function MyPassField(props) {
     <Controller
       name={name}
       control={control}
+      rules={rules}
       render={({
         field: { onChange, value },
         fieldState: { error }

@@ -25,7 +25,7 @@ python manage.py runserver
 # Работа с git
 git push
 
-# Работа с Refct
+# Работа с React
 npm create vite@latest # использовал этот порт проекта будет 5173
 npm install # установка дополнительного софта
 npm run dev # запуск сервера

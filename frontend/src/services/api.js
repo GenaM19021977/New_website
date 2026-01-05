@@ -5,20 +5,19 @@
  * Исключает публичные endpoints (register, login) из добавления токена.
  */
 
-import axios from 'axios'
-
-// Базовый URL backend API
-const baseURL = 'http://127.0.0.1:8000/'
+import axios from 'axios';
+import { API_BASE_URL, API_TIMEOUT, PUBLIC_ENDPOINTS } from '../config/api';
+import { STORAGE_KEYS } from '../config/constants';
 
 // Создание настроенного экземпляра Axios
-const AxiosInstance = axios.create({
-    baseURL: baseURL,  // Базовый URL для всех запросов
-    timeout: 5000,  // Таймаут запроса (5 секунд)
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    timeout: API_TIMEOUT,
     headers: {
-        'Content-Type': 'application/json',  // Тип контента для отправки
-        accept: 'application/json',  // Тип контента для получения
+        'Content-Type': 'application/json',
+        accept: 'application/json',
     }
-})
+});
 
 /**
  * Interceptor для автоматического добавления JWT токена в заголовки запросов
@@ -26,26 +25,31 @@ const AxiosInstance = axios.create({
  * Проверяет, является ли endpoint публичным (не требует авторизации).
  * Если endpoint не публичный, добавляет access_token из localStorage в заголовок Authorization.
  */
-AxiosInstance.interceptors.request.use(
+api.interceptors.request.use(
     (config) => {
-        // Список публичных endpoints, для которых не нужен токен
-        const publicEndpoints = ['register/', 'login/']
-        const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint))
-        
+        // Если данные FormData, не устанавливаем Content-Type (браузер установит автоматически)
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
+
+        // Проверка, является ли endpoint публичным
+        const isPublicEndpoint = PUBLIC_ENDPOINTS.some(endpoint => config.url?.includes(endpoint));
+
         // Если endpoint не публичный, добавляем токен авторизации
         if (!isPublicEndpoint) {
-            const token = localStorage.getItem('access_token')
+            const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
             if (token) {
                 // Добавление токена в заголовок Authorization в формате "Bearer <token>"
-                config.headers.Authorization = `Bearer ${token}`
+                config.headers.Authorization = `Bearer ${token}`;
             }
         }
-        return config
+        return config;
     },
     (error) => {
         // Обработка ошибок при настройке запроса
-        return Promise.reject(error)
+        return Promise.reject(error);
     }
-)
+);
 
-export default AxiosInstance
+export default api;
+

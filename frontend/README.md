@@ -1,16 +1,73 @@
-# React + Vite
+# Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Этот проект был создан с помощью [Create React App](https://github.com/facebook/create-react-app).
 
-Currently, two official plugins are available:
+## Доступные скрипты
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+В директории проекта вы можете запустить:
 
-## React Compiler
+### `npm start`
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+Запускает приложение в режиме разработки.\
+Откройте [http://localhost:3000](http://localhost:3000) для просмотра в браузере.
 
-## Expanding the ESLint configuration
+Страница будет перезагружаться при внесении изменений.\
+Вы также увидите любые ошибки линтера в консоли.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### `npm run build`
+
+Создает оптимизированную сборку приложения для продакшена в папке `build`.\
+Она правильно объединяет React в режиме продакшена и оптимизирует сборку для лучшей производительности.
+
+Сборка минифицирована, а имена файлов включают хеши.\
+Ваше приложение готово к развертыванию!
+
+### `npm test`
+
+Запускает тестовый раннер в интерактивном режиме просмотра.
+
+### `npm run eject`
+
+**Примечание: это односторонняя операция. После выполнения `eject` вы не сможете вернуться!**
+
+Если вас не устраивает инструментарий сборки и выбор конфигурации, вы можете в любой момент выполнить `eject`. Эта команда удалит единственную зависимость сборки из вашего проекта.
+
+Вместо этого она скопирует все файлы конфигурации и транзитивные зависимости (webpack, Babel, ESLint и т.д.) прямо в ваш проект, чтобы у вас был полный контроль над ними. Все команды, кроме `eject`, по-прежнему будут работать, но они будут указывать на скопированные скрипты, чтобы вы могли их настроить. На данный момент вы должны решать сами.
+
+## Установка зависимостей
+
+После миграции с Vite на Create React App выполните:
+
+```bash
+npm install
+```
+
+Это установит все необходимые зависимости, включая `react-scripts`.
+
+## Используемые библиотеки
+
+- **React** - библиотека для создания пользовательских интерфейсов
+- **React Router DOM** - маршрутизация в приложении
+- **Material-UI (MUI)** - компоненты пользовательского интерфейса
+- **Axios** - для HTTP-запросов
+- **React Hook Form** - для работы с формами
+- **Styled Components** - для стилизации компонентов
+
+## Структура проекта
+
+```
+frontend/
+├── public/          # Статические файлы
+│   └── images/      # Изображения
+├── src/
+│   ├── components/  # React компоненты
+│   ├── pages/       # Страницы приложения
+│   ├── config/      # Конфигурационные файлы
+│   ├── services/    # Сервисы для работы с API
+│   └── utils/       # Вспомогательные утилиты
+└── package.json
+```
+
+## Дополнительная информация
+
+Для получения дополнительной информации о Create React App см. [документацию](https://facebook.github.io/create-react-app/docs/getting-started).

@@ -2,11 +2,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 
+
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields): # создание пользователя
+    def create_user(
+        self, email, password=None, **extra_fields
+    ):  # создание пользователя
         if not email:
-            raise ValueError('Email is required')
-        
+            raise ValueError("Email is required")
+
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         # Хэширование пароля перед сохранением
@@ -14,20 +17,52 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    
-    def create_superuser(self, email, password=None, **extra_fields): # создание суперпользователя
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+    def create_superuser(
+        self, email, password=None, **extra_fields
+    ):  # создание суперпользователя
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
         return self.create_user(email, password, **extra_fields)
 
-class CustomUser(AbstractUser): # пользовательская модель
+
+class CustomUser(AbstractUser):  # пользовательская модель
     email = models.EmailField(max_length=200, unique=True)
     birthday = models.DateField(null=True, blank=True)
     username = models.CharField(max_length=200, null=True, blank=True)
+    phone = models.CharField(
+        max_length=20, null=True, blank=True, verbose_name="Телефон"
+    )
+    avatar = models.ImageField(
+        upload_to="avatars/", null=True, blank=True, verbose_name="Аватар"
+    )
+
+    # Адресные данные
+    country = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="Страна проживания"
+    )
+    region = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="Область"
+    )
+    district = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="Район"
+    )
+    city = models.CharField(max_length=100, null=True, blank=True, verbose_name="Город")
+    street = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="Улица"
+    )
+    house_number = models.CharField(
+        max_length=20, null=True, blank=True, verbose_name="Номер дома"
+    )
+    building_number = models.CharField(
+        max_length=20, null=True, blank=True, verbose_name="Номер корпуса"
+    )
+    apartment_number = models.CharField(
+        max_length=20, null=True, blank=True, verbose_name="Номер квартиры"
+    )
 
     objects = CustomUserManager()
-    
-    USERNAME_FIELD = 'email'
+
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
 

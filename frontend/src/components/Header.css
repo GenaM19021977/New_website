@@ -24,8 +24,31 @@
     align-items: center;
 }
 
+/* Кнопка гамбургера для мобильных устройств */
+.mobile-menu-button {
+    display: none !important;
+}
+
+/* Обычное меню для десктопа */
+.desktop-menu {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+/* Адаптивность: скрываем обычное меню и показываем кнопку гамбургера на маленьких экранах */
+@media (max-width: 768px) {
+    .mobile-menu-button {
+        display: flex !important;
+    }
+    
+    .desktop-menu {
+        display: none;
+    }
+}
+
 .header-link {
-    color: #000000;
+    color: #0e0d0d;
     text-decoration: none;
     font-size: 14px;
     transition: color 0.2s;
@@ -119,7 +142,7 @@
 
 .catalog-button {
     background-color: #0db39e;
-    color: #ffffff;
+    color: #edecec;
     border: none;
     padding: 12px 24px;
     display: flex;
@@ -190,7 +213,7 @@
 .user-section {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .user-icon {
@@ -203,6 +226,35 @@
     flex-direction: column;
     color: #ffffff;
     font-size: 12px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: right;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.user-surname {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.user-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    background-color: #0db39e !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 16px !important;
+    border: 2px solid #ffffff;
 }
 
 .login-link {
@@ -246,7 +298,7 @@
 .divider {
     width: 1px;
     height: 30px;
-    background-color: #555555;
+    background-color: #514747;
 }
 
 .header-icons {
@@ -296,7 +348,7 @@
 .header-content {
     flex: 1;
     padding: 500px 120px;
-    background-image: url('/images/87168176238132.png');
+    background-image: url('../images/87168176238132.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

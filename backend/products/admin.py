@@ -13,10 +13,33 @@ class CustomUserAdmin(admin.ModelAdmin):
     """
     Административный интерфейс для модели CustomUser
     """
-    list_display = ("email", "username", "birthday", "is_staff", "is_active", "date_joined")
-    list_filter = ("is_staff", "is_active", "date_joined")
-    search_fields = ("email", "username")
+    list_display = ("email", "first_name", "last_name", "phone", "city", "country", "username", "birthday", "is_staff", "is_active", "date_joined")
+    list_filter = ("is_staff", "is_active", "date_joined", "country", "city")
+    search_fields = ("email", "username", "first_name", "last_name", "phone", "city", "street")
     ordering = ("-date_joined",)
+    
+    # Группировка полей для удобства в админ-панели
+    fieldsets = (
+        ("Основная информация", {
+            "fields": ("email", "username", "avatar")
+        }),
+        ("Личные данные", {
+            "fields": ("first_name", "last_name", "phone", "birthday")
+        }),
+        ("Адресные данные", {
+            "fields": (
+                "country", "region", "district", "city", 
+                "street", "house_number", "building_number", "apartment_number"
+            )
+        }),
+        ("Права доступа", {
+            "fields": ("is_staff", "is_active", "is_superuser", "groups", "user_permissions")
+        }),
+        ("Важные даты", {
+            "fields": ("last_login", "date_joined"),
+            "classes": ("collapse",)
+        }),
+    )
 
 
 @admin.register(ElectricBoiler)
