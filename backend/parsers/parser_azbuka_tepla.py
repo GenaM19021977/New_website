@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import logging
+import re
 import django
 import requests
 from bs4 import BeautifulSoup
@@ -260,16 +261,94 @@ def get_product_details(product_url):
         response = make_request_with_retry(product_url)
         soup = BeautifulSoup(response.text, "lxml")
 
-        # Получаем описание товара
-        description_blocks = soup.find_all("p", style="text-align: justify;", limit=2)
-        description_parts = [
-            block.get_text(strip=True)
-            for block in description_blocks
-            if block.get_text(strip=True)
-        ]
-        full_description = (
-            " ".join(description_parts).replace("\n", " ").replace("|", "-")
+        # Получаем описание товара из вкладки "Описание"
+        # Ищем контейнер вкладки "Описание"
+        description_panel = soup.find(
+            "div", class_="woocommerce-Tabs-panel--description"
         )
+
+        full_description = ""
+
+        if description_panel:
+            # Создаем копию панели для работы
+            panel_copy = BeautifulSoup(str(description_panel), "lxml")
+
+            # Удаляем заголовок "Описание" если он есть
+            for heading in panel_copy.find_all(["h1", "h2", "h3", "h4"]):
+                heading_text = heading.get_text(strip=True)
+                if heading_text == "Описание":
+                    heading.decompose()
+                    break
+
+            # Удаляем все изображения
+            for img in panel_copy.find_all("img"):
+                img.decompose()
+
+            # Ищем и удаляем ссылку на инструкцию и всё после неё
+            instruction_patterns = [
+                "Инструкция на электрический котел TECline серии BO",
+                "Инструкция на электрический котел TECline",
+                "Инструкция на электрический котел",
+            ]
+
+            # Находим ссылку на инструкцию
+            instruction_link = None
+            for link in panel_copy.find_all("a", href=True):
+                link_text = link.get_text(strip=True)
+                for pattern in instruction_patterns:
+                    if pattern in link_text:
+                        instruction_link = link
+                        break
+                if instruction_link:
+                    break
+
+            # Если нашли ссылку, удаляем её и всё после неё
+            if instruction_link:
+                # Находим родительский элемент ссылки
+                parent = instruction_link.parent
+                if parent:
+                    # Удаляем ссылку и все последующие элементы в родителе
+                    found_link = False
+                    for child in list(parent.children):
+                        if child == instruction_link:
+                            found_link = True
+                            if hasattr(child, "extract"):
+                                child.extract()
+                        elif found_link:
+                            if hasattr(child, "extract"):
+                                child.extract()
+                else:
+                    instruction_link.decompose()
+
+            # Извлекаем весь текст из очищенной панели
+            full_description = panel_copy.get_text(separator=" ", strip=True)
+
+            # Очищаем от лишних пробелов и символов
+            full_description = re.sub(r"\s+", " ", full_description).strip()
+            full_description = full_description.replace("|", "-")
+
+            # Дополнительная проверка: удаляем текст после ссылки на инструкцию, если он остался
+            for marker in instruction_patterns:
+                if marker in full_description:
+                    full_description = full_description.split(marker)[0].strip()
+                    break
+        else:
+            # Fallback: ищем в других местах, если вкладка не найдена
+            description_blocks = soup.find_all(
+                "p", style="text-align: justify;", limit=2
+            )
+            description_parts = []
+            for block in description_blocks:
+                # Удаляем изображения из блока
+                block_copy = BeautifulSoup(str(block), "lxml")
+                for img in block_copy.find_all("img"):
+                    img.decompose()
+                text = block_copy.get_text(strip=True)
+                if text:
+                    description_parts.append(text)
+            full_description = (
+                " ".join(description_parts).replace("\n", " ").replace("|", "-")
+            )
 
         # Получаем все изображения товара (приоритет полноразмерным)
         image_urls = []
