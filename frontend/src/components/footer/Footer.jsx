@@ -9,7 +9,7 @@
  */
 
 import { Link } from 'react-router-dom';
-import '../Footer.css';
+import './Footer.css';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
@@ -19,6 +19,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import MenuIcon from '@mui/icons-material/Menu';
 import { ROUTES } from '../../config/constants';
+import logoHeader from '../../images/logo-header.png';
 
 export default function Footer() {
     // Функция для прокрутки страницы вверх
@@ -56,7 +57,7 @@ export default function Footer() {
                     <div className="footer-column footer-column-company">
                         <Link to={ROUTES.HOME} className="footer-logo">
                             <img
-                                src="/images/logo-header.png"
+                                src={logoHeader}
                                 alt="Kotelkov.by"
                                 className="footer-logo-image"
                             />
@@ -201,4 +202,3 @@ export default function Footer() {
         </footer>
     );
 }
-

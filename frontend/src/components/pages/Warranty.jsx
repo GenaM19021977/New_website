@@ -4,4 +4,4 @@ const Warranty = () => {
     );
 };
 
-export default Warranty
+export default Warranty;

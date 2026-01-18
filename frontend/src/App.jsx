@@ -9,16 +9,16 @@
  */
 
 import './App.css';
-import Register from './pages/Register';
-import Home from './pages/Home';
-import About from './pages/About';
-import Warranty from './pages/Warranty';
-import Delivery from './pages/Delivery';
-import Payment from './pages/Payment';
-import Return from './pages/Return';
-import New from './pages/New';
-import Header from './components/layout/Header';
-import Login from './pages/Login';
+import Register from './components/pages/Register';
+import Home from './components/pages/Home';
+import About from './components/pages/About';
+import Warranty from './components/pages/Warranty';
+import Delivery from './components/pages/Delivery';
+import Payment from './components/pages/Payment';
+import Return from './components/pages/Return';
+import New from './components/pages/New';
+import Header from './components/header/Header';
+import Login from './components/pages/Login';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from './config/constants';
 

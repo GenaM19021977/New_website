@@ -26,9 +26,19 @@ def init_django():
     Инициализация Django окружения
     Вызывается автоматически при необходимости использования модели
     """
-    if not django.apps.apps.ready:
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "electric_boiler.settings")
-        django.setup()
+    try:
+        # Пробуем проверить, инициализирован ли Django
+        from django.apps import apps
+
+        if apps.ready:
+            return
+    except (ImportError, AttributeError):
+        # Django еще не инициализирован, нужно настроить
+        pass
+
+    # Настраиваем Django
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "electric_boiler.settings")
+    django.setup()
 
 
 # Константы парсера
@@ -388,7 +398,12 @@ def parse_specifications(specs_text):
         ("Возможность для работы самостоятельно", "self_work"),
         ("Возможность для нагрева воды", "water_heating"),
         ("Возможность нагрева теплого пола", "floor_heating"),
+        ("Диапазон выбираемых температур, °C", "temp_range"),
         ("Диапазон выбираемых температур", "temp_range"),
+        ("радиаторное отопление, °C", "temp_range_radiator"),
+        ("радиаторное отопление", "temp_range_radiator"),
+        ("теплый пол, °C", "temp_range_floor"),
+        ("теплый пол", "temp_range_floor"),
         ("Габаритные размеры", "dimensions"),
         ("Регулировка мощности", "power_regulation"),
         ("Циркуляционный насос", "circulation_pump"),
@@ -404,14 +419,61 @@ def parse_specifications(specs_text):
     ]
 
     # Парсим характеристики построчно
-    for line in specs_text.split("\n"):
-        if ":" in line:
+    lines = specs_text.split("\n")
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+
+        # Обработка диапазона температур
+        if "Диапазон выбираемых температур" in line and ":" in line:
+            # Проверяем, является ли это обычным полем со значением
+            # (например: "Диапазон выбираемых температур: 30-80°C")
+            key, value = line.split(":", 1)
+            key = key.strip()
+            value = value.strip()
+
+            # Если после "Диапазон выбираемых температур" есть значение напрямую
+            if value and not value.startswith("-"):
+                # Сохраняем как temp_range, если это не подзаголовок с подстроками
+                key_lower = key.lower()
+                if key_lower in [
+                    "диапазон выбираемых температур, °c",
+                    "диапазон выбираемых температур",
+                ]:
+                    specs_dict["temp_range"] = value
+                    i += 1
+                    continue
+
+            # Если это подзаголовок без значения, ищем следующие строки с подзаголовками
+            i += 1
+            while i < len(lines):
+                next_line = lines[i].strip()
+                if ":" in next_line:
+                    key, value = next_line.split(":", 1)
+                    key = key.strip().lower()
+                    value = value.strip()
+
+                    if "радиаторное отопление" in key:
+                        specs_dict["temp_range_radiator"] = value
+                    elif "теплый пол" in key:
+                        specs_dict["temp_range_floor"] = value
+                    else:
+                        # Если встретили другую характеристику, останавливаемся
+                        i -= 1
+                        break
+                elif next_line and not next_line.startswith("-"):
+                    # Если строка не пустая и не начинается с "-", значит вышли из блока температур
+                    i -= 1
+                    break
+                i += 1
+
+        # Обычная обработка остальных характеристик
+        elif ":" in line:
             key, value = line.split(":", 1)
             key = key.strip()
             value = value.strip()
 
             # Ищем соответствие в маппинге (от длинных к коротким для приоритета)
-            # Используем точное совпадение или начало строки
             for spec_key, field_name in field_mapping:
                 key_lower = key.lower()
                 spec_key_lower = spec_key.lower()
@@ -419,6 +481,8 @@ def parse_specifications(specs_text):
                 if key_lower == spec_key_lower or key_lower.startswith(spec_key_lower):
                     specs_dict[field_name] = value
                     break  # Прерываем, так как нашли совпадение (от длинных к коротким)
+
+        i += 1
 
     return specs_dict
 
@@ -441,6 +505,11 @@ def save_to_database(product_data):
         # Парсим характеристики
         specs_dict = parse_specifications(product_data.get("specifications", ""))
 
+        # Если temp_range не найден на странице, используем значение из temp_range_radiator
+        if "temp_range" not in specs_dict or not specs_dict.get("temp_range"):
+            if specs_dict.get("temp_range_radiator"):
+                specs_dict["temp_range"] = specs_dict["temp_range_radiator"]
+
         # Подготавливаем данные для сохранения
         defaults = {
             "price": product_data.get("price", ""),
@@ -459,11 +528,13 @@ def save_to_database(product_data):
             defaults["image_2"] = image_urls[1] if len(image_urls) > 1 else None
             defaults["image_3"] = image_urls[2] if len(image_urls) > 2 else None
             defaults["image_4"] = image_urls[3] if len(image_urls) > 3 else None
+            defaults["image_5"] = image_urls[4] if len(image_urls) > 4 else None
         else:
             defaults["image_1"] = None
             defaults["image_2"] = None
             defaults["image_3"] = None
             defaults["image_4"] = None
+            defaults["image_5"] = None
 
         # Создаем или обновляем запись по product_url (уникальному ключу)
         # Используем product_url вместо name, так как URL уникальнее

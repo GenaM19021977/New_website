@@ -6,16 +6,16 @@
  * и перенаправляет пользователя на главную страницу.
  */
 
-import '../App.css';
+import '../../App.css';
 import { Box } from "@mui/material";
-import MyTextField from '../components/forms/MyTextField';
-import MyPassField from '../components/forms/MyPassField';
-import MyButton from '../components/forms/MyButton';
+import MyTextField from '../forms/MyTextField';
+import MyPassField from '../forms/MyPassField';
+import MyButton from '../forms/MyButton';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import api from '../services/api';
+import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS, ROUTES } from '../config/constants';
+import { STORAGE_KEYS, ROUTES } from '../../config/constants';
 
 const Login = () => {
     // Хук для программной навигации
@@ -98,4 +98,3 @@ const Login = () => {
 };
 
 export default Login;
-

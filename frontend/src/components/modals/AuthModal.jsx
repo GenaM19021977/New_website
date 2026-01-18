@@ -16,9 +16,9 @@ import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import MyTextField from '../../components/forms/MyTextField';
-import MyPassField from '../../components/forms/MyPassField';
-import MyButton from '../../components/forms/MyButton';
+import MyTextField from '../forms/MyTextField';
+import MyPassField from '../forms/MyPassField';
+import MyButton from '../forms/MyButton';
 import { useForm, Controller } from 'react-hook-form';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -50,6 +50,12 @@ const AuthModal = ({ open, onClose }) => {
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
         reset(); // Сброс формы при смене вкладки
+        setAvatarPreview(null); // Сброс превью аватара при смене вкладки
+        // Сброс input файла
+        const fileInput = document.getElementById('avatar-upload');
+        if (fileInput) {
+            fileInput.value = '';
+        }
     };
 
     /**
@@ -59,6 +65,11 @@ const AuthModal = ({ open, onClose }) => {
         reset(); // Сброс формы при закрытии
         setAvatarPreview(null); // Сброс превью аватара
         setActiveTab(0); // Возврат к первой вкладке
+        // Сброс input файла
+        const fileInput = document.getElementById('avatar-upload');
+        if (fileInput) {
+            fileInput.value = '';
+        }
         onClose();
     };
 

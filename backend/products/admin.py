@@ -61,7 +61,8 @@ class ElectricBoilerAdmin(admin.ModelAdmin):
         ("Технические характеристики", {
             "fields": (
                 "power", "power_regulation", "heating_area", "work_type",
-                "voltage", "cable", "fuse", "temp_range", "efficiency", "connection", "dimensions"
+                "voltage", "cable", "fuse", "temp_range", "temp_range_radiator", "temp_range_floor",
+                "efficiency", "connection", "dimensions"
             )
         }),
         ("Функциональные возможности", {
@@ -74,7 +75,7 @@ class ElectricBoilerAdmin(admin.ModelAdmin):
             "fields": ("expansion_tank", "circulation_pump")
         }),
         ("Документация и изображения", {
-            "fields": ("documentation", "image_1", "image_2", "image_3", "image_4")
+            "fields": ("documentation", "image_1", "image_2", "image_3", "image_4", "image_5")
         }),
         ("Метаданные", {
             "fields": ("created_at", "updated_at"),

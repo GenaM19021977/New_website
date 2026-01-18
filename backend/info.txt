@@ -9,7 +9,7 @@ python.exe -m pip install --upgrade pip
 python -m pip install Django
 python -m pip install djangorestframework # для работы с API
 
-
+password Testing321
 
 
 # Создание проекта на Django
