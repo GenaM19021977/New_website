@@ -1,35 +1,98 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+/**
+ * Главный компонент приложения
+ * 
+ * Управляет маршрутизацией и отображением компонентов.
+ * Реализует логику:
+ * - Автоматическое перенаправление аутентифицированных пользователей
+ * - Условное отображение Header (скрыт на страницах логина/регистрации)
+ * - Защита маршрутов через ProtectedRoute компонент
+ */
+
+import './App.css';
+import Register from './pages/Register';
+import Home from './pages/Home';
+import About from './pages/About';
+import Warranty from './pages/Warranty';
+import Delivery from './pages/Delivery';
+import Payment from './pages/Payment';
+import Return from './pages/Return';
+import New from './pages/New';
+import Header from './components/layout/Header';
+import Login from './pages/Login';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ROUTES } from './config/constants';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Routes>
+        {/* Публичные маршруты без Header */}
+        <Route path={ROUTES.LOGIN} element={<Login />} />
+        <Route path={ROUTES.REGISTER} element={<Register />} />
+
+        {/* Перенаправление с корня на /home */}
+        <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
+        
+        {/* Публичные маршруты с Header (доступны без авторизации) */}
+        <Route
+          path={ROUTES.HOME}
+          element={
+            <Header>
+              <Home />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.ABOUT}
+          element={
+            <Header>
+              <About />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.WARRANTY}
+          element={
+            <Header>
+              <Warranty />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.DELIVERY}
+          element={
+            <Header>
+              <Delivery />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.PAYMENT}
+          element={
+            <Header>
+              <Payment />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.RETURN}
+          element={
+            <Header>
+              <Return />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.NEW}
+          element={
+            <Header>
+              <New />
+            </Header>
+          }
+        />
+      </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

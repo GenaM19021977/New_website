@@ -1,0 +1,401 @@
+/**
+ * Стили для компонента Header
+ */
+
+.header-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Верхняя секция - белый фон */
+.header-top {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 8px 120px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-top-left {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+/* Кнопка гамбургера для мобильных устройств */
+.mobile-menu-button {
+    display: none !important;
+}
+
+/* Обычное меню для десктопа */
+.desktop-menu {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+/* Адаптивность: скрываем обычное меню и показываем кнопку гамбургера на маленьких экранах */
+@media (max-width: 768px) {
+    .mobile-menu-button {
+        display: flex !important;
+    }
+    
+    .desktop-menu {
+        display: none;
+    }
+}
+
+.header-link {
+    color: #0e0d0d;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.header-link:hover {
+    color: #0db39e;
+}
+
+.currency-selector {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #000000;
+}
+
+.dropdown-icon {
+    font-size: 16px !important;
+}
+
+.dropdown-icon-small {
+    font-size: 14px !important;
+    margin-left: 4px;
+}
+
+/* Средняя секция - белый фон */
+.header-middle {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 16px 120px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-middle-left {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.logo {
+    text-decoration: none;
+    color: #000000;
+    display: flex;
+    align-items: center;
+}
+
+.logo-image {
+    height: auto;
+    max-height: 60px;
+    width: auto;
+    display: block;
+}
+
+.header-middle-center {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+}
+
+.header-middle-right {
+    display: flex;
+    align-items: center;
+}
+
+.phone-numbers {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.phone-number {
+    color: #000000;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Нижняя секция - черный фон */
+.header-bottom {
+    background-color: #000000;
+    padding: 12px 120px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.catalog-button {
+    background-color: #0db39e;
+    color: #edecec;
+    border: none;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.catalog-button:hover {
+    background-color: #0aa08d;
+}
+
+.catalog-icon {
+    font-size: 20px !important;
+}
+
+.search-container {
+    flex: 1;
+    max-width: 895px;
+    display: flex;
+    align-items: center;
+    background-color: #333333;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.search-input {
+    flex: 1;
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    padding: 10px 16px;
+    font-size: 16px;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #999999;
+}
+
+.search-button {
+    background-color: #0db39e;
+    border: none;
+    color: #ffffff;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.search-button:hover {
+    background-color: #0aa08d;
+}
+
+.header-bottom-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-icon {
+    color: #ffffff;
+    font-size: 24px !important;
+}
+
+.user-text {
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: right;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.user-surname {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.user-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    background-color: #0db39e !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 16px !important;
+    border: 2px solid #ffffff;
+}
+
+.login-link {
+    color: #ffffff;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.login-link:hover {
+    color: #0db39e;
+}
+
+.login-link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #ffffff;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.login-link-button h3 {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: inherit;
+}
+
+.login-link-button:hover {
+    color: #0db39e;
+}
+
+.login-link-button:hover h3 {
+    color: #0db39e;
+}
+
+.divider {
+    width: 1px;
+    height: 30px;
+    background-color: #514747;
+}
+
+.header-icons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.icon-button {
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    position: relative;
+}
+
+.icon-button:hover {
+    color: #0db39e;
+}
+
+.cart-button {
+    position: relative;
+}
+
+.cart-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #0db39e;
+    color: #ffffff;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Контент страницы */
+.header-content {
+    flex: 1;
+    padding: 500px 120px;
+    background-image: url('../images/87168176238132.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .header-middle-left {
+        gap: 20px;
+    }
+
+    .header-top,
+    .header-middle,
+    .header-bottom {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-top-left {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .header-link {
+        font-size: 12px;
+    }
+
+    .header-middle {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .header-middle-left {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .header-bottom {
+        flex-wrap: wrap;
+    }
+
+    .search-container {
+        max-width: 100%;
+        order: 3;
+        width: 100%;
+    }
+}
