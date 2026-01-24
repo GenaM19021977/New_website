@@ -329,16 +329,6 @@
     font-weight: bold;
 }
 
-/* Контент страницы */
-.header-content {
-    flex: 1;
-    padding: 500px 120px;
-    background-image: url('../../images/87168176238132.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
 /* Адаптивность */
 @media (max-width: 1200px) {
     .header-top {
