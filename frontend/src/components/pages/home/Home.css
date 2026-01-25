@@ -1,0 +1,30 @@
+/**
+ * Стили для страницы Home
+ */
+
+.home-page {
+    flex: 1;
+    box-sizing: border-box;
+    padding: 100px 120px;
+    background-image: url('../../../images/87168176238132.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.header_bottom {
+    margin-bottom: 100px;
+}
+
+.container_cards {
+    display: flex;
+    justify-content: space-between;
+    column-gap: 30px;
+
+}
+
+@media (max-width: 768px) {
+    .home-page {
+        padding: 200px 16px;
+    }
+}

@@ -27,7 +27,6 @@ import IconButton from '@mui/material/IconButton';
 import Footer from '../footer/Footer';
 import AuthModal from '../modals/AuthModal';
 import ProfileModal from '../modals/ProfileModal';
-import Brand from '../brands/brand';
 import api from '../../services/api';
 import { STORAGE_KEYS, ROUTES } from '../../config/constants';
 import { getAvatarUrl } from '../../utils/avatar';
@@ -331,9 +330,7 @@ export default function Header(props) {
             </div>
 
             {/* Контент страницы */}
-            <Brand>
-                {children}
-            </Brand>
+            {children}
 
             {/* Footer */}
             <Footer />

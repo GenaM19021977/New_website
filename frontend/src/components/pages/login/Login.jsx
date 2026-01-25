@@ -1,21 +1,23 @@
 /**
  * Страница входа (Login)
- * 
+ *
  * Отображает форму входа с полями email и password.
  * При успешной аутентификации сохраняет JWT токены в localStorage
  * и перенаправляет пользователя на главную страницу.
  */
 
-import '../../App.css';
+import '../../../App.css';
+import './Login.css';
+
 import { Box } from "@mui/material";
-import MyTextField from '../forms/MyTextField';
-import MyPassField from '../forms/MyPassField';
-import MyButton from '../forms/MyButton';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import api from '../../services/api';
-import { useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS, ROUTES } from '../../config/constants';
+
+import MyTextField from '../../forms/MyTextField';
+import MyPassField from '../../forms/MyPassField';
+import MyButton from '../../forms/MyButton';
+import api from '../../../services/api';
+import { STORAGE_KEYS, ROUTES } from '../../../config/constants';
 
 const Login = () => {
     // Хук для программной навигации
@@ -26,7 +28,7 @@ const Login = () => {
 
     /**
      * Обработчик отправки формы входа
-     * 
+     *
      * @param {Object} data - Данные формы (email, password)
      */
     const submission = (data) => {
@@ -56,7 +58,7 @@ const Login = () => {
     };
 
     return (
-        <div className="myBackground">
+        <div className="myBackground login-page">
             <form onSubmit={handleSubmit(submission)}>
                 <Box className={"whiteBox"}>
 
@@ -98,3 +100,4 @@ const Login = () => {
 };
 
 export default Login;
+

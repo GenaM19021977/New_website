@@ -1,0 +1,16 @@
+/**
+ * Стили для страницы Warranty
+ */
+
+.warranty-page {
+    flex: 1;
+    box-sizing: border-box;
+    padding: 40px 120px;
+}
+
+@media (max-width: 768px) {
+    .warranty-page {
+        padding: 24px 16px;
+    }
+}
+

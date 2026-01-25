@@ -1,21 +1,23 @@
 /**
  * Страница регистрации (Register)
- * 
+ *
  * Отображает форму регистрации с полями email, password и password2 (подтверждение).
  * После успешной регистрации автоматически выполняет вход пользователя
  * и перенаправляет на главную страницу.
  */
 
-import '../../App.css';
+import '../../../App.css';
+import './Register.css';
+
 import { Box } from "@mui/material";
-import MyTextField from '../forms/MyTextField';
-import MyPassField from '../forms/MyPassField';
-import MyButton from '../forms/MyButton';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import api from '../../services/api';
-import { useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS, ROUTES } from '../../config/constants';
+
+import MyTextField from '../../forms/MyTextField';
+import MyPassField from '../../forms/MyPassField';
+import MyButton from '../../forms/MyButton';
+import api from '../../../services/api';
+import { STORAGE_KEYS, ROUTES } from '../../../config/constants';
 
 const Register = () => {
     // Хук для программной навигации
@@ -26,11 +28,11 @@ const Register = () => {
 
     /**
      * Обработчик отправки формы регистрации
-     * 
+     *
      * Выполняет два последовательных запроса:
      * 1. Регистрация нового пользователя
      * 2. Автоматический вход после регистрации
-     * 
+     *
      * @param {Object} data - Данные формы (email, password, password2)
      */
     const submission = (data) => {
@@ -65,7 +67,7 @@ const Register = () => {
     };
 
     return (
-        <div className="myBackground">
+        <div className="myBackground register-page">
             <form onSubmit={handleSubmit(submission)}>
                 <Box className={"whiteBox"}>
 
@@ -120,3 +122,4 @@ const Register = () => {
 };
 
 export default Register;
+
