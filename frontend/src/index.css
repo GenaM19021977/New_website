@@ -1,9 +1,109 @@
+/**
+ * Глобальные стили и дизайн-система
+ * Цветовая схема: тёмный фон, акцент #C7A75A, серый текст #9FB0B8
+ */
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Основные цвета */
+  --color-bg-main: #0E1A20;
+  --color-bg-dark: #0B1419;
+  --color-bg-card: #13232B;
+  --color-accent: #C7A75A;
+  --color-text-muted: #9FB0B8;
+  --color-text: #ffffff;
+  /* Отступы контейнера */
+  --container-max: 1280px;
+  --container-padding: 24px;
+  --section-padding-y: 80px;
+  /* Небольшой отступ от верха страницы до номера секции */
+  --page-section-number-offset: 24px;
 }
 
-html, body{
+@media (min-width: 768px) {
+  :root {
+    --container-padding: 40px;
+    --section-padding-y: 120px;
+    --page-section-number-offset: 32px;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --container-padding: 120px;
+  }
+}
+
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
+  background-color: var(--color-bg-main);
+  color: var(--color-text);
+}
+
+#root {
+  min-height: 100%;
+}
+
+/* Утилита контейнера с max-width и padding */
+.page-container {
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+/* Общий layout для внутренних страниц */
+.page-main {
+  flex: 1;
+}
+
+.page-section {
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+
+.page-section:first-child {
+  padding-top: 0;
+}
+
+.page-section-heading {
+  margin: 0 0 16px 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.page-section-text {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  max-width: 720px;
+}
+
+/* Адаптивная сетка для контента (2 колонки на md) */
+.page-grid-2 {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .page-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 3 колонки на md */
+.page-grid-3 {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .page-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

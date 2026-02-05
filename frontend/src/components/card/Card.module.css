@@ -1,0 +1,17 @@
+.card {
+  background-color: var(--color-bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card__image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}

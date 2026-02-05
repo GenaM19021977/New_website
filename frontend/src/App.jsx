@@ -12,11 +12,10 @@ import './App.css';
 import Register from './components/pages/register/Register';
 import Home from './components/pages/home/Home';
 import About from './components/pages/about/About';
-import Warranty from './components/pages/warranty/Warranty';
-import Delivery from './components/pages/delivery/Delivery';
-import Payment from './components/pages/payment/Payment';
-import Return from './components/pages/return/Return';
-import New from './components/pages/new/New';
+import Catalog from './components/pages/catalog/Catalog';
+import Selection from './components/pages/selection/Selection';
+import Brands from './components/pages/brands/Brands';
+import Contacts from './components/pages/contacts/Contacts';
 import Header from './components/header/Header';
 import Login from './components/pages/login/Login';
 import { Routes, Route, Navigate } from 'react-router-dom';
@@ -51,42 +50,34 @@ function App() {
           }
         />
         <Route
-          path={ROUTES.WARRANTY}
+          path={ROUTES.CATALOG}
           element={
             <Header>
-              <Warranty />
+              <Catalog />
             </Header>
           }
         />
         <Route
-          path={ROUTES.DELIVERY}
+          path={ROUTES.SELECTION}
           element={
             <Header>
-              <Delivery />
+              <Selection />
             </Header>
           }
         />
         <Route
-          path={ROUTES.PAYMENT}
+          path={ROUTES.BRANDS}
           element={
             <Header>
-              <Payment />
+              <Brands />
             </Header>
           }
         />
         <Route
-          path={ROUTES.RETURN}
+          path={ROUTES.CONTACTS}
           element={
             <Header>
-              <Return />
-            </Header>
-          }
-        />
-        <Route
-          path={ROUTES.NEW}
-          element={
-            <Header>
-              <New />
+              <Contacts />
             </Header>
           }
         />

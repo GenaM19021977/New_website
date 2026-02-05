@@ -1,13 +1,13 @@
 /**
- * About — цветовая схема, секции
+ * Selection — стили страницы подбора
  */
 
-.about-page {
+.selection-page {
   padding-top: var(--page-section-number-offset);
   padding-bottom: var(--section-padding-y);
 }
 
-.about-page .section-number {
+.selection-page .section-number {
   display: block;
   font-size: 4rem;
   font-weight: 700;
@@ -15,6 +15,6 @@
   line-height: 1;
 }
 
-.about-page .page-section-heading {
+.selection-page .page-section-heading {
   margin-top: 16px;
 }

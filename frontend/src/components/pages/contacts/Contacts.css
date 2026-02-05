@@ -1,0 +1,40 @@
+/**
+ * Contacts — стили страницы контактов
+ */
+
+.contacts-page {
+  padding-top: var(--page-section-number-offset);
+  padding-bottom: var(--section-padding-y);
+}
+
+.contacts-page .section-number {
+  display: block;
+  font-size: 4rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.06);
+  line-height: 1;
+}
+
+.contacts-page .page-section-heading {
+  margin-top: 16px;
+}
+
+.contacts-phones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.contacts-phone {
+  color: var(--color-accent);
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.contacts-phone:hover {
+  color: var(--color-text);
+  opacity: 0.9;
+}

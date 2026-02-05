@@ -1,18 +1,10 @@
 /**
  * Страница регистрации (Register)
- *
- * Отображает форму регистрации с полями email, password и password2 (подтверждение).
- * После успешной регистрации автоматически выполняет вход пользователя
- * и перенаправляет на главную страницу.
  */
-
-import '../../../App.css';
 import './Register.css';
-
-import { Box } from "@mui/material";
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-
+import { Box } from '@mui/material';
 import MyTextField from '../../forms/MyTextField';
 import MyPassField from '../../forms/MyPassField';
 import MyButton from '../../forms/MyButton';
@@ -20,106 +12,64 @@ import api from '../../../services/api';
 import { STORAGE_KEYS, ROUTES } from '../../../config/constants';
 
 const Register = () => {
-    // Хук для программной навигации
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { handleSubmit, control } = useForm();
 
-    // Хук для управления формой (react-hook-form)
-    const { handleSubmit, control } = useForm();
+  const submission = (data) => {
+    api.post('register/', {
+      email: data.email,
+      password: data.password,
+    })
+      .then(() => {
+        return api.post('login/', {
+          email: data.email,
+          password: data.password,
+        });
+      })
+      .then((response) => {
+        if (response.data.access) {
+          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.data.access);
+        }
+        if (response.data.refresh) {
+          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refresh);
+        }
+        navigate(ROUTES.HOME);
+      })
+      .catch((error) => {
+        console.error('Registration error:', error);
+      });
+  };
 
-    /**
-     * Обработчик отправки формы регистрации
-     *
-     * Выполняет два последовательных запроса:
-     * 1. Регистрация нового пользователя
-     * 2. Автоматический вход после регистрации
-     *
-     * @param {Object} data - Данные формы (email, password, password2)
-     */
-    const submission = (data) => {
-        // Шаг 1: Регистрация нового пользователя
-        api.post('register/', {
-            email: data.email,
-            password: data.password,
-        })
-            .then(() => {
-                // Шаг 2: Автоматический вход пользователя после успешной регистрации
-                return api.post('login/', {
-                    email: data.email,
-                    password: data.password,
-                });
-            })
-            .then((response) => {
-                // Сохранение JWT токенов в localStorage
-                if (response.data.access) {
-                    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.data.access);
-                }
-                if (response.data.refresh) {
-                    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refresh);
-                }
-
-                // Перенаправление на главную страницу
-                navigate(ROUTES.HOME);
-            })
-            .catch((error) => {
-                // Обработка ошибок при регистрации (email уже существует и т.д.)
-                console.error('Registration error:', error);
-            });
-    };
-
-    return (
-        <div className="myBackground register-page">
-            <form onSubmit={handleSubmit(submission)}>
-                <Box className={"whiteBox"}>
-
-                    <Box className={"itemBox"}>
-                        <Box className={"title"}>User registration</Box>
-                    </Box>
-
-                    <Box className={"itemBox"}>
-                        <MyTextField
-                            label={"Email"}
-                            name={"email"}
-                            control={control}
-                        />
-                    </Box>
-
-                    <Box className={"itemBox"}>
-                        <MyPassField
-                            label={"Password"}
-                            name={"password"}
-                            control={control}
-                        />
-                    </Box>
-
-                    <Box className={"itemBox"}>
-                        <MyPassField
-                            label={"Confirm password"}
-                            name={"password2"}
-                            control={control}
-                        />
-                    </Box>
-
-                    <Box className={"itemBox"}>
-                        <MyButton
-                            type={"submit"}
-                            label={"Register"}
-                        />
-                    </Box>
-
-                    <Box className={"itemBox"}>
-                        <Link
-                            to={ROUTES.LOGIN}
-                            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
-                        >
-                            Already registered? Please login!
-                        </Link>
-                    </Box>
-
-                </Box>
-            </form>
-        </div>
-    );
+  return (
+    <div className="auth-background register-page">
+      <main className="auth-main" role="main">
+        <form onSubmit={handleSubmit(submission)}>
+          <Box className="auth-box">
+            <Box className="auth-item">
+              <h1 className="auth-title">Регистрация</h1>
+            </Box>
+            <Box className="auth-item">
+              <MyTextField label="Email" name="email" control={control} />
+            </Box>
+            <Box className="auth-item">
+              <MyPassField label="Пароль" name="password" control={control} />
+            </Box>
+            <Box className="auth-item">
+              <MyPassField label="Подтвердите пароль" name="password2" control={control} />
+            </Box>
+            <Box className="auth-item">
+              <MyButton type="submit" label="Зарегистрироваться" />
+            </Box>
+            <Box className="auth-item">
+              <Link to={ROUTES.LOGIN} className="auth-link">
+                Уже есть аккаунт? Войти
+              </Link>
+            </Box>
+          </Box>
+        </form>
+      </main>
+    </div>
+  );
 };
 
 export default Register;
-

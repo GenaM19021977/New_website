@@ -30,7 +30,6 @@ import ProfileModal from '../modals/ProfileModal';
 import api from '../../services/api';
 import { STORAGE_KEYS, ROUTES } from '../../config/constants';
 import { getAvatarUrl } from '../../utils/avatar';
-import logoHeader from '../../images/logo-header.png';
 
 export default function Header(props) {
     const { children } = props;
@@ -178,124 +177,106 @@ export default function Header(props) {
     // Список пунктов меню для адаптивного меню
     const menuItems = [
         { label: 'О нас', path: ROUTES.ABOUT },
-        { label: 'Гарантия', path: ROUTES.WARRANTY },
-        { label: 'Доставка', path: ROUTES.DELIVERY },
-        { label: 'Оплата', path: ROUTES.PAYMENT },
-        { label: 'Возврат товара', path: ROUTES.RETURN },
+        { label: 'Каталог', path: ROUTES.CATALOG },
+        { label: 'Подбор', path: ROUTES.SELECTION },
+        { label: 'Бренды', path: ROUTES.BRANDS },
+        { label: 'Контакты', path: ROUTES.CONTACTS },
     ];
 
     return (
         <div className="header-wrapper">
-            {/* Объединенная секция - логотип, навигация, контакты и валюта */}
-            <div className="header-top">
-                <div className="header-top-left">
-                    {/* Иконка гамбургера для мобильных устройств */}
-                    <IconButton
-                        className="mobile-menu-button"
-                        onClick={handleOpenMobileMenu}
-                        sx={{ display: { xs: 'flex', md: 'none' } }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-
-                    {/* Логотип */}
-                    <Link to={ROUTES.HOME} className="logo">
-                        <img
-                            src={logoHeader}
-                            alt="Kotelkv.by"
-                            className="logo-image"
-                        />
+            <header className="header-top">
+                {/* Строка 1: Логотип, Поиск, Сравнение, Избранное, Валюта */}
+                <div className="header-row header-row-1">
+                    <Link to={ROUTES.HOME} className="header-logo" aria-label="На главную" title="На главную">
+                        <svg width="450" height="100" viewBox="0 0 450 120" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg">
+                            <style>
+                                {`.logo-main { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 34px; fill: #ffffff; letter-spacing: 0.75px; word-spacing: 0.375em; }
+                                .logo-sub { font-family: 'Roboto', sans-serif; font-weight: 300; font-size: 17.6px; fill: #9FB0B8; }
+                                .accent { fill: #C7A75A; }
+                                .heat-dot { animation: logo-pulse 2s infinite; transform-origin: center; }
+                                @keyframes logo-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.05); } }`}
+                            </style>
+                            <g transform="translate(20, 30)">
+                                <rect x="0" y="20" width="40" height="30" rx="3" fill="#13232B" />
+                                <polygon points="0,20 20,0 40,20" fill="#C7A75A" />
+                                <g opacity="0.6">
+                                    <circle cx="20" cy="50" r="25" fill="none" stroke="#C7A75A" strokeWidth="2" strokeDasharray="3,3" />
+                                    <circle cx="20" cy="50" r="35" fill="none" stroke="#9FB0B8" strokeWidth="1.5" strokeDasharray="2,4" />
+                                </g>
+                                <circle cx="20" cy="35" r="8" fill="#C7A75A" className="heat-dot" opacity="0.9" />
+                                <circle cx="20" cy="35" r="4" fill="#ffffff" />
+                            </g>
+                            <g transform="translate(80, 0)">
+                                <text x="0" y="50" className="logo-main" textLength="360" lengthAdjust="spacing">
+                                    <tspan className="accent">Тепло</tspan> в каждый дом
+                                </text>
+                                <text x="0" y="80" className="logo-sub" textLength="360" lengthAdjust="spacing">
+                                    Современные системы электрического отопления
+                                </text>
+                                <line x1="0" y1="90" x2="360" y2="90" stroke="#C7A75A" strokeWidth="2" />
+                                <g className="heat-dot">
+                                    <circle cx="10" cy="100" r="3" fill="#C7A75A" />
+                                    <circle cx="360" cy="100" r="3" fill="#C7A75A" />
+                                    <circle cx="175" cy="100" r="4" fill="#9FB0B8" />
+                                </g>
+                            </g>
+                        </svg>
                     </Link>
-
-                    {/* Навигационные ссылки для десктопа */}
-                    <div className="desktop-menu">
-                        <Link to={ROUTES.ABOUT} className="header-link">О нас</Link>
-                        <Link to={ROUTES.WARRANTY} className="header-link">Гарантия</Link>
-                        <Link to={ROUTES.DELIVERY} className="header-link">Доставка</Link>
-                        <Link to={ROUTES.PAYMENT} className="header-link">Оплата</Link>
-                        <Link to="/new" className="header-link">Новинки</Link>
-                        <Link to={ROUTES.RETURN} className="header-link">Возврат товара</Link>
-                    </div>
-                </div>
-                <div className="header-top-right">
-                    {/* Номера телефонов */}
-                    <div className="phone-numbers">
-                        <div className="phone-number">+375(44) 787 18 88</div>
-                        <div className="phone-number">
-                            +375(29) 235 31 00
-                            <KeyboardArrowDownIcon className="dropdown-icon-small" />
+                    <div className="header-search">
+                        <div className="search-container">
+                            <input
+                                type="text"
+                                placeholder="Поиск"
+                                className="search-input"
+                            />
+                            <button className="search-button">
+                                <SearchIcon />
+                            </button>
                         </div>
                     </div>
-                    {/* Кнопка выбора валюты */}
-                    <span className="currency-selector">
-                        руб. Валюта
-                        <KeyboardArrowDownIcon className="dropdown-icon" />
-                    </span>
-                </div>
-            </div>
-
-            {/* Адаптивное меню (Drawer) */}
-            <Drawer
-                anchor="left"
-                open={mobileMenuOpen}
-                onClose={handleCloseMobileMenu}
-                sx={{
-                    display: { xs: 'block', md: 'none' },
-                    '& .MuiDrawer-paper': {
-                        width: 280,
-                        boxSizing: 'border-box',
-                    },
-                }}
-            >
-                <List>
-                    {menuItems.map((item) => (
-                        <ListItem key={item.path} disablePadding>
-                            <ListItemButton
-                                component={Link}
-                                to={item.path}
-                                onClick={handleCloseMobileMenu}
-                            >
-                                <ListItemText primary={item.label} />
-                            </ListItemButton>
-                        </ListItem>
-                    ))}
-                </List>
-            </Drawer>
-
-            {/* Нижняя секция - каталог, поиск, пользователь */}
-            <div className="header-bottom">
-                <button className="catalog-button">
-                    <MenuIcon className="catalog-icon" />
-                    <span>Каталог товаров</span>
-                    <KeyboardArrowDownIcon className="dropdown-icon" />
-                </button>
-
-                <div className="search-container">
-                    <input
-                        type="text"
-                        placeholder="Поиск"
-                        className="search-input"
-                    />
-                    <button className="search-button">
-                        <SearchIcon />
-                    </button>
-                </div>
-
-                <div className="header-bottom-right">
-                    <div className="header-icons">
-                        <button className="icon-button">
+                    <div className="header-row-1-right">
+                        <button className="icon-button" aria-label="Сравнение товаров">
                             <CompareArrowsIcon />
                         </button>
-                        <button className="icon-button">
+                        <button className="icon-button" aria-label="Избранное">
                             <FavoriteBorderIcon />
                         </button>
-                        <button className="icon-button cart-button">
-                            <ShoppingCartIcon />
-                            <span className="cart-badge">0</span>
-                        </button>
+                        <span className="currency-selector">
+                            руб. Валюта
+                            <KeyboardArrowDownIcon className="dropdown-icon" />
+                        </span>
                     </div>
-                    <div className="divider"></div>
-                    <div className="user-section">
+                </div>
+
+                {/* Строка 2: Навигация, Корзина, Вход в кабинет */}
+                <div className="header-row header-row-2">
+                    <div className="header-nav-row">
+                        <IconButton
+                            className="mobile-menu-button"
+                            onClick={handleOpenMobileMenu}
+                            sx={{ display: { xs: 'flex', md: 'none' } }}
+                            aria-label="Открыть меню"
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                        <Link to={ROUTES.HOME} className="logo logo-text" aria-label="На главную">
+                            Домашняя
+                        </Link>
+                        <nav className="desktop-menu" aria-label="Основная навигация">
+                            <Link to={ROUTES.ABOUT} className="header-link">О нас</Link>
+                            <Link to={ROUTES.CATALOG} className="header-link">Каталог</Link>
+                            <Link to={ROUTES.SELECTION} className="header-link">Подбор</Link>
+                            <Link to={ROUTES.BRANDS} className="header-link">Бренды</Link>
+                            <Link to={ROUTES.CONTACTS} className="header-link">Контакты</Link>
+                        </nav>
+                    </div>
+                    <div className="divider header-top-divider" aria-hidden />
+                    <button className="icon-button cart-button header-top-cart" aria-label="Корзина">
+                        <ShoppingCartIcon />
+                        <span className="cart-badge">0</span>
+                    </button>
+                    <div className="user-section header-top-user">
                         {isAuthenticated && user ? (
                             <>
                                 <div className="user-info">
@@ -317,6 +298,7 @@ export default function Header(props) {
                                 <PersonIcon className="user-icon" />
                                 <div className="user-text">
                                     <button
+                                        type="button"
                                         className="login-link-button"
                                         onClick={handleOpenAuthModal}
                                     >
@@ -327,7 +309,40 @@ export default function Header(props) {
                         )}
                     </div>
                 </div>
-            </div>
+            </header>
+
+            {/* Адаптивное меню (Drawer) */}
+            <Drawer
+                anchor="left"
+                open={mobileMenuOpen}
+                onClose={handleCloseMobileMenu}
+                sx={{
+                    display: { xs: 'block', md: 'none' },
+                    '& .MuiDrawer-paper': {
+                        width: 280,
+                        boxSizing: 'border-box',
+                        backgroundColor: '#0B1419',
+                        color: '#ffffff',
+                    },
+                    '& .MuiListItemButton-root': { color: '#9FB0B8' },
+                    '& .MuiListItemButton-root:hover': { color: '#C7A75A', backgroundColor: 'rgba(199, 167, 90, 0.1)' },
+                }}
+            >
+                <List>
+                    {menuItems.map((item) => (
+                        <ListItem key={item.path} disablePadding>
+                            <ListItemButton
+                                component={Link}
+                                to={item.path}
+                                onClick={handleCloseMobileMenu}
+                            >
+                                <ListItemText primary={item.label} />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                </List>
+            </Drawer>
+
 
             {/* Контент страницы */}
             {children}

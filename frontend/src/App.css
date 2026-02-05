@@ -1,40 +1,101 @@
-.myBackground{
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #22C1C3;
-    background: linear-gradient(0deg, rgba(34, 193, 195, 1) 0%, rgba(253, 187, 45, 1) 100%);
+/**
+ * Стили для страниц входа/регистрации — дизайн-система #0E1A20, #C7A75A, #9FB0B8
+ */
+
+.auth-background {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-main);
+  padding: 24px;
 }
 
-.whiteBox{
-    background-color: white;
-    padding: 20px;
-    min-width: 300px;
-    height: 57%;
-    width: 25%;
-    border: 1px solid #333;
+.auth-box {
+  background-color: var(--color-bg-dark);
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid rgba(159, 176, 184, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.itemBox{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 80px;
+.auth-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
-.title{
-    font-size: 30px;
-    color: #333;
+.auth-item:last-of-type {
+  margin-bottom: 0;
 }
 
-.myForm,
-.myButton{
-    width: 100%;
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
-.myButton{
-    background: rgb(66, 8, 160) ! important;
+.auth-form,
+.auth-button {
+  width: 100%;
+}
+
+.auth-button {
+  background-color: var(--color-accent) !important;
+  color: var(--color-bg-dark) !important;
+  font-weight: 600 !important;
+}
+
+.auth-button:hover {
+  opacity: 0.9;
+}
+
+.auth-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.auth-link:hover {
+  color: var(--color-accent);
+}
+
+/* Кнопка в форме входа/регистрации */
+.auth-box .myButton,
+.auth-box .MuiButton-root {
+  background-color: var(--color-accent) !important;
+  color: var(--color-bg-dark) !important;
+  font-weight: 600 !important;
+}
+
+.auth-box .myButton:hover,
+.auth-box .MuiButton-root:hover {
+  opacity: 0.9;
+}
+
+/* Поля MUI в тёмной форме */
+.auth-box .MuiTextField-root .MuiOutlinedInput-root {
+  color: var(--color-text);
+  border-color: rgba(159, 176, 184, 0.3);
+}
+
+.auth-box .MuiTextField-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(159, 176, 184, 0.3);
+}
+
+.auth-box .MuiTextField-root .MuiInputLabel-root {
+  color: var(--color-text-muted);
+}
+
+.auth-box .MuiTextField-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-accent);
+}
+
+.auth-box .MuiTextField-root .MuiFormHelperText-root {
+  color: var(--color-text-muted);
 }

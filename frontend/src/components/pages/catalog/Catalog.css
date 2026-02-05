@@ -1,0 +1,36 @@
+/**
+ * Catalog — стили страницы каталога
+ */
+
+.catalog-page {
+  padding-top: var(--page-section-number-offset);
+  padding-bottom: var(--section-padding-y);
+}
+
+.catalog-page .section-number {
+  display: block;
+  font-size: 4rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.06);
+  line-height: 1;
+}
+
+.catalog-page .page-section-heading {
+  margin-top: 16px;
+}
+
+.catalog-cards {
+  display: grid;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.catalog-cards.md-grid-cols-3 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .catalog-cards.md-grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

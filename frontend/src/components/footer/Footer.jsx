@@ -31,7 +31,7 @@ export default function Footer() {
     };
 
     return (
-        <footer className="footer-wrapper">
+        <footer className="footer-wrapper" role="contentinfo">
             {/* Верхняя секция - подписка на рассылку */}
             <div className="footer-subscribe">
                 <div className="subscribe-content">
@@ -94,19 +94,18 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Средняя-левая колонка - Информация */}
                     <div className="footer-column">
                         <h3 className="footer-column-title">
-                            <span className="footer-title-icon">■</span>
+                            <span className="footer-title-icon" aria-hidden>■</span>
                             Информация
                         </h3>
                         <ul className="footer-links-list">
                             <li><Link to="/installation">Монтаж отопления в Бресте</Link></li>
                             <li><Link to={ROUTES.ABOUT}>О нас</Link></li>
-                            <li><Link to="/delivery">Информация о доставке</Link></li>
-                            <li><Link to="/payment">Оплата</Link></li>
-                            <li><Link to="/warranty">Гарантия</Link></li>
-                            <li><Link to="/return">Возврат товара</Link></li>
+                            <li><Link to={ROUTES.CATALOG}>Каталог</Link></li>
+                            <li><Link to={ROUTES.SELECTION}>Подбор</Link></li>
+                            <li><Link to={ROUTES.BRANDS}>Бренды</Link></li>
+                            <li><Link to={ROUTES.CONTACTS}>Контакты</Link></li>
                             <li><Link to="/order">Оформление заказа</Link></li>
                             <li><Link to="/privacy">Политика безопасности</Link></li>
                             <li><Link to="/offer">Публичная оферта</Link></li>

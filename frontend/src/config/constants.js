@@ -16,11 +16,10 @@ export const ROUTES = {
     ABOUT: '/about',
     LOGIN: '/login',
     REGISTER: '/register',
-    WARRANTY: '/warranty',
-    DELIVERY: '/delivery',
-    PAYMENT: '/payment',
-    RETURN: '/return',
-    NEW: '/new',
+    CATALOG: '/catalog',
+    SELECTION: '/selection',
+    BRANDS: '/brands',
+    CONTACTS: '/contacts',
 };
 
 // Страны для выбора в профиле

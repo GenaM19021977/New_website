@@ -1,8 +1,12 @@
 /**
- * Стили для страницы Login
+ * Login — обёртка под дизайн-систему
  */
 
 .login-page {
-    /* Дополнительные стили для страницы входа (поверх App.css) */
+  /* Использует .auth-background и .auth-box из App.css */
 }
 
+.auth-main {
+  width: 100%;
+  max-width: 420px;
+}
