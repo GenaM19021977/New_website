@@ -25,5 +25,11 @@ router.register("users", UserView, basename="users")
 # GET /me/ - получение данных текущего пользователя
 router.register("me", CurrentUserView, basename="current-user")
 
+# GET /manufacturers/ - список производителей котлов из БД
+router.register("manufacturers", ManufacturersView, basename="manufacturers")
+
+# GET /boilers/ - все товары (котлы) для страницы Каталог
+router.register("boilers", BoilersView, basename="boilers")
+
 # URL patterns, сгенерированные роутером
 urlpatterns = router.urls

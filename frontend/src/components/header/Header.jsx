@@ -50,6 +50,9 @@ export default function Header(props) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
+    // Список производителей котлов из БД для выпадающего меню «Каталог»
+    const [manufacturers, setManufacturers] = useState([]);
+
     /**
      * Функция для загрузки данных пользователя
      */
@@ -92,6 +95,21 @@ export default function Header(props) {
         return () => {
             window.removeEventListener('resize', checkScreenSize);
         };
+    }, []);
+
+    /**
+     * Загрузка списка производителей котлов из API для выпадающего меню «Каталог»
+     */
+    useEffect(() => {
+        api.get('manufacturers/')
+            .then((response) => {
+                if (Array.isArray(response.data)) {
+                    setManufacturers(response.data);
+                }
+            })
+            .catch((err) => {
+                console.error('Ошибка загрузки производителей:', err);
+            });
     }, []);
 
     /**
@@ -265,7 +283,31 @@ export default function Header(props) {
                         </Link>
                         <nav className="desktop-menu" aria-label="Основная навигация">
                             <Link to={ROUTES.ABOUT} className="header-link">О нас</Link>
-                            <Link to={ROUTES.CATALOG} className="header-link">Каталог</Link>
+                            <div className="header-catalog-dropdown">
+                                <Link to={ROUTES.CATALOG} className="header-link header-link-with-dropdown">
+                                    Каталог
+                                    <KeyboardArrowDownIcon className="dropdown-icon-small" />
+                                </Link>
+                                <div className="header-catalog-dropdown-panel" role="list">
+                                    <Link
+                                        to={ROUTES.CATALOG}
+                                        className="header-catalog-dropdown-item"
+                                        role="listitem"
+                                    >
+                                        Все товары
+                                    </Link>
+                                    {manufacturers.length > 0 ? manufacturers.map((m) => (
+                                        <Link
+                                            key={m.slug}
+                                            to={`${ROUTES.CATALOG}?manufacturer=${encodeURIComponent(m.slug)}`}
+                                            className="header-catalog-dropdown-item"
+                                            role="listitem"
+                                        >
+                                            {m.name}
+                                        </Link>
+                                    )) : null}
+                                </div>
+                            </div>
                             <Link to={ROUTES.SELECTION} className="header-link">Подбор</Link>
                             <Link to={ROUTES.BRANDS} className="header-link">Бренды</Link>
                             <Link to={ROUTES.CONTACTS} className="header-link">Контакты</Link>

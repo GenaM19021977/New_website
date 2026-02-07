@@ -18,12 +18,23 @@ import Brands from './components/pages/brands/Brands';
 import Contacts from './components/pages/contacts/Contacts';
 import Header from './components/header/Header';
 import Login from './components/pages/login/Login';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { ROUTES } from './config/constants';
+
+/** При смене маршрута прокручивает страницу вверх (для ссылок: Домашняя, О нас, Каталог, Подбор, Бренды, Контакты, логотип). */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Routes>
         {/* Публичные маршруты без Header */}
         <Route path={ROUTES.LOGIN} element={<Login />} />

@@ -19,18 +19,29 @@
   margin-top: 16px;
 }
 
+.catalog-loading {
+  color: var(--color-text-muted);
+  margin-top: 24px;
+}
+
 .catalog-cards {
   display: grid;
   gap: 24px;
   margin-top: 40px;
 }
 
-.catalog-cards.md-grid-cols-3 {
+.catalog-cards-4 {
   grid-template-columns: 1fr;
 }
 
-@media (min-width: 768px) {
-  .catalog-cards.md-grid-cols-3 {
-    grid-template-columns: repeat(3, 1fr);
+@media (min-width: 576px) {
+  .catalog-cards-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .catalog-cards-4 {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

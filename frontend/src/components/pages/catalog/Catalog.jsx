@@ -1,7 +1,51 @@
+import { useEffect, useState, useCallback } from 'react';
 import Card from '../../card/Card';
+import api from '../../../services/api';
 import './Catalog.css';
 
+/** Интервал опроса API для обновления списка при изменении данных в БД (мс) */
+const REFRESH_INTERVAL_MS = 45000;
+
 const Catalog = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = useCallback(() => {
+    api
+      .get('boilers/')
+      .then((res) => {
+        setProducts(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      api
+        .get('boilers/')
+        .then((res) => {
+          setProducts(Array.isArray(res.data) ? res.data : []);
+        })
+        .catch(() => setProducts([]));
+    }, REFRESH_INTERVAL_MS);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchProducts();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [fetchProducts]);
+
   return (
     <main className="page-main catalog-page">
       <div className="page-container">
@@ -15,14 +59,18 @@ const Catalog = () => {
           </p>
         </section>
         <section id="catalog-preview" className="home-section home-catalog" aria-labelledby="catalog-heading">
-        <div className="page-container">
-          <div className="home-cards grid-cols-1 md-grid-cols-3">
-            <Card />
-            <Card />
-            <Card />
+          <div className="page-container">
+            {loading ? (
+              <p className="catalog-loading">Загрузка…</p>
+            ) : (
+              <div className="catalog-cards catalog-cards-4">
+                {products.map((product) => (
+                  <Card key={product.id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      </section>
+        </section>
       </div>
     </main>
   );
