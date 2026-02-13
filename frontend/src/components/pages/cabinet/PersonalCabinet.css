@@ -1,0 +1,155 @@
+/**
+ * PersonalCabinet — личный кабинет пользователя
+ */
+
+.cabinet-page {
+  padding-top: var(--page-section-number-offset);
+  padding-bottom: var(--section-padding-y);
+}
+
+.cabinet-loading {
+  color: var(--color-text-muted);
+  margin-top: 24px;
+}
+
+.cabinet-heading {
+  margin-bottom: 32px;
+}
+
+.cabinet-content {
+  max-width: 560px;
+}
+
+.cabinet-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 24px;
+  background-color: var(--color-bg-card);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.cabinet-avatar-container {
+  position: relative;
+}
+
+.cabinet-avatar {
+  width: 96px !important;
+  height: 96px !important;
+  font-size: 2rem !important;
+  background-color: var(--color-accent) !important;
+  color: var(--color-bg-dark) !important;
+}
+
+.cabinet-avatar-upload-btn {
+  position: absolute !important;
+  bottom: 0;
+  right: 0;
+  background-color: var(--color-accent) !important;
+  color: var(--color-bg-dark) !important;
+}
+
+.cabinet-avatar-upload-btn:hover {
+  background-color: rgba(199, 167, 90, 0.9) !important;
+}
+
+.cabinet-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.cabinet-email-field {
+  width: 100%;
+  max-width: 320px;
+}
+
+.cabinet-email-field .MuiOutlinedInput-root {
+  color: var(--color-text);
+  background-color: var(--color-bg-dark);
+}
+
+.cabinet-email-field .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(159, 176, 184, 0.3);
+}
+
+.cabinet-section-block {
+  margin-bottom: 16px;
+  background-color: var(--color-bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cabinet-section-btn {
+  width: 100%;
+  justify-content: flex-start !important;
+  padding: 16px 20px !important;
+  color: var(--color-text) !important;
+  border-color: rgba(159, 176, 184, 0.3) !important;
+}
+
+.cabinet-section-btn:hover {
+  border-color: var(--color-accent) !important;
+  color: var(--color-accent) !important;
+  background-color: rgba(199, 167, 90, 0.08) !important;
+}
+
+.cabinet-section-content {
+  padding: 0 20px 20px;
+}
+
+.cabinet-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 576px) {
+  .cabinet-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cabinet-form-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cabinet-save-btn {
+  background-color: var(--color-accent) !important;
+  color: var(--color-bg-dark) !important;
+}
+
+.cabinet-save-btn:hover {
+  opacity: 0.9;
+}
+
+.cabinet-logout-btn {
+  margin-top: 24px;
+}
+
+.cabinet-section-content .MuiTextField-root,
+.cabinet-section-content .MuiFormControl-root {
+  width: 100%;
+}
+
+.cabinet-section-content .MuiOutlinedInput-root {
+  color: var(--color-text);
+}
+
+.cabinet-section-content .MuiInputLabel-root {
+  color: var(--color-text-muted);
+}
+
+.cabinet-section-content .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(159, 176, 184, 0.3);
+}
+
+.cabinet-section-content .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-accent);
+}

@@ -22,7 +22,12 @@ export const ROUTES = {
     SELECTION: '/selection',
     BRANDS: '/brands',
     CONTACTS: '/contacts',
+    CABINET: '/cabinet',
 };
+
+// Валидация телефона: + и ровно 12 цифр
+export const PHONE_REGEX = /^\+[0-9]{12}$/;
+export const PHONE_ERROR = "Некорректный ввод номера телефона.";
 
 // Страны для выбора в профиле
 export const COUNTRIES = [

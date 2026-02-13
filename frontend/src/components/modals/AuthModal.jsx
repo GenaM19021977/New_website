@@ -22,7 +22,7 @@ import MyButton from '../forms/MyButton';
 import { useForm, Controller } from 'react-hook-form';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS, ROUTES } from '../../config/constants';
+import { STORAGE_KEYS, ROUTES, PHONE_REGEX, PHONE_ERROR } from '../../config/constants';
 import './AuthModal.css';
 
 const AuthModal = ({ open, onClose }) => {
@@ -366,6 +366,13 @@ const AuthModal = ({ open, onClose }) => {
                                     label="Телефон"
                                     name="phone"
                                     control={control}
+                                    rules={{
+                                        validate: (value) => {
+                                            const v = (value || "").trim();
+                                            if (!v) return true;
+                                            return PHONE_REGEX.test(v) || PHONE_ERROR;
+                                        }
+                                    }}
                                 />
                             </Box>
 

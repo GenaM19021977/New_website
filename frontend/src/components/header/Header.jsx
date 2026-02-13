@@ -26,7 +26,6 @@ import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import Footer from '../footer/Footer';
 import AuthModal from '../modals/AuthModal';
-import ProfileModal from '../modals/ProfileModal';
 import api from '../../services/api';
 import { STORAGE_KEYS, ROUTES } from '../../config/constants';
 import { getAvatarUrl } from '../../utils/avatar';
@@ -36,9 +35,6 @@ export default function Header(props) {
 
     // Состояние для управления открытием/закрытием модального окна авторизации
     const [authModalOpen, setAuthModalOpen] = useState(false);
-
-    // Состояние для управления открытием/закрытием модального окна профиля
-    const [profileModalOpen, setProfileModalOpen] = useState(false);
 
     // Состояние для данных пользователя
     const [user, setUser] = useState(null);
@@ -157,28 +153,6 @@ export default function Header(props) {
     };
 
     /**
-     * Обработчик открытия модального окна профиля
-     */
-    const handleOpenProfileModal = () => {
-        setProfileModalOpen(true);
-    };
-
-    /**
-     * Обработчик закрытия модального окна профиля
-     */
-    const handleCloseProfileModal = () => {
-        setProfileModalOpen(false);
-    };
-
-    /**
-     * Обработчик обновления данных пользователя
-     */
-    const handleUserUpdate = (updatedUser) => {
-        setUser(updatedUser);
-        loadUserData(); // Перезагружаем данные для получения актуального аватара
-    };
-
-    /**
      * Обработчик открытия адаптивного меню
      */
     const handleOpenMobileMenu = () => {
@@ -201,6 +175,7 @@ export default function Header(props) {
         { label: 'Подбор', path: ROUTES.SELECTION },
         { label: 'Бренды', path: ROUTES.BRANDS },
         { label: 'Контакты', path: ROUTES.CONTACTS },
+        { label: isAuthenticated ? 'Личный кабинет' : 'Войти', path: isAuthenticated ? ROUTES.CABINET : ROUTES.LOGIN },
     ];
 
     return (
@@ -324,7 +299,12 @@ export default function Header(props) {
                     </button>
                     <div className="user-section header-top-user">
                         {isAuthenticated && user ? (
-                            <>
+                            <Link
+                                to={ROUTES.CABINET}
+                                className="user-section-link"
+                                onClick={scrollToTop}
+                                aria-label="Личный кабинет"
+                            >
                                 <div className="user-info">
                                     <div className="user-name">{user.first_name || ''}</div>
                                     <div className="user-surname">{user.last_name || ''}</div>
@@ -333,12 +313,11 @@ export default function Header(props) {
                                     src={getAvatarUrl(user.avatar)}
                                     alt={`${user.first_name} ${user.last_name}`}
                                     className="user-avatar"
-                                    onClick={handleOpenProfileModal}
                                     sx={{ cursor: 'pointer' }}
                                 >
                                     {!user.avatar && ((user.first_name?.[0] || '') + (user.last_name?.[0] || '') || 'U')}
                                 </Avatar>
-                            </>
+                            </Link>
                         ) : (
                             <>
                                 <PersonIcon className="user-icon" />
@@ -409,15 +388,6 @@ export default function Header(props) {
                 }}
             />
 
-            {/* Модальное окно профиля */}
-            {user && (
-                <ProfileModal
-                    open={profileModalOpen}
-                    onClose={handleCloseProfileModal}
-                    user={user}
-                    onUserUpdate={handleUserUpdate}
-                />
-            )}
         </div>
     );
 }

@@ -3,6 +3,7 @@
 Используются в API endpoints для работы с пользовательскими данными
 """
 
+import re
 from rest_framework import serializers
 from .models import *
 from django.contrib.auth import get_user_model
@@ -82,12 +83,22 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)  # ID только для чтения (генерируется автоматически)
 
 
+def validate_phone_format(value):
+    """Валидация телефона: + и ровно 12 цифр."""
+    if not value or not str(value).strip():
+        return value
+    if not re.match(r"^\+[0-9]{12}$", str(value).strip()):
+        raise serializers.ValidationError("Некорректный ввод номера телефона.")
+    return str(value).strip()
+
+
 class UserUpdateSerializer(serializers.ModelSerializer):
     """
     Сериализатор для обновления данных пользователя
     """
 
     avatar = serializers.ImageField(required=False, allow_null=True)
+    phone = serializers.CharField(required=False, allow_blank=True, validators=[validate_phone_format])
 
     class Meta:
         model = User
@@ -215,6 +226,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         if not value or not value.strip():
             raise serializers.ValidationError("Фамилия обязательна для заполнения")
         return value.strip()
+
+    def validate_phone(self, value):
+        """
+        Валидация телефона: + и ровно 12 цифр.
+        """
+        return validate_phone_format(value)
 
     def validate(self, attrs):
         """
