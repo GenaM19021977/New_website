@@ -22,7 +22,7 @@ import MyButton from '../forms/MyButton';
 import { useForm, Controller } from 'react-hook-form';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS, ROUTES, PHONE_REGEX, PHONE_ERROR } from '../../config/constants';
+import { STORAGE_KEYS, ROUTES, PHONE_REGEX, PHONE_ERROR, EMAIL_ERROR } from '../../config/constants';
 import './AuthModal.css';
 
 const AuthModal = ({ open, onClose }) => {
@@ -225,6 +225,11 @@ const AuthModal = ({ open, onClose }) => {
                                     label="Email"
                                     name="email"
                                     control={control}
+                                    rules={{
+                                        required: "Email обязателен для заполнения",
+                                        validate: (value) =>
+                                            (value || "").includes("@") || EMAIL_ERROR
+                                    }}
                                 />
                             </Box>
 
@@ -290,10 +295,8 @@ const AuthModal = ({ open, onClose }) => {
                                     control={control}
                                     rules={{
                                         required: "Email обязателен для заполнения",
-                                        pattern: {
-                                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                            message: "Неверный формат email"
-                                        }
+                                        validate: (value) =>
+                                            (value || "").includes("@") || EMAIL_ERROR
                                     }}
                                 />
                             </Box>

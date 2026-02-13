@@ -29,6 +29,10 @@ export const ROUTES = {
 export const PHONE_REGEX = /^\+[0-9]{12}$/;
 export const PHONE_ERROR = "Некорректный ввод номера телефона.";
 
+// Валидация email: обязательно наличие @
+export const EMAIL_ERROR = "Некорректный адрес электронной почты!";
+export const EMAIL_EXISTS_ERROR = "Пользователь с таким адресом электронной почты уже зарегистрирован!";
+
 // Страны для выбора в профиле
 export const COUNTRIES = [
     'Беларусь',

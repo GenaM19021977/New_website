@@ -9,7 +9,7 @@ import MyTextField from '../../forms/MyTextField';
 import MyPassField from '../../forms/MyPassField';
 import MyButton from '../../forms/MyButton';
 import api from '../../../services/api';
-import { STORAGE_KEYS, ROUTES } from '../../../config/constants';
+import { STORAGE_KEYS, ROUTES, EMAIL_ERROR } from '../../../config/constants';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -43,7 +43,16 @@ const Login = () => {
               <h1 className="auth-title">Вход в кабинет</h1>
             </Box>
             <Box className="auth-item">
-              <MyTextField label="Email" name="email" control={control} />
+              <MyTextField
+                label="Email"
+                name="email"
+                control={control}
+                rules={{
+                  required: "Email обязателен для заполнения",
+                  validate: (value) =>
+                    (value || "").includes("@") || EMAIL_ERROR
+                }}
+              />
             </Box>
             <Box className="auth-item">
               <MyPassField label="Пароль" name="password" control={control} />

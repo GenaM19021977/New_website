@@ -20,8 +20,13 @@ class LoginSerializer(serializers.Serializer):
     Не связан с моделью, так как используется только для валидации входных данных.
     """
 
-    email = serializers.EmailField()  # Email должен быть валидным
-    password = serializers.CharField()  # Пароль в виде строки
+    email = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate_email(self, value):
+        if not value or "@" not in str(value):
+            raise serializers.ValidationError("Некорректный адрес электронной почты!")
+        return value.strip()
 
 
 class ElectricBoilerSerializer(serializers.ModelSerializer):
@@ -185,13 +190,17 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         """
-        Валидация email
-
-        Проверяет, что email не пустой и валидный.
+        Валидация email: наличие @ и уникальность.
         """
         if not value:
             raise serializers.ValidationError("Email обязателен для заполнения")
-        return value
+        if "@" not in value:
+            raise serializers.ValidationError("Некорректный адрес электронной почты!")
+        if User.objects.filter(email__iexact=value.strip()).exists():
+            raise serializers.ValidationError(
+                "Пользователь с таким адресом электронной почты уже зарегистрирован!"
+            )
+        return value.strip()
 
     def validate_password(self, value):
         """

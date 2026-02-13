@@ -9,11 +9,11 @@ import MyTextField from '../../forms/MyTextField';
 import MyPassField from '../../forms/MyPassField';
 import MyButton from '../../forms/MyButton';
 import api from '../../../services/api';
-import { STORAGE_KEYS, ROUTES } from '../../../config/constants';
+import { STORAGE_KEYS, ROUTES, EMAIL_ERROR } from '../../../config/constants';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { handleSubmit, control } = useForm();
+  const { handleSubmit, control, setError } = useForm();
 
   const submission = (data) => {
     api.post('register/', {
@@ -37,6 +37,13 @@ const Register = () => {
       })
       .catch((error) => {
         console.error('Registration error:', error);
+        const data = error?.response?.data;
+        if (data) {
+          Object.keys(data).forEach((field) => {
+            const msg = Array.isArray(data[field]) ? data[field].join(", ") : data[field];
+            setError(field, { type: "server", message: msg });
+          });
+        }
       });
   };
 
@@ -49,7 +56,16 @@ const Register = () => {
               <h1 className="auth-title">Регистрация</h1>
             </Box>
             <Box className="auth-item">
-              <MyTextField label="Email" name="email" control={control} />
+              <MyTextField
+                label="Email"
+                name="email"
+                control={control}
+                rules={{
+                  required: "Email обязателен для заполнения",
+                  validate: (value) =>
+                    (value || "").includes("@") || EMAIL_ERROR
+                }}
+              />
             </Box>
             <Box className="auth-item">
               <MyPassField label="Пароль" name="password" control={control} />
