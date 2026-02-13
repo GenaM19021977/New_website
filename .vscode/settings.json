@@ -1,23 +1,19 @@
 {
-    "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/Scripts/python.exe",
-    "python.terminal.activateEnvironment": true,
-    "python.terminal.activateEnvInCurrentTerminal": true,
-    "python.autoComplete.extraPaths": [
-        "${workspaceFolder}/backend"
-    ],
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}/backend"
-    ],
-    "files.associations": {
-        "*.txt": "plaintext",
-        "*.md": "markdown"
-    },
-    "files.exclude": {
-        "**/.git": true,
-        "**/.DS_Store": true
-    },
-    "[plaintext]": {
-        "editor.defaultFormatter": null
-    },
-    "editor.formatOnSave": true
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.autoComplete.extraPaths": ["${workspaceFolder}/backend"],
+  "python.analysis.extraPaths": ["${workspaceFolder}/backend"],
+  "files.associations": { "*.txt": "plaintext", "*.md": "markdown" },
+  "files.exclude": { "**/.git": true, "**/.DS_Store": true },
+  "[plaintext]": { "editor.defaultFormatter": null },
+  "editor.formatOnSave": true,
+  "terminal.integrated.defaultProfile.windows": "PowerShell (venv auto)",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell (venv auto)": {
+      "path": "powershell.exe",
+      "args": ["-NoExit", "-ExecutionPolicy", "Bypass", "-File", "activate-venv.ps1"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
 }

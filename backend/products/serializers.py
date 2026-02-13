@@ -40,6 +40,14 @@ class ElectricBoilerSerializer(serializers.ModelSerializer):
         )
 
 
+class ElectricBoilerDetailSerializer(serializers.ModelSerializer):
+    """Сериализатор для страницы описания товара (все поля модели)."""
+
+    class Meta:
+        model = ElectricBoiler
+        fields = "__all__"
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Сериализатор для отображения данных пользователя

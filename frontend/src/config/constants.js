@@ -17,6 +17,8 @@ export const ROUTES = {
     LOGIN: '/login',
     REGISTER: '/register',
     CATALOG: '/catalog',
+    PRODUCT: '/catalog/:id',
+    productById: (id) => `/catalog/${id}`,
     SELECTION: '/selection',
     BRANDS: '/brands',
     CONTACTS: '/contacts',

@@ -192,6 +192,8 @@ export default function Header(props) {
         setMobileMenuOpen(false);
     };
 
+    const scrollToTop = () => window.scrollTo(0, 0);
+
     // Список пунктов меню для адаптивного меню
     const menuItems = [
         { label: 'О нас', path: ROUTES.ABOUT },
@@ -206,7 +208,7 @@ export default function Header(props) {
             <header className="header-top">
                 {/* Строка 1: Логотип, Поиск, Сравнение, Избранное, Валюта */}
                 <div className="header-row header-row-1">
-                    <Link to={ROUTES.HOME} className="header-logo" aria-label="На главную" title="На главную">
+                    <Link to={ROUTES.HOME} className="header-logo" aria-label="На главную" title="На главную" onClick={scrollToTop}>
                         <svg width="450" height="100" viewBox="0 0 450 120" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg">
                             <style>
                                 {`.logo-main { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 34px; fill: #ffffff; letter-spacing: 0.75px; word-spacing: 0.375em; }
@@ -278,13 +280,13 @@ export default function Header(props) {
                         >
                             <MenuIcon />
                         </IconButton>
-                        <Link to={ROUTES.HOME} className="logo logo-text" aria-label="На главную">
+                        <Link to={ROUTES.HOME} className="logo logo-text" aria-label="На главную" onClick={scrollToTop}>
                             Домашняя
                         </Link>
                         <nav className="desktop-menu" aria-label="Основная навигация">
-                            <Link to={ROUTES.ABOUT} className="header-link">О нас</Link>
+                            <Link to={ROUTES.ABOUT} className="header-link" onClick={scrollToTop}>О нас</Link>
                             <div className="header-catalog-dropdown">
-                                <Link to={ROUTES.CATALOG} className="header-link header-link-with-dropdown">
+                                <Link to={ROUTES.CATALOG} className="header-link header-link-with-dropdown" onClick={scrollToTop}>
                                     Каталог
                                     <KeyboardArrowDownIcon className="dropdown-icon-small" />
                                 </Link>
@@ -293,6 +295,7 @@ export default function Header(props) {
                                         to={ROUTES.CATALOG}
                                         className="header-catalog-dropdown-item"
                                         role="listitem"
+                                        onClick={scrollToTop}
                                     >
                                         Все товары
                                     </Link>
@@ -302,15 +305,16 @@ export default function Header(props) {
                                             to={`${ROUTES.CATALOG}?manufacturer=${encodeURIComponent(m.slug)}`}
                                             className="header-catalog-dropdown-item"
                                             role="listitem"
+                                            onClick={scrollToTop}
                                         >
                                             {m.name}
                                         </Link>
                                     )) : null}
                                 </div>
                             </div>
-                            <Link to={ROUTES.SELECTION} className="header-link">Подбор</Link>
-                            <Link to={ROUTES.BRANDS} className="header-link">Бренды</Link>
-                            <Link to={ROUTES.CONTACTS} className="header-link">Контакты</Link>
+                            <Link to={ROUTES.SELECTION} className="header-link" onClick={scrollToTop}>Подбор</Link>
+                            <Link to={ROUTES.BRANDS} className="header-link" onClick={scrollToTop}>Бренды</Link>
+                            <Link to={ROUTES.CONTACTS} className="header-link" onClick={scrollToTop}>Контакты</Link>
                         </nav>
                     </div>
                     <div className="divider header-top-divider" aria-hidden />
@@ -376,7 +380,10 @@ export default function Header(props) {
                             <ListItemButton
                                 component={Link}
                                 to={item.path}
-                                onClick={handleCloseMobileMenu}
+                                onClick={() => {
+                                    scrollToTop();
+                                    handleCloseMobileMenu();
+                                }}
                             >
                                 <ListItemText primary={item.label} />
                             </ListItemButton>

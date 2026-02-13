@@ -24,6 +24,18 @@
   margin-top: 24px;
 }
 
+.catalog-filter-hint {
+  margin-top: 16px;
+  margin-bottom: 0;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+.catalog-filter-hint__slug {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
 .catalog-cards {
   display: grid;
   gap: 24px;
@@ -44,4 +56,42 @@
   .catalog-cards-4 {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+
+/* Пагинация */
+.catalog-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 40px;
+  padding: 16px 0;
+}
+
+.catalog-pagination__btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background-color: var(--color-bg-card);
+  border: 1px solid rgba(159, 176, 184, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.catalog-pagination__btn:hover:not(:disabled) {
+  background-color: rgba(199, 167, 90, 0.2);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.catalog-pagination__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.catalog-pagination__info {
+  color: var(--color-text-muted);
+  font-size: 1rem;
 }

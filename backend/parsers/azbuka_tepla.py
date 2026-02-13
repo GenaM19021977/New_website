@@ -1030,10 +1030,11 @@ def extract_power(specs_text: str, product_name: str = "") -> Dict[str, str]:
     """
     Извлечение мощности из текста характеристик.
 
-    Извлекает значения мощности для целевых марок котлов с приоритетом:
-    1. "Максимальная тепловая мощность"
-    2. "Регулировка мощности" (для power_regulation и как запасной вариант)
-    3. Просто "Мощность" (если предыдущие не найдены)
+    Извлекает значения мощности с приоритетом:
+    1. "Мощность до , кВт" — сохраняет значение как есть (напр. "от 3 до 18,1 (6 ступеней)")
+    2. "Максимальная тепловая мощность" (для целевых марок)
+    3. "Регулировка мощности" (для power_regulation и как запасной вариант)
+    4. Просто "Мощность" (если предыдущие не найдены)
 
     Args:
         specs_text: Текст характеристик в формате "Ключ: Значение"
@@ -1059,6 +1060,16 @@ def extract_power(specs_text: str, product_name: str = "") -> Dict[str, str]:
     if not specs_text:
         return result
 
+    # Приоритет 1: "Мощность до , кВт" — сохраняем значение как есть
+    # (например: "Мощность до , кВт : от 3 до 18,1 (6 ступеней)" → "от 3 до 18,1 (6 ступеней)")
+    for line in specs_text.split("\n"):
+        if ":" in line:
+            key = line.split(":")[0].strip().lower()
+            value = line.split(":", 1)[1].strip() if ":" in line else ""
+            if "мощность до" in key and "квт" in key and value:
+                result["power"] = value.strip()
+                return result
+
     # Определяем марки, для которых нужно извлекать мощность из "Регулировка мощности"
     target_brands_for_power_extraction = [
         "vaillant",
@@ -1075,7 +1086,7 @@ def extract_power(specs_text: str, product_name: str = "") -> Dict[str, str]:
     )
 
     if is_target_brand:
-        # Сначала ищем "Максимальная тепловая мощность" (приоритет)
+        # Ищем "Максимальная тепловая мощность" (приоритет)
         # Затем ищем "Регулировка мощности" (если максимальная мощность не найдена)
         max_power_found = False
 
@@ -1355,6 +1366,7 @@ def parse_specifications(specs_text: str, product_name: str = "") -> Dict[str, A
     # Расширенный маппинг названий характеристик на поля модели
     # Учитываем различные варианты написания
     field_mapping = {
+        "Мощность до , кВт": "power",
         "Максимальная тепловая мощность": "power",
         "Максимальная мощность": "power",
         "Мощность": "power",
@@ -1468,15 +1480,19 @@ def parse_specifications(specs_text: str, product_name: str = "") -> Dict[str, A
                 # Пропускаем установку мощности, если она уже была извлечена специальной логикой
                 continue
 
-            # Для мощности убираем "кВт" из значения
+            # Для мощности убираем "кВт" из значения (кроме формата "от X до Y (Z ступеней)")
             if matched_field == "power":
-                # Убираем "кВт" и другие единицы измерения, оставляем только числовое значение
-                power_value_clean = re.sub(
-                    REGEX_REMOVE_KW_UNIT, "", value, flags=re.IGNORECASE
-                ).strip()
-                specs_dict[matched_field] = (
-                    power_value_clean if power_value_clean else value
-                )
+                # Формат "Мощность до , кВт : от 3 до 18,1 (6 ступеней)" — сохраняем как есть
+                if re.match(r"от\s+\d+", value, re.IGNORECASE):
+                    specs_dict[matched_field] = value
+                else:
+                    # Убираем "кВт" и другие единицы измерения, оставляем только числовое значение
+                    power_value_clean = re.sub(
+                        REGEX_REMOVE_KW_UNIT, "", value, flags=re.IGNORECASE
+                    ).strip()
+                    specs_dict[matched_field] = (
+                        power_value_clean if power_value_clean else value
+                    )
             # Для регулировки мощности также убираем "кВт" из значения
             elif matched_field == "power_regulation":
                 # Убираем "кВт" и другие единицы измерения, оставляем только числовое значение
@@ -1830,9 +1846,8 @@ def get_default_country_by_brand(name: str) -> str:
     Note:
         Поддерживаемые марки и их страны:
         - Vaillant, eloBLOCK -> Германия
-        - Protherm, СКАТ -> Словакия
-        - TEKNIX, ESPRO -> Словакия
-        - TECLine -> Словакия
+        - Protherm -> Словакия
+        - TEKNIX, ESPRO -> Венгрия
     """
     name_lower = name.lower()
 
@@ -1844,8 +1859,8 @@ def get_default_country_by_brand(name: str) -> str:
     if "teknix" in name_lower and "espro" in name_lower:
         return "Венгрия"
 
-    # PROTHERM СКАТ -> Словакия
-    if "protherm" in name_lower and "скат" in name_lower:
+    # PROTHERM (электрические котлы) -> Словакия
+    if "protherm" in name_lower:
         return "Словакия"
 
     return ""

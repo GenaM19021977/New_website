@@ -41,9 +41,15 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    width: 100%;
 }
 
 .auth-field-box {
+    width: 100%;
+}
+
+.auth-field-box .MuiTextField-root,
+.auth-field-box .MuiFormControl-root {
     width: 100%;
 }
 

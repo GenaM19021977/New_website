@@ -13,6 +13,7 @@ import Register from './components/pages/register/Register';
 import Home from './components/pages/home/Home';
 import About from './components/pages/about/About';
 import Catalog from './components/pages/catalog/Catalog';
+import ProductDetail from './components/pages/product/ProductDetail';
 import Selection from './components/pages/selection/Selection';
 import Brands from './components/pages/brands/Brands';
 import Contacts from './components/pages/contacts/Contacts';
@@ -65,6 +66,14 @@ function App() {
           element={
             <Header>
               <Catalog />
+            </Header>
+          }
+        />
+        <Route
+          path="/catalog/:id"
+          element={
+            <Header>
+              <ProductDetail />
             </Header>
           }
         />

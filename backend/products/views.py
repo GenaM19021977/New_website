@@ -11,6 +11,7 @@ from .serializers import (
     UserUpdateSerializer,
     PasswordChangeSerializer,
     ElectricBoilerSerializer,
+    ElectricBoilerDetailSerializer,
 )
 from .models import ElectricBoiler
 from rest_framework.response import Response
@@ -59,10 +60,11 @@ class ManufacturersView(viewsets.ViewSet):
 
 class BoilersView(viewsets.ViewSet):
     """
-    Список всех котлов (товаров) из БД для страницы Каталог.
+    Список и детали котлов (товаров) из БД.
 
-    Endpoint: GET /boilers/
-    Возвращает все записи ElectricBoiler, сериализованные для карточек.
+    Endpoints:
+    - GET /boilers/ — все записи для страницы Каталог
+    - GET /boilers/{id}/ — одна запись для страницы описания товара
     """
 
     permission_classes = [permissions.AllowAny]
@@ -71,6 +73,17 @@ class BoilersView(viewsets.ViewSet):
     def list(self, request):
         qs = ElectricBoiler.objects.all().order_by("name")
         serializer = self.serializer_class(qs, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        try:
+            boiler = ElectricBoiler.objects.get(pk=pk)
+        except ElectricBoiler.DoesNotExist:
+            return Response(
+                {"detail": "Товар не найден"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = ElectricBoilerDetailSerializer(boiler)
         return Response(serializer.data)
 
 
