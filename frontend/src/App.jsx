@@ -1,6 +1,6 @@
 /**
  * Главный компонент приложения
- * 
+ *
  * Управляет маршрутизацией и отображением компонентов.
  * Реализует логику:
  * - Автоматическое перенаправление аутентифицированных пользователей
@@ -8,22 +8,22 @@
  * - Защита маршрутов через ProtectedRoute компонент
  */
 
-import './App.css';
-import Register from './components/pages/register/Register';
-import Home from './components/pages/home/Home';
-import About from './components/pages/about/About';
-import Catalog from './components/pages/catalog/Catalog';
-import ProductDetail from './components/pages/product/ProductDetail';
-import Selection from './components/pages/selection/Selection';
-import Brands from './components/pages/brands/Brands';
-import Contacts from './components/pages/contacts/Contacts';
-import PersonalCabinet from './components/pages/cabinet/PersonalCabinet';
-import Cart from './components/pages/cart/Cart';
-import Header from './components/header/Header';
-import Login from './components/pages/login/Login';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
-import { ROUTES } from './config/constants';
+import "./App.css";
+import Register from "./components/pages/register/Register";
+import Home from "./components/pages/home/Home";
+import About from "./components/pages/about/About";
+import Catalog from "./components/pages/catalog/Catalog";
+import ProductDetail from "./components/pages/product/ProductDetail";
+import Selection from "./components/pages/selection/Selection";
+import Brands from "./components/pages/brands/Brands";
+import Contacts from "./components/pages/contacts/Contacts";
+import PersonalCabinet from "./components/pages/cabinet/PersonalCabinet";
+import Cart from "./components/pages/cart/Cart";
+import Header from "./components/header/Header";
+import Login from "./components/pages/login/Login";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { ROUTES } from "./config/constants";
 
 /** При смене маршрута прокручивает страницу вверх (для ссылок: Домашняя, О нас, Каталог, Подбор, Бренды, Контакты, логотип). */
 function ScrollToTop() {
@@ -45,7 +45,7 @@ function App() {
 
         {/* Перенаправление с корня на /home */}
         <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
-        
+
         {/* Публичные маршруты с Header (доступны без авторизации) */}
         <Route
           path={ROUTES.HOME}

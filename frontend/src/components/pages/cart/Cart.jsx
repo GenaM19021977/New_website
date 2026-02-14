@@ -20,6 +20,24 @@ function getImageUrl(raw) {
   return base ? `${base}${path ? (base.endsWith("/") ? path : `/${path}`) : ""}` : t;
 }
 
+/** Извлекает число из строки цены (например "12 500 руб." → 12500) */
+function parsePrice(priceStr) {
+  if (priceStr == null || priceStr === "") return 0;
+  const s = String(priceStr).replace(/\s/g, "");
+  const m = s.match(/[\d.,]+/);
+  if (!m) return 0;
+  return parseFloat(m[0].replace(",", ".")) || 0;
+}
+
+/** Форматирует число как цену (12500.5 → "12 500,50") */
+function formatPrice(num) {
+  if (num == null || isNaN(num)) return "";
+  const fixed = num.toFixed(2).replace(".", ",");
+  const [intPart, decPart] = fixed.split(",");
+  const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return decPart ? `${formatted},${decPart}` : formatted;
+}
+
 const Cart = () => {
   const [items, setItems] = useState([]);
 
@@ -39,7 +57,8 @@ const Cart = () => {
   const handleQuantityChange = (id, delta) => {
     const item = items.find((i) => i.id === id);
     if (!item) return;
-    updateQuantity(id, (item.quantity || 1) + delta);
+    const current = Math.max(0, item.quantity ?? 0);
+    updateQuantity(id, current + delta);
   };
 
   if (items.length === 0) {
@@ -65,7 +84,8 @@ const Cart = () => {
         <div className="cart-list">
           {items.map((item) => {
             const imgSrc = getImageUrl(item.image_1);
-            const qty = item.quantity || 1;
+            const qty = Math.max(0, item.quantity ?? 0);
+            const sum = parsePrice(item.price) * qty;
             return (
               <article key={item.id} className="cart-item">
                 <div className="cart-item__image">
@@ -79,9 +99,7 @@ const Cart = () => {
                   <Link to={ROUTES.productById(item.id)} className="cart-item__title">
                     {item.name}
                   </Link>
-                  {item.price && (
-                    <p className="cart-item__price">{item.price}</p>
-                  )}
+                  <p className="cart-item__sum">{formatPrice(sum)}</p>
                   <div className="cart-item__actions">
                     <div className="cart-item__qty">
                       <button

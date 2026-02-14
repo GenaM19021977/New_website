@@ -96,8 +96,8 @@
   color: var(--color-accent);
 }
 
-.cart-item__price {
-  margin: 0;
+.cart-item__sum {
+  margin: 4px 0 0 0;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--color-accent);

@@ -23,7 +23,6 @@ const Card = ({ product }) => {
   const title = product?.name || "Котёл";
   const price =
     product?.price != null && product?.price !== "" ? product.price : null;
-  const productUrl = product?.product_url?.trim?.() || null;
 
   const handleImageError = (e) => {
     e.target.onerror = null;
@@ -62,23 +61,6 @@ const Card = ({ product }) => {
         >
           В корзину
         </button>
-        {productUrl ? (
-          <a
-            href={productUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.card__buyBtn}
-          >
-            Купить сейчас
-          </a>
-        ) : (
-          <Link
-            to={ROUTES.productById(product.id)}
-            className={styles.card__buyBtn}
-          >
-            Купить сейчас
-          </Link>
-        )}
       </div>
     </article>
   );

@@ -224,16 +224,6 @@ const ProductDetail = () => {
               >
                 В корзину
               </button>
-              {product.product_url && (
-                <a
-                  href={product.product_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="product-detail__buy-btn"
-                >
-                  Купить сейчас
-                </a>
-              )}
             </div>
             {product.product_url && (
               <a

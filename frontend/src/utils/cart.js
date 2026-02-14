@@ -13,7 +13,7 @@ export function getCart() {
   }
 }
 
-export function setCart(items) {
+function setCart(items) {
   try {
     localStorage.setItem(CART_KEY, JSON.stringify(items));
     window.dispatchEvent(new CustomEvent("cart-updated"));
@@ -48,11 +48,7 @@ export function updateQuantity(productId, quantity) {
   const items = getCart();
   const item = items.find((i) => i.id === productId);
   if (!item) return;
-  if (quantity <= 0) {
-    removeFromCart(productId);
-    return;
-  }
-  item.quantity = quantity;
+  item.quantity = quantity < 1 ? 0 : quantity;
   setCart(items);
 }
 

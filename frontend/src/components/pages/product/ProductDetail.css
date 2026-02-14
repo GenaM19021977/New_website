@@ -281,23 +281,6 @@
   color: var(--color-accent);
 }
 
-.product-detail__buy-btn {
-  display: inline-block;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  text-align: center;
-  text-decoration: none;
-  color: var(--color-bg-dark);
-  background-color: var(--color-accent);
-  border-radius: 8px;
-  transition: opacity 0.2s;
-}
-
-.product-detail__buy-btn:hover {
-  opacity: 0.9;
-}
-
 .product-detail__external-link,
 .product-detail__doc-link {
   color: var(--color-accent);
