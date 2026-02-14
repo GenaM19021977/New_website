@@ -11,6 +11,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import api from "../../../services/api";
 import { API_BASE_URL } from "../../../config/api";
 import { ROUTES } from "../../../config/constants";
+import { addToCart } from "../../../utils/cart";
 import "./ProductDetail.css";
 
 /** Поля спецификаций: ключ API → подпись для отображения */
@@ -215,6 +216,25 @@ const ProductDetail = () => {
             {product.price && (
               <p className="product-detail__price">{product.price}</p>
             )}
+            <div className="product-detail__actions">
+              <button
+                type="button"
+                className="product-detail__cart-btn"
+                onClick={() => addToCart(product)}
+              >
+                В корзину
+              </button>
+              {product.product_url && (
+                <a
+                  href={product.product_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="product-detail__buy-btn"
+                >
+                  Купить сейчас
+                </a>
+              )}
+            </div>
             {product.product_url && (
               <a
                 href={product.product_url}

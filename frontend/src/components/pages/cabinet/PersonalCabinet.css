@@ -10,14 +10,24 @@
 .cabinet-loading {
   color: var(--color-text-muted);
   margin-top: 24px;
+  text-align: center;
+}
+
+.cabinet-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .cabinet-heading {
   margin-bottom: 32px;
+  text-align: center;
 }
 
 .cabinet-content {
+  width: 100%;
   max-width: 560px;
+  margin: 0 auto;
 }
 
 .cabinet-header {

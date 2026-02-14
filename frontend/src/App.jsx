@@ -18,6 +18,7 @@ import Selection from './components/pages/selection/Selection';
 import Brands from './components/pages/brands/Brands';
 import Contacts from './components/pages/contacts/Contacts';
 import PersonalCabinet from './components/pages/cabinet/PersonalCabinet';
+import Cart from './components/pages/cart/Cart';
 import Header from './components/header/Header';
 import Login from './components/pages/login/Login';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
@@ -107,6 +108,14 @@ function App() {
           element={
             <Header>
               <PersonalCabinet />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.CART}
+          element={
+            <Header>
+              <Cart />
             </Header>
           }
         />

@@ -28,6 +28,7 @@ import Footer from '../footer/Footer';
 import AuthModal from '../modals/AuthModal';
 import api from '../../services/api';
 import { STORAGE_KEYS, ROUTES } from '../../config/constants';
+import { getCartCount } from '../../utils/cart';
 import { getAvatarUrl } from '../../utils/avatar';
 
 export default function Header(props) {
@@ -48,6 +49,9 @@ export default function Header(props) {
 
     // Список производителей котлов из БД для выпадающего меню «Каталог»
     const [manufacturers, setManufacturers] = useState([]);
+
+    // Количество товаров в корзине
+    const [cartCount, setCartCount] = useState(0);
 
     /**
      * Функция для загрузки данных пользователя
@@ -91,6 +95,16 @@ export default function Header(props) {
         return () => {
             window.removeEventListener('resize', checkScreenSize);
         };
+    }, []);
+
+    /**
+     * Обновление счётчика корзины
+     */
+    useEffect(() => {
+        setCartCount(getCartCount());
+        const handler = () => setCartCount(getCartCount());
+        window.addEventListener('cart-updated', handler);
+        return () => window.removeEventListener('cart-updated', handler);
     }, []);
 
     /**
@@ -175,6 +189,7 @@ export default function Header(props) {
         { label: 'Подбор', path: ROUTES.SELECTION },
         { label: 'Бренды', path: ROUTES.BRANDS },
         { label: 'Контакты', path: ROUTES.CONTACTS },
+        { label: 'Корзина', path: ROUTES.CART },
         { label: isAuthenticated ? 'Личный кабинет' : 'Войти', path: isAuthenticated ? ROUTES.CABINET : ROUTES.LOGIN },
     ];
 
@@ -293,10 +308,15 @@ export default function Header(props) {
                         </nav>
                     </div>
                     <div className="divider header-top-divider" aria-hidden />
-                    <button className="icon-button cart-button header-top-cart" aria-label="Корзина">
+                    <Link
+                        to={ROUTES.CART}
+                        className="icon-button cart-button header-top-cart"
+                        aria-label="Корзина"
+                        onClick={scrollToTop}
+                    >
                         <ShoppingCartIcon />
-                        <span className="cart-badge">0</span>
-                    </button>
+                        <span className="cart-badge">{cartCount}</span>
+                    </Link>
                     <div className="user-section header-top-user">
                         {isAuthenticated && user ? (
                             <Link

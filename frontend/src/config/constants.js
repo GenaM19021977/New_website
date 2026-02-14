@@ -23,6 +23,7 @@ export const ROUTES = {
     BRANDS: '/brands',
     CONTACTS: '/contacts',
     CABINET: '/cabinet',
+    CART: '/cart',
 };
 
 // Валидация телефона: + и ровно 12 цифр

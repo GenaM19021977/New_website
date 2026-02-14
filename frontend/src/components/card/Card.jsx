@@ -3,6 +3,7 @@ import styles from "./Card.module.css";
 import defaultImage from "../../images/kat_01.png";
 import { API_BASE_URL } from "../../config/api";
 import { ROUTES } from "../../config/constants";
+import { addToCart } from "../../utils/cart";
 
 /** Берёт URL из image_1; относительные пути превращает в абсолютные. */
 function getBoilerImageUrl(product) {
@@ -22,10 +23,17 @@ const Card = ({ product }) => {
   const title = product?.name || "Котёл";
   const price =
     product?.price != null && product?.price !== "" ? product.price : null;
+  const productUrl = product?.product_url?.trim?.() || null;
 
   const handleImageError = (e) => {
     e.target.onerror = null;
     e.target.src = defaultImage;
+  };
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
   };
 
   return (
@@ -46,6 +54,32 @@ const Card = ({ product }) => {
           {price && <p className={styles.card__price}>{price}</p>}
         </div>
       </Link>
+      <div className={styles.card__actions}>
+        <button
+          type="button"
+          className={styles.card__cartBtn}
+          onClick={handleAddToCart}
+        >
+          В корзину
+        </button>
+        {productUrl ? (
+          <a
+            href={productUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.card__buyBtn}
+          >
+            Купить сейчас
+          </a>
+        ) : (
+          <Link
+            to={ROUTES.productById(product.id)}
+            className={styles.card__buyBtn}
+          >
+            Купить сейчас
+          </Link>
+        )}
+      </div>
     </article>
   );
 };
