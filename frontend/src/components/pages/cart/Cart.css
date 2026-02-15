@@ -154,6 +154,26 @@
 
 .cart-footer {
   padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cart-checkout-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-bg-dark);
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.cart-checkout-btn:hover {
+  opacity: 0.9;
 }
 
 .cart-back-link {
