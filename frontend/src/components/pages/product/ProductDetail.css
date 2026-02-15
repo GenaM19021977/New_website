@@ -281,6 +281,22 @@
   color: var(--color-accent);
 }
 
+.product-detail__favorites-btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-bg-dark);
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.product-detail__favorites-btn:hover {
+  opacity: 0.9;
+}
+
 .product-detail__external-link,
 .product-detail__doc-link {
   color: var(--color-accent);

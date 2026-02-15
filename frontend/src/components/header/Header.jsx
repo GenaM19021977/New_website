@@ -13,7 +13,6 @@ import './Header.css';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -30,6 +29,7 @@ import api from '../../services/api';
 import { STORAGE_KEYS, ROUTES, CURRENCIES } from '../../config/constants';
 import { useCurrency } from '../../context/CurrencyContext';
 import { getCartCount } from '../../utils/cart';
+import { getFavoritesCount } from '../../utils/favorites';
 import { getAvatarUrl } from '../../utils/avatar';
 
 export default function Header(props) {
@@ -53,6 +53,9 @@ export default function Header(props) {
 
     // Количество товаров в корзине
     const [cartCount, setCartCount] = useState(0);
+
+    // Количество товаров в избранном
+    const [favoritesCount, setFavoritesCount] = useState(0);
 
     // Выбранная валюта из контекста
     const { currency, setCurrency } = useCurrency();
@@ -109,6 +112,16 @@ export default function Header(props) {
         const handler = () => setCartCount(getCartCount());
         window.addEventListener('cart-updated', handler);
         return () => window.removeEventListener('cart-updated', handler);
+    }, []);
+
+    /**
+     * Обновление счётчика избранного
+     */
+    useEffect(() => {
+        setFavoritesCount(getFavoritesCount());
+        const handler = () => setFavoritesCount(getFavoritesCount());
+        window.addEventListener('favorites-updated', handler);
+        return () => window.removeEventListener('favorites-updated', handler);
     }, []);
 
     /**
@@ -194,6 +207,7 @@ export default function Header(props) {
         { label: 'Бренды', path: ROUTES.BRANDS },
         { label: 'Контакты', path: ROUTES.CONTACTS },
         { label: 'Корзина', path: ROUTES.CART },
+        { label: 'Избранное', path: ROUTES.FAVORITES },
         { label: isAuthenticated ? 'Личный кабинет' : 'Войти', path: isAuthenticated ? ROUTES.CABINET : ROUTES.LOGIN },
     ];
 
@@ -250,16 +264,22 @@ export default function Header(props) {
                         </div>
                     </div>
                     <div className="header-row-1-right">
-                        <button className="icon-button" aria-label="Сравнение товаров">
-                            <CompareArrowsIcon />
-                        </button>
-                        <button className="icon-button" aria-label="Избранное">
-                            <FavoriteBorderIcon />
-                        </button>
+                        <Link
+                            to={ROUTES.FAVORITES}
+                            className="btn-site btn-favorites"
+                            aria-label="Избранное"
+                            onClick={scrollToTop}
+                        >
+                            <FavoriteBorderIcon className="btn-favorites-icon" />
+                            <span>Избранное</span>
+                            {favoritesCount > 0 && (
+                                <span className="favorites-badge">{favoritesCount}</span>
+                            )}
+                        </Link>
                         <div className="currency-dropdown">
                             <button
                                 type="button"
-                                className="currency-selector"
+                                className="currency-selector btn-site"
                                 aria-haspopup="listbox"
                                 aria-expanded="false"
                                 aria-label="Выбрать валюту"

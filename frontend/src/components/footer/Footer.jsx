@@ -16,7 +16,6 @@ import EmailIcon from '@mui/icons-material/Email';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SendIcon from '@mui/icons-material/Send';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import MenuIcon from '@mui/icons-material/Menu';
 import { ROUTES } from '../../config/constants';
 import logoHeader from '../../images/logo-header.png';
@@ -32,7 +31,7 @@ export default function Footer() {
 
     return (
         <footer className="footer-wrapper" role="contentinfo">
-            {/* Верхняя секция - подписка на рассылку */}
+            {/* Верхняя секция - подписка на рассылку
             <div className="footer-subscribe">
                 <div className="subscribe-content">
                     <MailOutlineIcon className="subscribe-icon" />
@@ -48,20 +47,24 @@ export default function Footer() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Основной контент - 4 колонки */}
             <div className="footer-main">
                 <div className="footer-container">
                     {/* Левая колонка - Информация о компании */}
                     <div className="footer-column footer-column-company">
-                        <Link to={ROUTES.HOME} className="footer-logo">
-                            <img
+                        <h3 className="footer-column-title">
+                            <span className="footer-title-icon" aria-hidden>■</span>
+                            Контакты
+                        </h3>
+                        {/* <Link to={ROUTES.HOME} className="footer-logo"> */}
+                            {/* <img
                                 src={logoHeader}
                                 alt="Kotelkov.by"
                                 className="footer-logo-image"
-                            />
-                        </Link>
+                            /> */}
+                        {/* </Link> */}
                         <div className="company-info">
                             <p>ИП Турков Д.А</p>
                             <p>УНП 291600425</p>
@@ -85,13 +88,13 @@ export default function Footer() {
                                 <span>г. Брест ул. Гоголя 89 Пн - Вс с 9-00 до 19-00</span>
                             </div>
                         </div>
-                        <div className="footer-links">
+                        {/* <div className="footer-links">
                             <Link to="/promotion" className="footer-link-single">Продвижение сайта&gt;</Link>
                             <a href="https://t.me/kotelkovby" className="footer-link-single">
                                 <SendIcon className="footer-link-icon" />
                                 telegram
                             </a>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div className="footer-column">
@@ -100,23 +103,23 @@ export default function Footer() {
                             Информация
                         </h3>
                         <ul className="footer-links-list">
-                            <li><Link to="/installation">Монтаж отопления в Бресте</Link></li>
+                            {/* <li><Link to="/installation">Монтаж отопления в Бресте</Link></li> */}
                             <li><Link to={ROUTES.ABOUT}>О нас</Link></li>
                             <li><Link to={ROUTES.CATALOG}>Каталог</Link></li>
                             <li><Link to={ROUTES.SELECTION}>Подбор</Link></li>
                             <li><Link to={ROUTES.BRANDS}>Бренды</Link></li>
                             <li><Link to={ROUTES.CONTACTS}>Контакты</Link></li>
-                            <li><Link to="/order">Оформление заказа</Link></li>
+                            {/* <li><Link to="/order">Оформление заказа</Link></li>
                             <li><Link to="/privacy">Политика безопасности</Link></li>
                             <li><Link to="/offer">Публичная оферта</Link></li>
                             <li><Link to="/terms">Условия соглашения</Link></li>
                             <li><Link to="/contact">Связаться с нами</Link></li>
                             <li><Link to="/manufacturers">Производители</Link></li>
-                            <li><Link to="/promotions">Акции</Link></li>
+                            <li><Link to="/promotions">Акции</Link></li> */}
                         </ul>
                     </div>
 
-                    {/* Средняя-правая колонка - Категории */}
+                    {/* Средняя-правая колонка - Категории
                     <div className="footer-column">
                         <h3 className="footer-column-title">
                             <MenuIcon className="footer-title-icon" />
@@ -132,7 +135,7 @@ export default function Footer() {
                             <li><Link to="/category/plumbing">Сантехника</Link></li>
                             <li><Link to="/category/pipes">Трубы и фитинги</Link></li>
                         </ul>
-                    </div>
+                    </div> */}
 
                     {/* Правая колонка - Личный кабинет */}
                     <div className="footer-column">
@@ -142,8 +145,8 @@ export default function Footer() {
                         </h3>
                         <ul className="footer-links-list">
                             <li><Link to={ROUTES.CABINET}>Личный кабинет</Link></li>
+                            <li><Link to={ROUTES.FAVORITES}>Избранное</Link></li>
                             <li><Link to="/orders">История заказа</Link></li>
-                            <li><Link to="/bookmarks">Закладки</Link></li>
                         </ul>
                     </div>
                 </div>
@@ -154,14 +157,14 @@ export default function Footer() {
                 <div className="footer-bottom-container">
                     {/* Способы оплаты */}
                     <div className="payment-methods">
-                        <span className="payment-text">Способы оплаты:</span>
+                        {/* <span className="payment-text">Способы оплаты:</span> */}
                         <div className="payment-logos">
                             {/* Здесь должны быть изображения логотипов платежных систем */}
-                            <span className="payment-logo">Visa</span>
+                            {/* <span className="payment-logo">Visa</span>
                             <span className="payment-logo">Mastercard</span>
                             <span className="payment-logo">Maestro</span>
                             <span className="payment-logo">Belkart</span>
-                            <span className="payment-logo">Assist</span>
+                            <span className="payment-logo">Assist</span> */}
                         </div>
                     </div>
 
@@ -188,9 +191,6 @@ export default function Footer() {
 
             {/* Плавающие кнопки */}
             <div className="floating-buttons">
-                <button className="floating-button floating-button-chat">
-                    <ChatBubbleOutlineIcon />
-                </button>
                 <a href="tel:+375447871888" className="floating-button floating-button-phone">
                     <PhoneIcon />
                 </a>

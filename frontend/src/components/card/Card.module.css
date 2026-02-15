@@ -44,8 +44,9 @@
 .card__actions {
   padding: 0 16px 16px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -67,4 +68,13 @@
 .card__cartBtn:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+}
+
+.card__favoritesIcon {
+  color: var(--color-text-muted) !important;
+  padding: 6px !important;
+}
+
+.card__favoritesIcon:hover {
+  color: var(--color-accent) !important;
 }

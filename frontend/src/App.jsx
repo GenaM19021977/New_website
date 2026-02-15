@@ -20,6 +20,7 @@ import Contacts from "./components/pages/contacts/Contacts";
 import PersonalCabinet from "./components/pages/cabinet/PersonalCabinet";
 import Cart from "./components/pages/cart/Cart";
 import Checkout from "./components/pages/checkout/Checkout";
+import Favorites from "./components/pages/favorites/Favorites";
 import PurchaseAuthGuard from "./components/auth/PurchaseAuthGuard";
 import Header from "./components/header/Header";
 import Login from "./components/pages/login/Login";
@@ -110,6 +111,16 @@ function App() {
           element={
             <Header>
               <PersonalCabinet />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.FAVORITES}
+          element={
+            <Header>
+              <PurchaseAuthGuard message="Для просмотра избранного зарегистрируйтесь или авторизуйтесь!">
+                <Favorites />
+              </PurchaseAuthGuard>
             </Header>
           }
         />

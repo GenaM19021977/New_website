@@ -5,9 +5,11 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { getCart, removeFromCart, updateQuantity } from "../../../utils/cart";
+import { addToFavoritesIfAuth } from "../../../utils/favorites";
 import { API_BASE_URL } from "../../../config/api";
-import { ROUTES } from "../../../config/constants";
+import { ROUTES, AUTH_REQUIRED_FAVORITES } from "../../../config/constants";
 import { useCurrency } from "../../../context/CurrencyContext";
 import { parsePrice, formatPrice } from "../../../utils/price";
 import "./Cart.css";
@@ -37,6 +39,12 @@ const Cart = () => {
 
   const handleRemove = (id) => {
     removeFromCart(id);
+  };
+
+  const handleAddToFavorites = (item) => {
+    if (!addToFavoritesIfAuth(item)) {
+      alert(AUTH_REQUIRED_FAVORITES);
+    }
   };
 
   const handleQuantityChange = (id, delta) => {
@@ -112,6 +120,15 @@ const Cart = () => {
                     >
                       <DeleteIcon />
                     </IconButton>
+                    <button
+                      type="button"
+                      className="btn-site cart-item__favorites"
+                      onClick={() => handleAddToFavorites(item)}
+                      aria-label="В избранное"
+                    >
+                      <FavoriteBorderIcon className="cart-item__favorites-icon" />
+                      <span>В избранное</span>
+                    </button>
                   </div>
                 </div>
               </article>

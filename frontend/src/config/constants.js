@@ -29,10 +29,14 @@ export const ROUTES = {
     CABINET: '/cabinet',
     CART: '/cart',
     CHECKOUT: '/checkout',
+    FAVORITES: '/favorites',
 };
 
 // Сообщение для неавторизованных при покупке
 export const AUTH_REQUIRED_PURCHASE = "Для совершения покупки в нашем магазине зарегистрируйтесь или авторизуйтесь!";
+
+// Сообщение для неавторизованных при просмотре избранного
+export const AUTH_REQUIRED_FAVORITES = "Для просмотра избранного зарегистрируйтесь или авторизуйтесь!";
 
 // Валидация телефона: + и ровно 12 цифр
 export const PHONE_REGEX = /^\+[0-9]{12}$/;

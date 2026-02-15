@@ -233,9 +233,9 @@ const AuthModal = ({ open, onClose }) => {
                                 />
                             </Box>
 
-                            <Box className="auth-field-box">
+                            <Box className="auth-field-box auth-password-field">
                                 <MyPassField
-                                    label="Password"
+                                    label="Пароль"
                                     name="password"
                                     control={control}
                                 />
@@ -301,7 +301,7 @@ const AuthModal = ({ open, onClose }) => {
                                 />
                             </Box>
 
-                            <Box className="auth-field-box">
+                            <Box className="auth-field-box auth-password-field">
                                 <MyPassField
                                     label="Пароль *"
                                     name="password"
@@ -316,7 +316,7 @@ const AuthModal = ({ open, onClose }) => {
                                 />
                             </Box>
 
-                            <Box className="auth-field-box">
+                            <Box className="auth-field-box auth-password-field">
                                 <MyPassField
                                     label="Подтверждение пароля *"
                                     name="password2"

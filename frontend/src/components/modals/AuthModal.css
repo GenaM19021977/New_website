@@ -4,11 +4,17 @@
 
 .auth-modal .MuiDialog-paper {
     border-radius: 8px;
+    background-color: #1a2332;
+}
+
+.auth-modal .MuiDialogTitle-root,
+.auth-modal .MuiDialogContent-root {
+    background-color: #1a2332;
 }
 
 .auth-modal-title {
     padding: 0 !important;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .auth-tabs {
@@ -19,7 +25,7 @@
     text-transform: none;
     font-size: 16px;
     font-weight: 500;
-    color: #666666;
+    color: #9FB0B8;
     min-height: 48px;
 }
 
@@ -53,6 +59,23 @@
     width: 100%;
 }
 
+/* Стили полей формы на тёмном фоне */
+.auth-modal .auth-field-box .MuiInputLabel-root {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.auth-modal .auth-field-box .MuiInputLabel-root.Mui-focused {
+    color: #ffffff;
+}
+
+.auth-modal .auth-field-box .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.auth-modal .auth-field-box .MuiOutlinedInput-input {
+    color: #ffffff;
+}
+
 .auth-avatar-box {
     display: flex;
     flex-direction: column;
@@ -62,5 +85,35 @@
 
 .auth-avatar-box label {
     cursor: pointer;
+}
+
+/* Рамка и надпись «Пароль» белого цвета */
+.auth-password-field .MuiInputLabel-root {
+    color: #ffffff !important;
+}
+
+.auth-password-field .MuiInputLabel-root.Mui-focused {
+    color: #ffffff !important;
+}
+
+.auth-password-field .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff !important;
+}
+
+.auth-password-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff !important;
+}
+
+.auth-password-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff !important;
+    border-width: 2px !important;
+}
+
+.auth-password-field .MuiOutlinedInput-input {
+    color: #ffffff;
+}
+
+.auth-password-field .MuiIconButton-root {
+    color: #ffffff !important;
 }
 

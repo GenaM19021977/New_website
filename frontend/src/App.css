@@ -1,5 +1,6 @@
 /**
- * Стили для страниц входа/регистрации — дизайн-система #0E1A20, #C7A75A, #9FB0B8
+ * Стили для страниц входа/регистрации
+ * Согласованы со стилем AuthModal (MuiDialog-paper)
  */
 
 .auth-background {
@@ -11,14 +12,16 @@
   padding: 24px;
 }
 
+/* Блок формы — в стиле AuthModal (MuiDialog-paper) */
 .auth-box {
-  background-color: var(--color-bg-dark);
-  padding: 40px;
+  background-color: #1a2332;
+  padding: 24px;
   width: 100%;
   max-width: 420px;
-  border: 1px solid rgba(159, 176, 184, 0.2);
   border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2),
+    0px 24px 38px 3px rgba(0, 0, 0, 0.14),
+    0px 9px 46px 8px rgba(0, 0, 0, 0.12);
 }
 
 .auth-item {
@@ -26,7 +29,11 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+
+.auth-item:last-of-type {
+  margin-bottom: 0;
 }
 
 .auth-item .MuiTextField-root,
@@ -34,14 +41,10 @@
   width: 100%;
 }
 
-.auth-item:last-of-type {
-  margin-bottom: 0;
-}
-
 .auth-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: #ffffff;
 }
 
 .auth-form,
@@ -50,8 +53,8 @@
 }
 
 .auth-button {
-  background-color: var(--color-accent) !important;
-  color: var(--color-bg-dark) !important;
+  background-color: #0db39e !important;
+  color: #ffffff !important;
   font-weight: 600 !important;
 }
 
@@ -60,21 +63,21 @@
 }
 
 .auth-link {
-  color: var(--color-text-muted);
+  color: #9FB0B8;
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s;
 }
 
 .auth-link:hover {
-  color: var(--color-accent);
+  color: #0db39e;
 }
 
-/* Кнопка в форме входа/регистрации */
+/* Кнопка в форме */
 .auth-box .myButton,
 .auth-box .MuiButton-root {
-  background-color: var(--color-accent) !important;
-  color: var(--color-bg-dark) !important;
+  background-color: #0db39e !important;
+  color: #ffffff !important;
   font-weight: 600 !important;
 }
 
@@ -83,24 +86,62 @@
   opacity: 0.9;
 }
 
-/* Поля MUI в тёмной форме */
-.auth-box .MuiTextField-root .MuiOutlinedInput-root {
-  color: var(--color-text);
-  border-color: rgba(159, 176, 184, 0.3);
+/* Поля формы — как в AuthModal */
+.auth-box .auth-item .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.auth-box .MuiTextField-root .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(159, 176, 184, 0.3);
+.auth-box .auth-item .MuiInputLabel-root.Mui-focused {
+  color: #ffffff;
 }
 
-.auth-box .MuiTextField-root .MuiInputLabel-root {
-  color: var(--color-text-muted);
+.auth-box .auth-item .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
-.auth-box .MuiTextField-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-  border-color: var(--color-accent);
+.auth-box .auth-item .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
-.auth-box .MuiTextField-root .MuiFormHelperText-root {
-  color: var(--color-text-muted);
+.auth-box .auth-item .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff;
+  border-width: 2px;
+}
+
+.auth-box .auth-item .MuiOutlinedInput-input {
+  color: #ffffff;
+}
+
+.auth-box .auth-item .MuiFormHelperText-root {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Поля пароля — белая рамка и надпись */
+.auth-box .auth-password-field .MuiInputLabel-root {
+  color: #ffffff !important;
+}
+
+.auth-box .auth-password-field .MuiInputLabel-root.Mui-focused {
+  color: #ffffff !important;
+}
+
+.auth-box .auth-password-field .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff !important;
+}
+
+.auth-box .auth-password-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff !important;
+}
+
+.auth-box .auth-password-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff !important;
+  border-width: 2px !important;
+}
+
+.auth-box .auth-password-field .MuiOutlinedInput-input {
+  color: #ffffff;
+}
+
+.auth-box .auth-password-field .MuiIconButton-root {
+  color: #ffffff !important;
 }

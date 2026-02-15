@@ -54,7 +54,7 @@ const Login = () => {
                 }}
               />
             </Box>
-            <Box className="auth-item">
+            <Box className="auth-item auth-password-field">
               <MyPassField label="Пароль" name="password" control={control} />
             </Box>
             <Box className="auth-item">

@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import IconButton from "@mui/material/IconButton";
 import styles from "./Card.module.css";
 import defaultImage from "../../images/kat_01.png";
 import { API_BASE_URL } from "../../config/api";
-import { ROUTES } from "../../config/constants";
+import { ROUTES, AUTH_REQUIRED_FAVORITES } from "../../config/constants";
 import { addToCartIfAuth } from "../../utils/cart";
+import { addToFavoritesIfAuth } from "../../utils/favorites";
 import { useCurrency } from "../../context/CurrencyContext";
 import { formatPriceWithCurrency } from "../../utils/price";
 
@@ -40,6 +43,14 @@ const Card = ({ product }) => {
     addToCartIfAuth(product);
   };
 
+  const handleAddToFavorites = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!addToFavoritesIfAuth(product)) {
+      alert(AUTH_REQUIRED_FAVORITES);
+    }
+  };
+
   return (
     <article className={styles.card}>
       <Link
@@ -66,6 +77,14 @@ const Card = ({ product }) => {
         >
           В корзину
         </button>
+        <IconButton
+          className={styles.card__favoritesIcon}
+          onClick={handleAddToFavorites}
+          aria-label="В избранное"
+          size="small"
+        >
+          <FavoriteBorderIcon />
+        </IconButton>
       </div>
     </article>
   );

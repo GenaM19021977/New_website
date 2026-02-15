@@ -249,18 +249,25 @@
 .currency-selector {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
-  background: none;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--color-accent);
+  color: var(--color-bg-dark);
   border: none;
-  color: var(--color-text-muted);
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
   font-family: inherit;
+  transition: opacity 0.2s;
 }
 
 .currency-selector:hover {
-  color: var(--color-text);
+  opacity: 0.9;
+}
+
+.currency-selector .dropdown-icon {
+  color: var(--color-bg-dark);
 }
 
 .currency-dropdown-panel {
@@ -512,6 +519,52 @@
 
 .icon-button:hover {
   color: var(--color-accent);
+}
+
+/* Общая кнопка сайта — акцентный стиль */
+.btn-site {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--color-accent);
+  color: var(--color-bg-dark);
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-site:hover {
+  opacity: 0.9;
+}
+
+.btn-favorites-icon {
+  font-size: 20px;
+}
+
+.btn-favorites {
+  position: relative;
+  text-decoration: none;
+}
+
+.favorites-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-dark);
+  color: var(--color-accent);
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .cart-button {

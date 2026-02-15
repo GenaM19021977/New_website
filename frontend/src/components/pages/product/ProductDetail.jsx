@@ -10,8 +10,9 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import api from "../../../services/api";
 import { API_BASE_URL } from "../../../config/api";
-import { ROUTES } from "../../../config/constants";
+import { ROUTES, AUTH_REQUIRED_FAVORITES } from "../../../config/constants";
 import { addToCartIfAuth } from "../../../utils/cart";
+import { addToFavoritesIfAuth } from "../../../utils/favorites";
 import { useCurrency } from "../../../context/CurrencyContext";
 import { formatPriceWithCurrency } from "../../../utils/price";
 import "./ProductDetail.css";
@@ -228,6 +229,17 @@ const ProductDetail = () => {
                 onClick={() => addToCartIfAuth(product)}
               >
                 В корзину
+              </button>
+              <button
+                type="button"
+                className="product-detail__favorites-btn"
+                onClick={() => {
+                  if (!addToFavoritesIfAuth(product)) {
+                    alert(AUTH_REQUIRED_FAVORITES);
+                  }
+                }}
+              >
+                В избранное
               </button>
             </div>
             {product.product_url && (
