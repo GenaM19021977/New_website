@@ -23,17 +23,31 @@ const Catalog = () => {
   const manufacturerSlug = (searchParams.get("manufacturer") || "")
     .trim()
     .toLowerCase();
+  const searchQuery = (searchParams.get("search") || "").trim().toLowerCase();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredProducts = useMemo(() => {
-    if (!manufacturerSlug) return products;
-    return products.filter(
-      (p) => getManufacturerSlug(p.name) === manufacturerSlug,
-    );
-  }, [products, manufacturerSlug]);
+    let result = products;
+    if (manufacturerSlug) {
+      result = result.filter(
+        (p) => getManufacturerSlug(p.name) === manufacturerSlug,
+      );
+    }
+    if (searchQuery) {
+      result = result.filter((p) => {
+        const name = (p.name || "").toLowerCase();
+        const power = (p.power || "").toLowerCase();
+        return (
+          name.includes(searchQuery) ||
+          power.includes(searchQuery)
+        );
+      });
+    }
+    return result;
+  }, [products, manufacturerSlug, searchQuery]);
 
   const fetchProducts = useCallback(() => {
     api
@@ -51,7 +65,7 @@ const Catalog = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [manufacturerSlug]);
+  }, [manufacturerSlug, searchQuery]);
 
   useEffect(() => {
     setCurrentPage((p) => {
@@ -125,12 +139,25 @@ const Catalog = () => {
               <p className="catalog-loading">Загрузка…</p>
             ) : (
               <>
-                {manufacturerSlug && (
+                {(manufacturerSlug || searchQuery) && (
                   <p className="catalog-filter-hint">
-                    Котлы производителя:{" "}
-                    <span className="catalog-filter-hint__slug">
-                      {manufacturerSlug}
-                    </span>
+                    {manufacturerSlug && (
+                      <>
+                        Котлы производителя:{" "}
+                        <span className="catalog-filter-hint__slug">
+                          {manufacturerSlug}
+                        </span>
+                      </>
+                    )}
+                    {manufacturerSlug && searchQuery && " · "}
+                    {searchQuery && (
+                      <>
+                        Поиск:{" "}
+                        <span className="catalog-filter-hint__slug">
+                          {searchQuery}
+                        </span>
+                      </>
+                    )}
                   </p>
                 )}
                 <div className="catalog-cards catalog-cards-4">

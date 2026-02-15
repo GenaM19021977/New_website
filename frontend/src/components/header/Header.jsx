@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
@@ -17,6 +17,8 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Avatar from '@mui/material/Avatar';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -34,6 +36,13 @@ import { getAvatarUrl } from '../../utils/avatar';
 
 export default function Header(props) {
     const { children } = props;
+    const navigate = useNavigate();
+
+    // Поиск: запрос и результаты в модальном окне
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchProducts, setSearchProducts] = useState([]);
+    const [searchModalOpen, setSearchModalOpen] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
 
     // Состояние для управления открытием/закрытием модального окна авторизации
     const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -199,6 +208,52 @@ export default function Header(props) {
 
     const scrollToTop = () => window.scrollTo(0, 0);
 
+    // Загрузка товаров для поиска при первом вводе
+    const [allProducts, setAllProducts] = useState([]);
+    const [productsFetched, setProductsFetched] = useState(false);
+
+    const fetchProductsForSearch = () => {
+        if (productsFetched) return;
+        setSearchLoading(true);
+        api.get('boilers/')
+            .then((res) => {
+                setAllProducts(Array.isArray(res.data) ? res.data : []);
+                setProductsFetched(true);
+            })
+            .catch(() => setAllProducts([]))
+            .finally(() => setSearchLoading(false));
+    };
+
+    // Фильтрация товаров по названию при вводе, показ модального окна
+    useEffect(() => {
+        const query = (searchQuery || '').trim().toLowerCase();
+        if (!query) {
+            setSearchProducts([]);
+            setSearchModalOpen(false);
+            return;
+        }
+        fetchProductsForSearch();
+        const matches = allProducts.filter((p) =>
+            (p.name || '').toLowerCase().includes(query),
+        );
+        setSearchProducts(matches);
+        setSearchModalOpen(true);
+    }, [searchQuery, allProducts]);
+
+    const handleSearchProductClick = (product) => {
+        navigate(ROUTES.productById(product.id));
+        setSearchQuery('');
+        setSearchModalOpen(false);
+    };
+
+    const handleCloseSearchModal = () => {
+        setSearchModalOpen(false);
+    };
+
+    const handleSearchButtonClick = () => {
+        navigate(ROUTES.CATALOG);
+    };
+
     // Список пунктов меню для адаптивного меню
     const menuItems = [
         { label: 'О нас', path: ROUTES.ABOUT },
@@ -251,14 +306,23 @@ export default function Header(props) {
                             </g>
                         </svg>
                     </Link>
-                    <div className="header-search">
+                    <div className="header-search" role="search">
                         <div className="search-container">
                             <input
-                                type="text"
+                                type="search"
                                 placeholder="Поиск"
                                 className="search-input"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onFocus={fetchProductsForSearch}
+                                aria-label="Поиск товаров"
                             />
-                            <button className="search-button">
+                            <button
+                                type="button"
+                                className="search-button"
+                                aria-label="Перейти в каталог"
+                                onClick={handleSearchButtonClick}
+                            >
                                 <SearchIcon />
                             </button>
                         </div>
@@ -453,6 +517,44 @@ export default function Header(props) {
                     loadUserData();
                 }}
             />
+
+            {/* Модальное окно результатов поиска */}
+            <Dialog
+                open={searchModalOpen}
+                onClose={handleCloseSearchModal}
+                maxWidth="sm"
+                fullWidth
+                className="search-modal"
+                PaperProps={{
+                    sx: {
+                        backgroundColor: '#1a2332',
+                        color: '#ffffff',
+                    },
+                }}
+            >
+                <DialogContent className="search-modal-content">
+                    <h3 className="search-modal-title">Результаты поиска</h3>
+                    {searchLoading ? (
+                        <p className="search-modal-loading">Загрузка…</p>
+                    ) : searchProducts.length === 0 && searchQuery.trim() ? (
+                        <p className="search-modal-empty">Ничего не найдено</p>
+                    ) : (
+                        <ul className="search-modal-list">
+                            {searchProducts.map((product) => (
+                                <li key={product.id}>
+                                    <button
+                                        type="button"
+                                        className="search-modal-item"
+                                        onClick={() => handleSearchProductClick(product)}
+                                    >
+                                        {product.name}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </DialogContent>
+            </Dialog>
 
         </div>
     );
