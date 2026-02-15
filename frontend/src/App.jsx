@@ -19,6 +19,8 @@ import Brands from "./components/pages/brands/Brands";
 import Contacts from "./components/pages/contacts/Contacts";
 import PersonalCabinet from "./components/pages/cabinet/PersonalCabinet";
 import Cart from "./components/pages/cart/Cart";
+import Checkout from "./components/pages/checkout/Checkout";
+import PurchaseAuthGuard from "./components/auth/PurchaseAuthGuard";
 import Header from "./components/header/Header";
 import Login from "./components/pages/login/Login";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -115,7 +117,19 @@ function App() {
           path={ROUTES.CART}
           element={
             <Header>
-              <Cart />
+              <PurchaseAuthGuard>
+                <Cart />
+              </PurchaseAuthGuard>
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.CHECKOUT}
+          element={
+            <Header>
+              <PurchaseAuthGuard>
+                <Checkout />
+              </PurchaseAuthGuard>
             </Header>
           }
         />

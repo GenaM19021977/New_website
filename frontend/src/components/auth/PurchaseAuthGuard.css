@@ -1,0 +1,52 @@
+.purchase-auth-guard {
+  padding-top: var(--page-section-number-offset);
+  padding-bottom: var(--section-padding-y);
+}
+
+.purchase-auth-guard__box {
+  text-align: center;
+  padding: 48px 24px;
+  background-color: var(--color-bg-card);
+  border-radius: 12px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.purchase-auth-guard__message {
+  margin: 0 0 24px 0;
+  font-size: 1.125rem;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.purchase-auth-guard__actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.purchase-auth-guard__btn {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.purchase-auth-guard__btn--primary {
+  background-color: var(--color-accent);
+  color: var(--color-bg-dark);
+}
+
+.purchase-auth-guard__btn--secondary {
+  background-color: transparent;
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+}
+
+.purchase-auth-guard__btn:hover {
+  opacity: 0.9;
+}

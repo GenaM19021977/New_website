@@ -8,6 +8,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { getCart, removeFromCart, updateQuantity } from "../../../utils/cart";
 import { API_BASE_URL } from "../../../config/api";
 import { ROUTES } from "../../../config/constants";
+import { useCurrency } from "../../../context/CurrencyContext";
+import { parsePrice, formatPrice } from "../../../utils/price";
 import "./Cart.css";
 
 function getImageUrl(raw) {
@@ -20,25 +22,8 @@ function getImageUrl(raw) {
   return base ? `${base}${path ? (base.endsWith("/") ? path : `/${path}`) : ""}` : t;
 }
 
-/** Извлекает число из строки цены (например "12 500 руб." → 12500) */
-function parsePrice(priceStr) {
-  if (priceStr == null || priceStr === "") return 0;
-  const s = String(priceStr).replace(/\s/g, "");
-  const m = s.match(/[\d.,]+/);
-  if (!m) return 0;
-  return parseFloat(m[0].replace(",", ".")) || 0;
-}
-
-/** Форматирует число как цену (12500.5 → "12 500,50") */
-function formatPrice(num) {
-  if (num == null || isNaN(num)) return "";
-  const fixed = num.toFixed(2).replace(".", ",");
-  const [intPart, decPart] = fixed.split(",");
-  const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return decPart ? `${formatted},${decPart}` : formatted;
-}
-
 const Cart = () => {
+  const { currency, convertPrice } = useCurrency();
   const [items, setItems] = useState([]);
 
   const refresh = () => setItems(getCart());
@@ -85,7 +70,8 @@ const Cart = () => {
           {items.map((item) => {
             const imgSrc = getImageUrl(item.image_1);
             const qty = Math.max(0, item.quantity ?? 0);
-            const sum = parsePrice(item.price) * qty;
+            const sumByn = parsePrice(item.price) * qty;
+            const sum = convertPrice ? convertPrice(sumByn) : sumByn;
             return (
               <article key={item.id} className="cart-item">
                 <div className="cart-item__image">
@@ -99,13 +85,14 @@ const Cart = () => {
                   <Link to={ROUTES.productById(item.id)} className="cart-item__title">
                     {item.name}
                   </Link>
-                  <p className="cart-item__sum">{formatPrice(sum)}</p>
+                  <p className="cart-item__sum">{formatPrice(sum)} {currency}</p>
                   <div className="cart-item__actions">
                     <div className="cart-item__qty">
                       <button
                         type="button"
                         onClick={() => handleQuantityChange(item.id, -1)}
                         aria-label="Уменьшить"
+                        disabled={qty <= 1}
                       >
                         −
                       </button>
@@ -132,6 +119,9 @@ const Cart = () => {
           })}
         </div>
         <div className="cart-footer">
+          <Link to={ROUTES.CHECKOUT} className="cart-checkout-btn">
+            Оформить заказ
+          </Link>
           <Link to={ROUTES.CATALOG} className="cart-back-link">
             ← Продолжить покупки
           </Link>

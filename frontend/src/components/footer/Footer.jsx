@@ -141,7 +141,7 @@ export default function Footer() {
                             Личный кабинет
                         </h3>
                         <ul className="footer-links-list">
-                            <li><Link to="/account">Личный кабинет</Link></li>
+                            <li><Link to={ROUTES.CABINET}>Личный кабинет</Link></li>
                             <li><Link to="/orders">История заказа</Link></li>
                             <li><Link to="/bookmarks">Закладки</Link></li>
                         </ul>

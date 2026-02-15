@@ -11,7 +11,9 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import api from "../../../services/api";
 import { API_BASE_URL } from "../../../config/api";
 import { ROUTES } from "../../../config/constants";
-import { addToCart } from "../../../utils/cart";
+import { addToCartIfAuth } from "../../../utils/cart";
+import { useCurrency } from "../../../context/CurrencyContext";
+import { formatPriceWithCurrency } from "../../../utils/price";
 import "./ProductDetail.css";
 
 /** Поля спецификаций: ключ API → подпись для отображения */
@@ -65,6 +67,7 @@ function getImageUrl(raw) {
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const { currency, convertPrice } = useCurrency();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -214,13 +217,15 @@ const ProductDetail = () => {
           <div className="product-detail__info">
             <h1 className="product-detail__title">{product.name}</h1>
             {product.price && (
-              <p className="product-detail__price">{product.price}</p>
+              <p className="product-detail__price">
+                {formatPriceWithCurrency(product.price, currency, convertPrice)}
+              </p>
             )}
             <div className="product-detail__actions">
               <button
                 type="button"
                 className="product-detail__cart-btn"
-                onClick={() => addToCart(product)}
+                onClick={() => addToCartIfAuth(product)}
               >
                 В корзину
               </button>

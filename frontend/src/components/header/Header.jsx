@@ -27,7 +27,8 @@ import IconButton from '@mui/material/IconButton';
 import Footer from '../footer/Footer';
 import AuthModal from '../modals/AuthModal';
 import api from '../../services/api';
-import { STORAGE_KEYS, ROUTES } from '../../config/constants';
+import { STORAGE_KEYS, ROUTES, CURRENCIES } from '../../config/constants';
+import { useCurrency } from '../../context/CurrencyContext';
 import { getCartCount } from '../../utils/cart';
 import { getAvatarUrl } from '../../utils/avatar';
 
@@ -52,6 +53,9 @@ export default function Header(props) {
 
     // Количество товаров в корзине
     const [cartCount, setCartCount] = useState(0);
+
+    // Выбранная валюта из контекста
+    const { currency, setCurrency } = useCurrency();
 
     /**
      * Функция для загрузки данных пользователя
@@ -252,10 +256,32 @@ export default function Header(props) {
                         <button className="icon-button" aria-label="Избранное">
                             <FavoriteBorderIcon />
                         </button>
-                        <span className="currency-selector">
-                            руб. Валюта
-                            <KeyboardArrowDownIcon className="dropdown-icon" />
-                        </span>
+                        <div className="currency-dropdown">
+                            <button
+                                type="button"
+                                className="currency-selector"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                                aria-label="Выбрать валюту"
+                            >
+                                {currency}. Валюта
+                                <KeyboardArrowDownIcon className="dropdown-icon" />
+                            </button>
+                            <div className="currency-dropdown-panel" role="listbox">
+                                {CURRENCIES.map((code) => (
+                                    <button
+                                        key={code}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={currency === code}
+                                        className={`currency-dropdown-item ${currency === code ? 'currency-dropdown-item--active' : ''}`}
+                                        onClick={() => setCurrency(code)}
+                                    >
+                                        {code}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
