@@ -10,8 +10,10 @@ from .serializers import (
     UserSerializer,
     UserUpdateSerializer,
     PasswordChangeSerializer,
+    ElectricBoilerSerializer,
+    ElectricBoilerDetailSerializer,
 )
-from .models import *
+from .models import ElectricBoiler
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -20,6 +22,69 @@ from rest_framework.decorators import action
 
 # Получаем модель пользователя из настроек Django
 User = get_user_model()
+
+
+class ManufacturersView(viewsets.ViewSet):
+    """
+    Список производителей котлов по данным из БД.
+
+    Endpoint: GET /manufacturers/
+    Возвращает уникальные производители (третье слово из наименования котла),
+    отсортированные по имени. Формат: [{"name": "...", "slug": "..."}, ...].
+    """
+
+    permission_classes = [permissions.AllowAny]
+
+    def list(self, request):
+        names = ElectricBoiler.objects.values_list("name", flat=True).distinct()
+        seen = set()
+        result = []
+        for raw_name in names:
+            if not raw_name or not raw_name.strip():
+                continue
+            words = raw_name.strip().split()
+            # Производитель = третье слово наименования (индекс 2)
+            if len(words) < 3:
+                continue
+            third_word = words[2]
+            if not third_word:
+                continue
+            slug = third_word.lower()
+            if slug in seen:
+                continue
+            seen.add(slug)
+            result.append({"name": third_word, "slug": slug})
+        result.sort(key=lambda x: x["name"].lower())
+        return Response(result)
+
+
+class BoilersView(viewsets.ViewSet):
+    """
+    Список и детали котлов (товаров) из БД.
+
+    Endpoints:
+    - GET /boilers/ — все записи для страницы Каталог
+    - GET /boilers/{id}/ — одна запись для страницы описания товара
+    """
+
+    permission_classes = [permissions.AllowAny]
+    serializer_class = ElectricBoilerSerializer
+
+    def list(self, request):
+        qs = ElectricBoiler.objects.all().order_by("name")
+        serializer = self.serializer_class(qs, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        try:
+            boiler = ElectricBoiler.objects.get(pk=pk)
+        except ElectricBoiler.DoesNotExist:
+            return Response(
+                {"detail": "Товар не найден"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = ElectricBoilerDetailSerializer(boiler)
+        return Response(serializer.data)
 
 
 class LoginView(viewsets.ViewSet):

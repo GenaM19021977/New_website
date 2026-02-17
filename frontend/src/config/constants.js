@@ -8,7 +8,11 @@
 export const STORAGE_KEYS = {
     ACCESS_TOKEN: 'access_token',
     REFRESH_TOKEN: 'refresh_token',
+    CURRENCY: 'turiki_currency',
 };
+
+// Доступные валюты
+export const CURRENCIES = ['BYN', 'RUB', 'USD', 'EUR'];
 
 // Маршруты приложения
 export const ROUTES = {
@@ -16,12 +20,31 @@ export const ROUTES = {
     ABOUT: '/about',
     LOGIN: '/login',
     REGISTER: '/register',
-    WARRANTY: '/warranty',
-    DELIVERY: '/delivery',
-    PAYMENT: '/payment',
-    RETURN: '/return',
-    NEW: '/new',
+    CATALOG: '/catalog',
+    PRODUCT: '/catalog/:id',
+    productById: (id) => `/catalog/${id}`,
+    SELECTION: '/selection',
+    BRANDS: '/brands',
+    CONTACTS: '/contacts',
+    CABINET: '/cabinet',
+    CART: '/cart',
+    CHECKOUT: '/checkout',
+    FAVORITES: '/favorites',
 };
+
+// Сообщение для неавторизованных при покупке
+export const AUTH_REQUIRED_PURCHASE = "Для совершения покупки в нашем магазине зарегистрируйтесь или авторизуйтесь!";
+
+// Сообщение для неавторизованных при просмотре избранного
+export const AUTH_REQUIRED_FAVORITES = "Для просмотра избранного зарегистрируйтесь или авторизуйтесь!";
+
+// Валидация телефона: + и ровно 12 цифр
+export const PHONE_REGEX = /^\+[0-9]{12}$/;
+export const PHONE_ERROR = "Некорректный ввод номера телефона.";
+
+// Валидация email: обязательно наличие @
+export const EMAIL_ERROR = "Некорректный адрес электронной почты!";
+export const EMAIL_EXISTS_ERROR = "Пользователь с таким адресом электронной почты уже зарегистрирован!";
 
 // Страны для выбора в профиле
 export const COUNTRIES = [

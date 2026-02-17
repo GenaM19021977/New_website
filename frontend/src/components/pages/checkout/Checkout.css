@@ -1,0 +1,146 @@
+/**
+ * Checkout — оформление заказа, первый шаг
+ */
+
+.checkout-page {
+  padding-top: var(--page-section-number-offset);
+  padding-bottom: var(--section-padding-y);
+}
+
+.checkout-empty {
+  margin: 0 0 16px 0;
+  color: var(--color-text-muted);
+}
+
+.checkout-back-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.checkout-back-link:hover {
+  color: var(--color-accent);
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 767px) {
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checkout-left {
+  min-height: 400px;
+}
+
+.checkout-image-placeholder {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background-color: var(--color-bg-card);
+  border-radius: 12px;
+}
+
+.checkout-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.checkout-section-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.checkout-delivery-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.checkout-delivery-option {
+  flex: 1;
+  min-width: 140px;
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-card);
+  border: 1px solid rgba(159, 176, 184, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.checkout-delivery-option:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.checkout-delivery-option--active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background-color: rgba(199, 167, 90, 0.08);
+}
+
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.checkout-field .MuiOutlinedInput-root {
+  color: var(--color-text);
+  background-color: var(--color-bg-dark);
+}
+
+.checkout-field .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(159, 176, 184, 0.3);
+}
+
+.checkout-field .MuiInputLabel-root {
+  color: var(--color-text-muted);
+}
+
+.checkout-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.checkout-total {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkout-total-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.checkout-total-label {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.checkout-continue-btn {
+  background-color: var(--color-accent) !important;
+  color: var(--color-bg-dark) !important;
+  padding: 12px 28px !important;
+}
+
+.checkout-continue-btn:hover {
+  opacity: 0.9;
+}

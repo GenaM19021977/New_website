@@ -1,0 +1,20 @@
+/**
+ * About — цветовая схема, секции
+ */
+
+.about-page {
+  padding-top: var(--page-section-number-offset);
+  padding-bottom: var(--section-padding-y);
+}
+
+.about-page .section-number {
+  display: block;
+  font-size: 4rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.06);
+  line-height: 1;
+}
+
+.about-page .page-section-heading {
+  margin-top: 16px;
+}

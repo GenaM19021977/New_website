@@ -3,6 +3,7 @@
 Используются в API endpoints для работы с пользовательскими данными
 """
 
+import re
 from rest_framework import serializers
 from .models import *
 from django.contrib.auth import get_user_model
@@ -19,8 +20,38 @@ class LoginSerializer(serializers.Serializer):
     Не связан с моделью, так как используется только для валидации входных данных.
     """
 
-    email = serializers.EmailField()  # Email должен быть валидным
-    password = serializers.CharField()  # Пароль в виде строки
+    email = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate_email(self, value):
+        if not value or "@" not in str(value):
+            raise serializers.ValidationError("Некорректный адрес электронной почты!")
+        return value.strip()
+
+
+class ElectricBoilerSerializer(serializers.ModelSerializer):
+    """Сериализатор для карточки товара (котла) в каталоге."""
+
+    class Meta:
+        model = ElectricBoiler
+        fields = (
+            "id",
+            "name",
+            "price",
+            "power",
+            "product_url",
+            "image_1",
+            "image_2",
+            "image_3",
+        )
+
+
+class ElectricBoilerDetailSerializer(serializers.ModelSerializer):
+    """Сериализатор для страницы описания товара (все поля модели)."""
+
+    class Meta:
+        model = ElectricBoiler
+        fields = "__all__"
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -30,32 +61,65 @@ class UserSerializer(serializers.ModelSerializer):
     Используется для возврата информации о пользователе в API ответах.
     Исключает чувствительные данные (пароль) из ответа.
     """
-    
+
     # Поле для возврата полного URL аватара
     avatar = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = User
         fields = (
-            "id", "email", "username", "birthday", "first_name", "last_name", "phone", "avatar",
-            "country", "region", "district", "city", "street", "house_number", "building_number", "apartment_number"
+            "id",
+            "email",
+            "username",
+            "birthday",
+            "first_name",
+            "last_name",
+            "phone",
+            "avatar",
+            "country",
+            "region",
+            "district",
+            "city",
+            "street",
+            "house_number",
+            "building_number",
+            "apartment_number",
         )  # Поля для сериализации
         read_only_fields = ("id",)  # ID только для чтения (генерируется автоматически)
+
+
+def validate_phone_format(value):
+    """Валидация телефона: + и ровно 12 цифр."""
+    if not value or not str(value).strip():
+        return value
+    if not re.match(r"^\+[0-9]{12}$", str(value).strip()):
+        raise serializers.ValidationError("Некорректный ввод номера телефона.")
+    return str(value).strip()
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     """
     Сериализатор для обновления данных пользователя
     """
-    
+
     avatar = serializers.ImageField(required=False, allow_null=True)
+    phone = serializers.CharField(required=False, allow_blank=True, validators=[validate_phone_format])
 
     class Meta:
         model = User
         fields = (
-            "first_name", "last_name", "phone", "avatar",
-            "country", "region", "district", "city", "street", 
-            "house_number", "building_number", "apartment_number"
+            "first_name",
+            "last_name",
+            "phone",
+            "avatar",
+            "country",
+            "region",
+            "district",
+            "city",
+            "street",
+            "house_number",
+            "building_number",
+            "apartment_number",
         )
         extra_kwargs = {
             "first_name": {"required": False},
@@ -67,13 +131,16 @@ class PasswordChangeSerializer(serializers.Serializer):
     """
     Сериализатор для смены пароля
     """
+
     old_password = serializers.CharField(required=True, write_only=True)
     new_password = serializers.CharField(required=True, min_length=8, write_only=True)
     new_password2 = serializers.CharField(required=True, min_length=8, write_only=True)
 
     def validate(self, attrs):
-        if attrs['new_password'] != attrs['new_password2']:
-            raise serializers.ValidationError({"new_password2": "Новые пароли не совпадают"})
+        if attrs["new_password"] != attrs["new_password2"]:
+            raise serializers.ValidationError(
+                {"new_password2": "Новые пароли не совпадают"}
+            )
         return attrs
 
 
@@ -83,7 +150,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     Используется для создания нового пользователя с валидацией данных.
     Автоматически хэширует пароль при создании пользователя.
-    
+
     Обязательные поля:
     - email (обязательно)
     - password (обязательно)
@@ -97,35 +164,43 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "email", "password", "password2", "first_name", "last_name", "phone", "avatar")  # Поля для регистрации
+        fields = (
+            "id",
+            "email",
+            "password",
+            "password2",
+            "first_name",
+            "last_name",
+            "phone",
+            "avatar",
+        )  # Поля для регистрации
         extra_kwargs = {
-            "email": {
-                "required": True
-            },  # Email обязателен
+            "email": {"required": True},  # Email обязателен
             "password": {
                 "write_only": True,
                 "required": True,
-                "min_length": 8
+                "min_length": 8,
             },  # Пароль обязателен, минимум 8 символов
-            "first_name": {
-                "required": True,
-                "allow_blank": False
-            },  # Имя обязательно
+            "first_name": {"required": True, "allow_blank": False},  # Имя обязательно
             "last_name": {
                 "required": True,
-                "allow_blank": False
+                "allow_blank": False,
             },  # Фамилия обязательна
         }
 
     def validate_email(self, value):
         """
-        Валидация email
-
-        Проверяет, что email не пустой и валидный.
+        Валидация email: наличие @ и уникальность.
         """
         if not value:
             raise serializers.ValidationError("Email обязателен для заполнения")
-        return value
+        if "@" not in value:
+            raise serializers.ValidationError("Некорректный адрес электронной почты!")
+        if User.objects.filter(email__iexact=value.strip()).exists():
+            raise serializers.ValidationError(
+                "Пользователь с таким адресом электронной почты уже зарегистрирован!"
+            )
+        return value.strip()
 
     def validate_password(self, value):
         """
@@ -136,7 +211,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("Пароль обязателен для заполнения")
         if len(value) < 8:
-            raise serializers.ValidationError("Пароль должен содержать минимум 8 символов")
+            raise serializers.ValidationError(
+                "Пароль должен содержать минимум 8 символов"
+            )
         return value
 
     def validate_first_name(self, value):
@@ -159,13 +236,19 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Фамилия обязательна для заполнения")
         return value.strip()
 
+    def validate_phone(self, value):
+        """
+        Валидация телефона: + и ровно 12 цифр.
+        """
+        return validate_phone_format(value)
+
     def validate(self, attrs):
         """
         Валидация данных регистрации
 
         Проверяет совпадение пароля и подтверждения пароля.
         """
-        if attrs['password'] != attrs['password2']:
+        if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError({"password2": "Пароли не совпадают"})
         return attrs
 
@@ -180,11 +263,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             User: Созданный объект пользователя
         """
         # Удаляем password2 из validated_data, так как его нет в модели
-        validated_data.pop('password2')
-        
+        validated_data.pop("password2")
+
         # Извлекаем пароль
-        password = validated_data.pop('password')
-        
+        password = validated_data.pop("password")
+
         # create_user автоматически хэширует пароль
         user = User.objects.create_user(password=password, **validated_data)
         user.save()  # Явно сохраняем пользователя в БД

@@ -74,7 +74,7 @@ class ElectricBoiler(models.Model):
     Все данные сохраняются в базе данных PostgreSQL.
     """
 
-    # Основная информация
+    # Основная информация (в порядке новой структуры)
     name = models.CharField(
         max_length=200,
         verbose_name="Наименование котла",
@@ -84,20 +84,6 @@ class ElectricBoiler(models.Model):
         verbose_name="Ссылка на товар",
         help_text="URL ссылка на товар на внешнем ресурсе",
     )
-    price = models.CharField(
-        max_length=50,
-        verbose_name="Цена",
-        help_text="Цена товара",
-    )
-    country = models.CharField(
-        max_length=100,
-        verbose_name="Страна производитель",
-        blank=True,
-        null=True,
-        help_text="Страна-производитель котла",
-    )
-
-    # Технические характеристики
     power = models.CharField(
         max_length=50,
         verbose_name="Мощность кВт",
@@ -118,6 +104,18 @@ class ElectricBoiler(models.Model):
         blank=True,
         null=True,
         help_text="Рекомендуемая площадь отопления",
+    )
+    price = models.CharField(
+        max_length=50,
+        verbose_name="Цена",
+        help_text="Цена товара",
+    )
+    country = models.CharField(
+        max_length=100,
+        verbose_name="Страна производитель",
+        blank=True,
+        null=True,
+        help_text="Страна-производитель котла",
     )
     work_type = models.CharField(
         max_length=100,
@@ -187,14 +185,21 @@ class ElectricBoiler(models.Model):
         verbose_name="Диапазон выбираемых температур, °C",
         blank=True,
         null=True,
-        help_text="Диапазон рабочих температур",
+        help_text="Диапазон выбираемых температур (или значение радиаторного отопления)",
     )
-    efficiency = models.CharField(
+    temp_range_radiator = models.CharField(
         max_length=100,
-        verbose_name="КПД",
+        verbose_name="Диапазон выбираемых температур - радиаторное отопление, °C",
         blank=True,
         null=True,
-        help_text="Коэффициент полезного действия",
+        help_text="Диапазон температур для радиаторного отопления",
+    )
+    temp_range_floor = models.CharField(
+        max_length=100,
+        verbose_name="Диапазон выбираемых температур - теплый пол, °C",
+        blank=True,
+        null=True,
+        help_text="Диапазон температур для теплого пола",
     )
     connection = models.CharField(
         max_length=50,
@@ -238,8 +243,6 @@ class ElectricBoiler(models.Model):
         null=True,
         help_text="Поддержка датчика уличной температуры",
     )
-
-    # Описания и документация
     description = models.TextField(
         verbose_name="Описание",
         blank=True,
@@ -252,8 +255,6 @@ class ElectricBoiler(models.Model):
         null=True,
         help_text="Ссылка на документацию/инструкцию",
     )
-
-    # Изображения
     image_1 = models.URLField(
         verbose_name="Изображение 1",
         blank=True,
@@ -277,6 +278,12 @@ class ElectricBoiler(models.Model):
         blank=True,
         null=True,
         help_text="URL четвертого изображения",
+    )
+    image_5 = models.URLField(
+        verbose_name="Изображение 5",
+        blank=True,
+        null=True,
+        help_text="URL пятого изображения",
     )
 
     # Метаданные
@@ -315,16 +322,14 @@ class ElectricBoiler(models.Model):
         Returns:
             ElectricBoiler: Сохраненный объект модели
         """
-        # Основная информация
+        # Основная информация (в порядке новой структуры)
         self.name = parser_data.get("name", "")
         self.product_url = parser_data.get("product_url", "")
-        self.price = parser_data.get("price", "")
-        self.country = parser_data.get("country") or None
-
-        # Технические характеристики
         self.power = parser_data.get("power") or None
         self.power_regulation = parser_data.get("power_regulation") or None
         self.heating_area = parser_data.get("heating_area") or None
+        self.price = parser_data.get("price", "")
+        self.country = parser_data.get("country") or None
         self.work_type = parser_data.get("work_type") or None
         self.self_work = parser_data.get("self_work") or None
         self.water_heating = parser_data.get("water_heating") or None
@@ -334,16 +339,19 @@ class ElectricBoiler(models.Model):
         self.voltage = parser_data.get("voltage") or None
         self.cable = parser_data.get("cable") or None
         self.fuse = parser_data.get("fuse") or None
-        self.temp_range = parser_data.get("temp_range") or None
-        self.efficiency = parser_data.get("efficiency") or None
+        # Диапазон выбираемых температур: если есть на странице, использовать его, иначе значение радиаторного отопления
+        temp_range_value = parser_data.get("temp_range")
+        if not temp_range_value:
+            temp_range_value = parser_data.get("temp_range_radiator")
+        self.temp_range = temp_range_value or None
+        self.temp_range_radiator = parser_data.get("temp_range_radiator") or None
+        self.temp_range_floor = parser_data.get("temp_range_floor") or None
         self.connection = parser_data.get("connection") or None
         self.dimensions = parser_data.get("dimensions") or None
         self.wifi = parser_data.get("wifi") or None
         self.thermostat = parser_data.get("thermostat") or None
         self.thermostat_included = parser_data.get("thermostat_included") or None
         self.outdoor_sensor = parser_data.get("outdoor_sensor") or None
-
-        # Описания
         self.description = parser_data.get("description") or None
         self.documentation = parser_data.get("documentation") or None
 
@@ -362,11 +370,15 @@ class ElectricBoiler(models.Model):
             self.image_4 = (
                 image_urls[3] if len(image_urls) > 3 and image_urls[3] else None
             )
+            self.image_5 = (
+                image_urls[4] if len(image_urls) > 4 and image_urls[4] else None
+            )
         else:
             self.image_1 = None
             self.image_2 = None
             self.image_3 = None
             self.image_4 = None
+            self.image_5 = None
 
         self.save()
         return self

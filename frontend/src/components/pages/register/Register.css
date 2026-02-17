@@ -1,0 +1,12 @@
+/**
+ * Register — обёртка под дизайн-систему
+ */
+
+.register-page {
+  /* Использует .auth-background и .auth-box из App.css */
+}
+
+.auth-main {
+  width: 100%;
+  max-width: 420px;
+}

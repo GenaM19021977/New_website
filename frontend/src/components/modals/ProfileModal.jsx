@@ -32,8 +32,8 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
-import MyTextField from '../../components/forms/MyTextField';
-import MyPassField from '../../components/forms/MyPassField';
+import MyTextField from '../forms/MyTextField';
+import MyPassField from '../forms/MyPassField';
 import { STORAGE_KEYS, ROUTES, COUNTRIES } from '../../config/constants';
 import { getAvatarUrl } from '../../utils/avatar';
 import './ProfileModal.css';
@@ -109,32 +109,82 @@ const ProfileModal = ({ open, onClose, user, onUserUpdate }) => {
      */
     const handleAvatarChange = async (event) => {
         const file = event.target.files[0];
-        if (file) {
-            // Создание превью
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatarPreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
 
-            // Создание FormData для отправки
-            const formData = new FormData();
-            formData.append('avatar', file);
+        // Валидация файла
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        
+        if (!allowedTypes.includes(file.type)) {
+            alert('Неподдерживаемый формат файла. Используйте JPEG, PNG, GIF или WebP.');
+            // Сброс input
+            event.target.value = '';
+            return;
+        }
 
-            // Отправка на сервер
-            try {
-                const response = await api.put('me/update-profile/', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                if (onUserUpdate) {
-                    onUserUpdate(response.data);
-                }
-            } catch (error) {
-                console.error('Error updating avatar:', error);
-                alert('Ошибка при обновлении аватара');
+        if (file.size > maxSize) {
+            alert('Файл слишком большой. Максимальный размер: 5MB.');
+            // Сброс input
+            event.target.value = '';
+            return;
+        }
+
+        // Создание превью
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setAvatarPreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        // Создание FormData для отправки
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        // Отправка на сервер
+        try {
+            // Используем PATCH для частичного обновления
+            // DRF использует snake_case по умолчанию, поэтому update_profile, а не update-profile
+            const response = await api.patch('me/update_profile/', formData);
+            if (onUserUpdate) {
+                onUserUpdate(response.data);
             }
+            // Обновление превью на основе ответа сервера
+            if (response.data.avatar) {
+                setAvatarPreview(getAvatarUrl(response.data.avatar));
+            }
+        } catch (error) {
+            console.error('Error updating avatar:', error);
+            
+            // Откат превью в случае ошибки
+            if (user?.avatar) {
+                setAvatarPreview(getAvatarUrl(user.avatar));
+            } else {
+                setAvatarPreview(null);
+            }
+            
+            // Сброс input
+            event.target.value = '';
+            
+            // Детальное сообщение об ошибке
+            let errorMessage = 'Ошибка при обновлении аватара';
+            if (error.response?.data) {
+                if (typeof error.response.data === 'string') {
+                    errorMessage += ': ' + error.response.data;
+                } else if (error.response.data.avatar) {
+                    const avatarErrors = Array.isArray(error.response.data.avatar) 
+                        ? error.response.data.avatar.join(', ') 
+                        : error.response.data.avatar;
+                    errorMessage += ': ' + avatarErrors;
+                } else if (error.response.data.detail) {
+                    errorMessage += ': ' + error.response.data.detail;
+                } else {
+                    errorMessage += ': ' + JSON.stringify(error.response.data);
+                }
+            } else if (error.message) {
+                errorMessage += ': ' + error.message;
+            }
+            
+            alert(errorMessage);
         }
     };
 
@@ -142,7 +192,7 @@ const ProfileModal = ({ open, onClose, user, onUserUpdate }) => {
      * Обработчик сохранения личных данных
      */
     const handleSavePersonalData = (data) => {
-        api.put('me/update-profile/', data)
+        api.patch('me/update_profile/', data)
             .then((response) => {
                 if (onUserUpdate) {
                     onUserUpdate(response.data);
@@ -163,7 +213,7 @@ const ProfileModal = ({ open, onClose, user, onUserUpdate }) => {
      * Обработчик смены пароля
      */
     const handleChangePassword = (data) => {
-        api.post('me/change-password/', {
+        api.post('me/change_password/', {
             old_password: data.old_password,
             new_password: data.new_password,
             new_password2: data.new_password2

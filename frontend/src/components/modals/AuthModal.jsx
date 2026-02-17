@@ -16,13 +16,13 @@ import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import MyTextField from '../../components/forms/MyTextField';
-import MyPassField from '../../components/forms/MyPassField';
-import MyButton from '../../components/forms/MyButton';
+import MyTextField from '../forms/MyTextField';
+import MyPassField from '../forms/MyPassField';
+import MyButton from '../forms/MyButton';
 import { useForm, Controller } from 'react-hook-form';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS, ROUTES } from '../../config/constants';
+import { STORAGE_KEYS, ROUTES, PHONE_REGEX, PHONE_ERROR, EMAIL_ERROR } from '../../config/constants';
 import './AuthModal.css';
 
 const AuthModal = ({ open, onClose }) => {
@@ -50,6 +50,12 @@ const AuthModal = ({ open, onClose }) => {
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
         reset(); // Сброс формы при смене вкладки
+        setAvatarPreview(null); // Сброс превью аватара при смене вкладки
+        // Сброс input файла
+        const fileInput = document.getElementById('avatar-upload');
+        if (fileInput) {
+            fileInput.value = '';
+        }
     };
 
     /**
@@ -59,6 +65,11 @@ const AuthModal = ({ open, onClose }) => {
         reset(); // Сброс формы при закрытии
         setAvatarPreview(null); // Сброс превью аватара
         setActiveTab(0); // Возврат к первой вкладке
+        // Сброс input файла
+        const fileInput = document.getElementById('avatar-upload');
+        if (fileInput) {
+            fileInput.value = '';
+        }
         onClose();
     };
 
@@ -214,12 +225,17 @@ const AuthModal = ({ open, onClose }) => {
                                     label="Email"
                                     name="email"
                                     control={control}
+                                    rules={{
+                                        required: "Email обязателен для заполнения",
+                                        validate: (value) =>
+                                            (value || "").includes("@") || EMAIL_ERROR
+                                    }}
                                 />
                             </Box>
 
-                            <Box className="auth-field-box">
+                            <Box className="auth-field-box auth-password-field">
                                 <MyPassField
-                                    label="Password"
+                                    label="Пароль"
                                     name="password"
                                     control={control}
                                 />
@@ -279,15 +295,13 @@ const AuthModal = ({ open, onClose }) => {
                                     control={control}
                                     rules={{
                                         required: "Email обязателен для заполнения",
-                                        pattern: {
-                                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                            message: "Неверный формат email"
-                                        }
+                                        validate: (value) =>
+                                            (value || "").includes("@") || EMAIL_ERROR
                                     }}
                                 />
                             </Box>
 
-                            <Box className="auth-field-box">
+                            <Box className="auth-field-box auth-password-field">
                                 <MyPassField
                                     label="Пароль *"
                                     name="password"
@@ -302,7 +316,7 @@ const AuthModal = ({ open, onClose }) => {
                                 />
                             </Box>
 
-                            <Box className="auth-field-box">
+                            <Box className="auth-field-box auth-password-field">
                                 <MyPassField
                                     label="Подтверждение пароля *"
                                     name="password2"
@@ -355,6 +369,13 @@ const AuthModal = ({ open, onClose }) => {
                                     label="Телефон"
                                     name="phone"
                                     control={control}
+                                    rules={{
+                                        validate: (value) => {
+                                            const v = (value || "").trim();
+                                            if (!v) return true;
+                                            return PHONE_REGEX.test(v) || PHONE_ERROR;
+                                        }
+                                    }}
                                 />
                             </Box>
 

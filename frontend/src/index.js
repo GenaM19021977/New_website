@@ -10,13 +10,16 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { CurrencyProvider } from './context/CurrencyContext';
 
 // Создание корневого элемента и рендеринг приложения
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <Router>
-      <App />
+      <CurrencyProvider>
+        <App />
+      </CurrencyProvider>
     </Router>
   </React.StrictMode>
 );
