@@ -6,7 +6,7 @@
 """
 
 from django.contrib import admin
-from .models import CustomUser, ElectricBoiler
+from .models import CustomUser, ElectricBoiler, Delivery
 
 
 @admin.register(CustomUser)
@@ -186,3 +186,45 @@ class ElectricBoilerAdmin(admin.ModelAdmin):
     save_on_top = True  # Кнопки сохранения сверху и снизу
     save_as = True  # Возможность сохранить как новый объект
     save_as_continue = True  # Продолжить редактирование после сохранения как нового
+
+
+@admin.register(Delivery)
+class DeliveryAdmin(admin.ModelAdmin):
+    """
+    Административный интерфейс для модели Доставка.
+
+    Отображается структура из 5 пунктов доставки. Для каждого можно вручную
+    внести числовое значение (стоимость в BYN и т.д.) и текстовое (условия).
+    """
+
+    list_display = ("title", "value_number", "value_text_short", "sort_order")
+    list_editable = ("value_number", "sort_order")
+    list_display_links = ("title",)
+    list_filter = ("sort_order",)
+    search_fields = ("title", "value_text")
+    ordering = ("sort_order", "id")
+
+    fieldsets = (
+        (
+            "Условие доставки",
+            {
+                "fields": ("title", "sort_order"),
+                "description": "Название пункта из структуры доставки (например: По г. Брест при сумме заказа от 1000 BYN).",
+            },
+        ),
+        (
+            "Значения (вносятся вручную)",
+            {
+                "fields": ("value_number", "value_text"),
+                "description": "Числовое значение (BYN, кг) и текстовое (условия, примечания) — оба опциональны.",
+            },
+        ),
+    )
+
+    def value_text_short(self, obj):
+        """Краткий вывод текстового значения в списке."""
+        if not obj.value_text:
+            return "—"
+        return obj.value_text[:60] + "…" if len(obj.value_text) > 60 else obj.value_text
+
+    value_text_short.short_description = "Текстовое значение"

@@ -382,3 +382,37 @@ class ElectricBoiler(models.Model):
 
         self.save()
         return self
+
+
+class Delivery(models.Model):
+    """
+    Модель для хранения сведений по доставке.
+
+    Каждая запись — один вариант доставки (например: по г. Брест от 1000 BYN,
+    по РБ до 30 кг и т.д.). Название и описание стоимости/условий редактируются в админке.
+    """
+
+    title = models.CharField(
+        max_length=300,
+        verbose_name="Название условия доставки",
+        help_text="Например: По г. Брест при сумме заказа от 1000 BYN",
+    )
+    description = models.TextField(
+        verbose_name="Стоимость и условия",
+        blank=True,
+        help_text="Описание стоимости и условий доставки (редактируемый текст)",
+    )
+    sort_order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name="Порядок отображения",
+        help_text="Меньшее значение — выше в списке",
+    )
+
+    class Meta:
+        db_table = "delivery"
+        verbose_name = "Доставка"
+        verbose_name_plural = "Доставка"
+        ordering = ["sort_order", "id"]
+
+    def __str__(self):
+        return self.title

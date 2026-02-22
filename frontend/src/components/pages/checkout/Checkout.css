@@ -40,10 +40,16 @@
 }
 
 .checkout-image-placeholder {
+  position: relative;
   width: 100%;
   aspect-ratio: 4/3;
   background-color: var(--color-bg-card);
   border-radius: 12px;
+  overflow: hidden;
+}
+
+.checkout-image-placeholder iframe {
+  display: block;
 }
 
 .checkout-right {
