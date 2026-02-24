@@ -12,8 +12,9 @@ from .serializers import (
     PasswordChangeSerializer,
     ElectricBoilerSerializer,
     ElectricBoilerDetailSerializer,
+    DeliverySerializer,
 )
-from .models import ElectricBoiler
+from .models import ElectricBoiler, Delivery
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -84,6 +85,22 @@ class BoilersView(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
         serializer = ElectricBoilerDetailSerializer(boiler)
+        return Response(serializer.data)
+
+
+class DeliveryView(viewsets.ViewSet):
+    """
+    Список условий доставки из таблицы Доставка.
+
+    Endpoint: GET /delivery/
+    Возвращает все записи (title, value_number, value_text, sort_order) для модального окна.
+    """
+
+    permission_classes = [permissions.AllowAny]
+
+    def list(self, request):
+        qs = Delivery.objects.all().order_by("sort_order", "id")
+        serializer = DeliverySerializer(qs, many=True)
         return Response(serializer.data)
 
 

@@ -102,6 +102,13 @@ class ElectricBoilerAdmin(admin.ModelAdmin):
     ordering = ("-created_at", "name")  # Сначала новые, потом по имени
     readonly_fields = ("created_at", "updated_at")
 
+    def get_readonly_fields(self, request, obj=None):
+        """Стоимость (price) можно менять вручную только суперпользователю."""
+        readonly = list(super().get_readonly_fields(request, obj))
+        if not request.user.is_superuser:
+            readonly.append("price")
+        return readonly
+
     # Количество объектов на странице
     list_per_page = 25
     list_max_show_all = 100

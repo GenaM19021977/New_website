@@ -388,8 +388,8 @@ class Delivery(models.Model):
     """
     Модель для хранения сведений по доставке.
 
-    Каждая запись — один вариант доставки (например: по г. Брест от 1000 BYN,
-    по РБ до 30 кг и т.д.). Название и описание стоимости/условий редактируются в админке.
+    Структура: 5 типов условий доставки. К каждому можно вручную внести
+    числовое значение (например, стоимость в BYN) и текстовое (условия, примечания).
     """
 
     title = models.CharField(
@@ -397,10 +397,18 @@ class Delivery(models.Model):
         verbose_name="Название условия доставки",
         help_text="Например: По г. Брест при сумме заказа от 1000 BYN",
     )
-    description = models.TextField(
-        verbose_name="Стоимость и условия",
+    value_number = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
         blank=True,
-        help_text="Описание стоимости и условий доставки (редактируемый текст)",
+        verbose_name="Числовое значение (BYN, кг и т.д.)",
+        help_text="Стоимость в BYN или другое число — при необходимости оставьте пустым",
+    )
+    value_text = models.TextField(
+        verbose_name="Текстовое значение (условия, примечания)",
+        blank=True,
+        help_text="Описание стоимости и условий доставки — вносится вручную",
     )
     sort_order = models.PositiveSmallIntegerField(
         default=0,

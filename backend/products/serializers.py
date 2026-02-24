@@ -54,6 +54,14 @@ class ElectricBoilerDetailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class DeliverySerializer(serializers.ModelSerializer):
+    """Сериализатор для списка условий доставки (модальное окно «Информация о доставке»)."""
+
+    class Meta:
+        model = Delivery
+        fields = ("id", "title", "value_number", "value_text", "sort_order")
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Сериализатор для отображения данных пользователя

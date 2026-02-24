@@ -19,6 +19,10 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import MenuIcon from '@mui/icons-material/Menu';
 import { ROUTES } from '../../config/constants';
 import logoHeader from '../../images/logo-header.png';
+import iconVk from '../../images/img_social/free-icon-vk-2504953.png';
+import iconFacebook from '../../images/img_social/free-icon-facebook-2504903.png';
+import iconWhatsapp from '../../images/img_social/free-icon-whatsapp-2504957.png';
+import iconInstagram from '../../images/img_social/free-icon-instagram-1409946.png';
 
 export default function Footer() {
     // Функция для прокрутки страницы вверх
@@ -176,14 +180,17 @@ export default function Footer() {
 
                     {/* Социальные сети */}
                     <div className="social-icons">
-                        <a href="https://vk.com/kotelkovby" className="social-icon" target="_blank" rel="noopener noreferrer">
-                            <span>VK</span>
+                        <a href="https://vk.com/kotelkovby" className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="ВКонтакте">
+                            <img src={iconVk} alt="VK" className="social-icon__img" />
                         </a>
-                        <a href="https://facebook.com/kotelkovby" className="social-icon" target="_blank" rel="noopener noreferrer">
-                            <span>f</span>
+                        <a href="https://facebook.com/kotelkovby" className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                            <img src={iconFacebook} alt="Facebook" className="social-icon__img" />
                         </a>
-                        <a href="https://wa.me/375447871888" className="social-icon" target="_blank" rel="noopener noreferrer">
-                            <span>WA</span>
+                        <a href="https://wa.me/375447871888" className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                            <img src={iconWhatsapp} alt="WhatsApp" className="social-icon__img" />
+                        </a>
+                        <a href="https://instagram.com/kotelkovby" className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                            <img src={iconInstagram} alt="Instagram" className="social-icon__img" />
                         </a>
                     </div>
                 </div>
@@ -191,9 +198,6 @@ export default function Footer() {
 
             {/* Плавающие кнопки */}
             <div className="floating-buttons">
-                <a href="tel:+375447871888" className="floating-button floating-button-phone">
-                    <PhoneIcon />
-                </a>
                 <button className="floating-button floating-button-top" onClick={scrollToTop}>
                     <KeyboardArrowUpIcon />
                 </button>

@@ -18,3 +18,209 @@
 .about-page .page-section-heading {
   margin-top: 16px;
 }
+
+.about-page-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.about-action-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px;
+  min-width: 280px;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  background-color: var(--color-bg-card, #1e293b);
+  color: var(--color-text, #f1f5f9);
+  font-weight: 600;
+  border-radius: 10px;
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.about-action-btn:hover {
+  background-color: var(--color-accent, #3b82f6);
+  transform: translateY(-1px);
+}
+
+.about-action-btn img {
+  flex-shrink: 0;
+}
+
+/* Модальное окно «Информация о доставке» */
+.about-delivery-modal .MuiDialog-paper {
+  border-radius: 12px;
+  background-color: var(--color-bg-card, #1a2332);
+  color: var(--color-text, #f1f5f9);
+}
+
+.about-delivery-modal-title {
+  position: relative;
+  padding: 16px 24px !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.about-delivery-modal-close {
+  position: absolute !important;
+  top: 8px;
+  right: 8px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.about-delivery-modal-close:hover {
+  color: #fff;
+}
+
+.about-delivery-modal-content {
+  padding: 24px !important;
+}
+
+.about-delivery-modal-heading {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.about-delivery-modal-subheading {
+  margin: 16px 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text, #f1f5f9);
+}
+
+.about-delivery-modal-list {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.about-delivery-modal-list li {
+  margin-bottom: 4px;
+}
+
+.about-delivery-modal-text {
+  margin: 16px 0 8px;
+  line-height: 1.6;
+}
+
+.about-delivery-modal-note {
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+}
+
+.about-delivery-modal-loading,
+.about-delivery-modal-empty {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+}
+
+.about-delivery-modal-error {
+  margin: 0;
+  color: var(--color-error, #ef4444);
+  line-height: 1.6;
+}
+
+.about-delivery-modal-list--from-api {
+  list-style: none;
+  padding-left: 0;
+}
+
+.about-delivery-modal-item {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  line-height: 1.5;
+}
+
+.about-delivery-modal-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.about-delivery-modal-item-title {
+  font-weight: 600;
+  color: var(--color-text, #f1f5f9);
+}
+
+.about-delivery-modal-item-value {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Модальное окно «Оплата» */
+.about-payment-modal .MuiDialog-paper {
+  border-radius: 12px;
+  background-color: var(--color-bg-card, #1a2332);
+  color: var(--color-text, #f1f5f9);
+}
+
+.about-payment-modal-title {
+  position: relative;
+  padding: 16px 24px !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.about-payment-modal-close {
+  position: absolute !important;
+  top: 8px;
+  right: 8px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.about-payment-modal-close:hover {
+  color: #fff;
+}
+
+.about-payment-modal-content {
+  padding: 24px !important;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.about-payment-modal-lead {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text, #f1f5f9);
+  line-height: 1.5;
+}
+
+.about-payment-modal-heading {
+  margin: 16px 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text, #f1f5f9);
+}
+
+.about-payment-modal-text {
+  margin: 0 0 12px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.about-payment-modal-text:last-child {
+  margin-bottom: 0;
+}
+
+.about-payment-modal-list {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.about-payment-modal-list li {
+  margin-bottom: 4px;
+}

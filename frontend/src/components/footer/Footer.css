@@ -310,23 +310,31 @@
 }
 
 .social-icon {
-  width: 36px;
-  height: 36px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background-color: var(--color-bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-muted);
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: color 0.2s, background-color 0.2s;
+  overflow: hidden;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.social-icon__img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
 }
 
 .social-icon:hover {
-  background-color: var(--color-accent);
-  color: var(--color-bg-dark);
+  background-color: var(--color-bg-card);
+  opacity: 0.9;
+}
+
+.social-icon:hover .social-icon__img {
+  filter: brightness(1.2);
 }
 
 .floating-buttons {

@@ -75,7 +75,17 @@ const Checkout = () => {
     <main className="page-main checkout-page">
       <div className="page-container checkout-layout">
         <div className="checkout-left">
-          <div className="checkout-image-placeholder" />
+          <div className="checkout-image-placeholder">
+            <iframe
+              src="https://yandex.ru/map-widget/v1/?mode=search&text=%D0%91%D1%80%D0%B5%D1%81%D1%82%2C%20%D1%83%D0%BB.%20%D0%93%D0%BE%D0%B3%D0%BE%D0%BB%D1%8F%2089"
+              title="Яндекс.Карта — г. Брест, ул. Гоголя 89"
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              allowFullScreen
+              style={{ position: "absolute", inset: 0, borderRadius: "12px" }}
+            />
+          </div>
         </div>
         <div className="checkout-right">
           <h2 className="checkout-section-title">Способ доставки</h2>
