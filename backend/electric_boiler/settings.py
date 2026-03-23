@@ -195,7 +195,7 @@ REST_FRAMEWORK = {
 # Конфигурация JWT токенов для аутентификации
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),  # Время жизни access токена (1 час)
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),  # Время жизни access токена (2 часа)
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Время жизни refresh токена (7 дней)
     "ROTATE_REFRESH_TOKENS": True,  # Генерировать новый refresh токен при обновлении
     "BLACKLIST_AFTER_ROTATION": True,  # Добавлять старый refresh токен в черный список

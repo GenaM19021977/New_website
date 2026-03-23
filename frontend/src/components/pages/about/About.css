@@ -162,6 +162,7 @@
   border-radius: 12px;
   background-color: var(--color-bg-card, #1a2332);
   color: var(--color-text, #f1f5f9);
+  max-width: 900px;
 }
 
 .about-payment-modal-title {
