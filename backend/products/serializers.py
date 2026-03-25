@@ -59,7 +59,7 @@ class DeliverySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Delivery
-        fields = ("id", "title", "value_number", "value_text", "sort_order")
+        fields = ("id", "title", "value_number", "amount", "sort_order")
 
 
 class UserSerializer(serializers.ModelSerializer):

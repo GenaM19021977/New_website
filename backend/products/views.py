@@ -93,7 +93,7 @@ class DeliveryView(viewsets.ViewSet):
     Список условий доставки из таблицы Доставка.
 
     Endpoint: GET /delivery/
-    Возвращает все записи (title, value_number, value_text, sort_order) для модального окна.
+    Возвращает все записи (title, value_number, amount, sort_order) для модального окна.
     """
 
     permission_classes = [permissions.AllowAny]

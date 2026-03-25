@@ -258,6 +258,60 @@
   gap: 4px;
 }
 
+.checkout-total-line--compact {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.checkout-total-sublabel {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.checkout-total-meta {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* Подписи маршрута «От / До» и пояснения под блоком расстояния (курьер) */
+.checkout-route-notes {
+  margin: -4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkout-route-notes .checkout-total-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.checkout-total-note {
+  margin: -4px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.checkout-total-warning {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--color-error, #ef4444);
+}
+
+.checkout-total-divider {
+  border: none;
+  border-top: 1px solid rgba(159, 176, 184, 0.25);
+  margin: 4px 0 0;
+}
+
 .checkout-total-value {
   font-size: 1.5rem;
   font-weight: 700;
@@ -269,6 +323,12 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text);
+}
+
+.checkout-total-value.checkout-total-value--grand {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-accent);
 }
 
 .checkout-total-label {

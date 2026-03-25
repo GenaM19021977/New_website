@@ -200,15 +200,14 @@ class DeliveryAdmin(admin.ModelAdmin):
     """
     Административный интерфейс для модели Доставка.
 
-    Отображается структура из 5 пунктов доставки. Для каждого можно вручную
-    внести числовое значение (стоимость в BYN и т.д.) и текстовое (условия).
+    Отображается структура пунктов доставки. Для каждого: числовое значение, сумма (BYN).
     """
 
-    list_display = ("title", "value_number", "value_text_short", "sort_order")
-    list_editable = ("value_number", "sort_order")
+    list_display = ("title", "value_number", "amount", "sort_order")
+    list_editable = ("value_number", "amount", "sort_order")
     list_display_links = ("title",)
     list_filter = ("sort_order",)
-    search_fields = ("title", "value_text")
+    search_fields = ("title",)
     ordering = ("sort_order", "id")
 
     fieldsets = (
@@ -222,16 +221,8 @@ class DeliveryAdmin(admin.ModelAdmin):
         (
             "Значения (вносятся вручную)",
             {
-                "fields": ("value_number", "value_text"),
-                "description": "Числовое значение (BYN, кг) и текстовое (условия, примечания) — оба опциональны.",
+                "fields": ("value_number", "amount"),
+                "description": "Числовое значение и сумма (BYN) — при необходимости оставьте поля пустыми.",
             },
         ),
     )
-
-    def value_text_short(self, obj):
-        """Краткий вывод текстового значения в списке."""
-        if not obj.value_text:
-            return "—"
-        return obj.value_text[:60] + "…" if len(obj.value_text) > 60 else obj.value_text
-
-    value_text_short.short_description = "Текстовое значение"
