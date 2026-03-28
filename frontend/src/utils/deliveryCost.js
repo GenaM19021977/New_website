@@ -165,6 +165,162 @@ function roundMoney(n) {
   return Math.round(n * 100) / 100;
 }
 
+/** Запись Delivery: Брест и сумма заказа больше порога → amount этой строки. */
+const DELIVERY_ROW_ID_BREST_ORDER_OVER = 1;
+/** Запись Delivery: Брест и сумма заказа меньше порога → amount этой строки. */
+const DELIVERY_ROW_ID_BREST_ORDER_UNDER = 2;
+
+/** В поле «Город» указан г. Брест (не область). */
+export function isDeliveryCityBrest(cityRaw) {
+  let c = String(cityRaw ?? "")
+    .trim()
+    .toLowerCase();
+  c = c.replace(/^г\.?\s*/u, "").trim();
+  if (!c) return false;
+  if (/област/u.test(c)) return false;
+  return c === "брест" || /^брест\b/u.test(c);
+}
+
+const RE_BREST_ORDER_OT =
+  /по\s+г\.?\s*брест[\s\S]*?при\s+сумме\s+заказа\s+от\b/iu;
+const RE_BREST_ORDER_DO =
+  /по\s+г\.?\s*брест[\s\S]*?при\s+сумме\s+заказа\s+до\b/iu;
+const RE_RB_ORDER_OT =
+  /по\s+республике\s+беларус[ьи][\s\S]*?при\s+сумме\s+заказа\s+от\b/iu;
+const RE_RB_ORDER_DO =
+  /по\s+республике\s+беларус[ьи][\s\S]*?при\s+сумме\s+заказа\s+до\b/iu;
+
+function pickOtThenDoRow(otCandidates, doCandidates, order) {
+  const otOk = otCandidates
+    .filter((x) => order >= x.threshold)
+    .sort(
+      (a, b) =>
+        b.threshold - a.threshold ||
+        a.sort - b.sort ||
+        (a.row.id ?? 0) - (b.row.id ?? 0),
+    );
+  if (otOk.length) return otOk[0];
+  const doOk = doCandidates
+    .filter((x) => order <= x.threshold)
+    .sort(
+      (a, b) =>
+        a.threshold - b.threshold ||
+        a.sort - b.sort ||
+        (a.row.id ?? 0) - (b.row.id ?? 0),
+    );
+  return doOk.length ? doOk[0] : null;
+}
+
+/**
+ * Стоимость курьерской доставки checkout по GET /delivery/.
+ * Для Бреста: сначала id=2 (сумма &lt; value_number → amount), затем id=1 (сумма &gt; value_number → amount).
+ * Иначе строки «По г. Брест… / По Республике Беларусь…» (от/до).
+ */
+export function computeCheckoutCourierDeliveryQuote(
+  deliveryItems,
+  orderSubtotalByn,
+  cityRaw,
+) {
+  const zone = isDeliveryCityBrest(cityRaw) ? "brest" : "belarus";
+  const empty = (noRule) => ({
+    amount: null,
+    needsManager: false,
+    noRule,
+    zone,
+  });
+
+  if (!Array.isArray(deliveryItems) || deliveryItems.length === 0) {
+    return empty(true);
+  }
+
+  const order = Math.max(0, Number(orderSubtotalByn) || 0);
+
+  const rowFixed = deliveryItems.find(
+    (r) => Number(r.id) === DELIVERY_ROW_ID_BREST_ORDER_UNDER,
+  );
+  if (rowFixed && isDeliveryCityBrest(cityRaw)) {
+    const threshold = toNum(rowFixed.value_number);
+    const fee = toNum(rowFixed.amount);
+    if (threshold != null && fee != null && order < threshold) {
+      if (fee === -1) {
+        return { amount: null, needsManager: true, noRule: false, zone };
+      }
+      if (fee === 0) {
+        return { amount: 0, needsManager: false, noRule: false, zone };
+      }
+      return {
+        amount: roundMoney(fee),
+        needsManager: false,
+        noRule: false,
+        zone,
+      };
+    }
+  }
+
+  const rowOver = deliveryItems.find(
+    (r) => Number(r.id) === DELIVERY_ROW_ID_BREST_ORDER_OVER,
+  );
+  if (rowOver && isDeliveryCityBrest(cityRaw)) {
+    const thresholdOver = toNum(rowOver.value_number);
+    const feeOver = toNum(rowOver.amount);
+    if (thresholdOver != null && feeOver != null && order > thresholdOver) {
+      if (feeOver === -1) {
+        return { amount: null, needsManager: true, noRule: false, zone };
+      }
+      if (feeOver === 0) {
+        return { amount: 0, needsManager: false, noRule: false, zone };
+      }
+      return {
+        amount: roundMoney(feeOver),
+        needsManager: false,
+        noRule: false,
+        zone,
+      };
+    }
+  }
+
+  const reOt = zone === "brest" ? RE_BREST_ORDER_OT : RE_RB_ORDER_OT;
+  const reDo = zone === "brest" ? RE_BREST_ORDER_DO : RE_RB_ORDER_DO;
+
+  const otRows = [];
+  const doRows = [];
+
+  for (const row of deliveryItems) {
+    const title = String(row.title || "");
+    const threshold = toNum(row.value_number);
+    const rowFee = toNum(row.amount);
+    if (threshold == null || rowFee == null) continue;
+    const sort = Number(row.sort_order) || 0;
+    const entry = { row, threshold, fee: rowFee, sort };
+    if (reOt.test(title)) otRows.push(entry);
+    else if (reDo.test(title)) doRows.push(entry);
+  }
+
+  if (otRows.length === 0 && doRows.length === 0) {
+    return empty(true);
+  }
+
+  const chosen = pickOtThenDoRow(otRows, doRows, order);
+  if (!chosen) {
+    return empty(true);
+  }
+
+  const fee = chosen.fee;
+  if (fee === -1) {
+    return { amount: null, needsManager: true, noRule: false, zone };
+  }
+  if (fee === 0) {
+    return { amount: 0, needsManager: false, noRule: false, zone };
+  }
+
+  return {
+    amount: roundMoney(fee),
+    needsManager: false,
+    noRule: false,
+    zone,
+  };
+}
+
 /**
  * Сколько полных «тарифных» километров выставить клиенту: ceil(факт), 0 если расстояние нулевое.
  * Используется вместе с фактическим расстоянием от Яндекса или по прямой.

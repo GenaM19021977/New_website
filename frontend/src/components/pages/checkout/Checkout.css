@@ -336,6 +336,29 @@
   color: var(--color-text-muted);
 }
 
+.checkout-delivery-calc-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  border-color: rgba(159, 176, 184, 0.45) !important;
+  color: var(--color-text) !important;
+  gap: 8px;
+}
+
+.checkout-delivery-calc-btn:hover {
+  border-color: var(--color-accent) !important;
+  background-color: rgba(159, 176, 184, 0.08) !important;
+}
+
+.checkout-delivery-calc-btn .MuiButton-startIcon {
+  margin-right: 4px;
+}
+
+.checkout-delivery-calc-btn .MuiSvgIcon-root {
+  font-size: 1.35rem;
+}
+
 .checkout-continue-btn {
   background-color: var(--color-accent) !important;
   color: var(--color-bg-dark) !important;
