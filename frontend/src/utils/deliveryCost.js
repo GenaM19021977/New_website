@@ -169,6 +169,10 @@ function roundMoney(n) {
 const DELIVERY_ROW_ID_BREST_ORDER_OVER = 1;
 /** Запись Delivery: Брест и сумма заказа меньше порога → amount этой строки. */
 const DELIVERY_ROW_ID_BREST_ORDER_UNDER = 2;
+/** Запись Delivery: не Брест (город указан) и сумма больше порога → amount этой строки. */
+const DELIVERY_ROW_ID_NON_BREST_ORDER_OVER = 3;
+/** Запись Delivery: не Брест (город указан) и сумма меньше порога → amount этой строки. */
+const DELIVERY_ROW_ID_NON_BREST_ORDER_UNDER = 4;
 
 /** В поле «Город» указан г. Брест (не область). */
 export function isDeliveryCityBrest(cityRaw) {
@@ -213,7 +217,8 @@ function pickOtThenDoRow(otCandidates, doCandidates, order) {
 
 /**
  * Стоимость курьерской доставки checkout по GET /delivery/.
- * Для Бреста: сначала id=2 (сумма &lt; value_number → amount), затем id=1 (сумма &gt; value_number → amount).
+ * Брест: id=2 (сумма &lt; порог), затем id=1 (сумма &gt; порог).
+ * Не Брест (город заполнен): id=4 (сумма &lt; порог), затем id=3 (сумма &gt; порог).
  * Иначе строки «По г. Брест… / По Республике Беларусь…» (от/до).
  */
 export function computeCheckoutCourierDeliveryQuote(
@@ -272,6 +277,51 @@ export function computeCheckoutCourierDeliveryQuote(
       }
       return {
         amount: roundMoney(feeOver),
+        needsManager: false,
+        noRule: false,
+        zone,
+      };
+    }
+  }
+
+  const cityTrim = String(cityRaw ?? "").trim();
+  const rowNonBrestUnder = deliveryItems.find(
+    (r) => Number(r.id) === DELIVERY_ROW_ID_NON_BREST_ORDER_UNDER,
+  );
+  if (rowNonBrestUnder && cityTrim && !isDeliveryCityBrest(cityRaw)) {
+    const th4 = toNum(rowNonBrestUnder.value_number);
+    const fee4 = toNum(rowNonBrestUnder.amount);
+    if (th4 != null && fee4 != null && order < th4) {
+      if (fee4 === -1) {
+        return { amount: null, needsManager: true, noRule: false, zone };
+      }
+      if (fee4 === 0) {
+        return { amount: 0, needsManager: false, noRule: false, zone };
+      }
+      return {
+        amount: roundMoney(fee4),
+        needsManager: false,
+        noRule: false,
+        zone,
+      };
+    }
+  }
+
+  const rowNonBrestOver = deliveryItems.find(
+    (r) => Number(r.id) === DELIVERY_ROW_ID_NON_BREST_ORDER_OVER,
+  );
+  if (rowNonBrestOver && cityTrim && !isDeliveryCityBrest(cityRaw)) {
+    const th3 = toNum(rowNonBrestOver.value_number);
+    const fee3 = toNum(rowNonBrestOver.amount);
+    if (th3 != null && fee3 != null && order > th3) {
+      if (fee3 === -1) {
+        return { amount: null, needsManager: true, noRule: false, zone };
+      }
+      if (fee3 === 0) {
+        return { amount: 0, needsManager: false, noRule: false, zone };
+      }
+      return {
+        amount: roundMoney(fee3),
         needsManager: false,
         noRule: false,
         zone,
