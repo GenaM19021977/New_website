@@ -2,7 +2,8 @@
  * @file Страница оформления заказа (первый шаг).
  *
  * Макет:
- *   Слева — список позиций из localStorage (корзина), справа — выбор способа доставки, контакты, итоги.
+ *   Слева — позиции заказа из корзины (можно менять количество, удалить, перейти в каталог за новыми товарами).
+ *   Справа — способ доставки, контакты, итоги.
  *
  * Самовывоз: в итогах только сумма заказа (товары).
  * Курьер: сумма заказа, кнопка расчёта доставки, стоимость доставки, стоимость заказа (товары + доставка).
@@ -19,8 +20,10 @@ import { Link } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import { getCart } from "../../../utils/cart";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { getCart, removeFromCart, updateQuantity } from "../../../utils/cart";
 import { parsePrice, formatPrice } from "../../../utils/price";
 import {
   ROUTES,
@@ -133,6 +136,25 @@ const Checkout = () => {
   /** Локальное обновление одного поля объекта адреса без мутации состояния */
   const setAddressField = (field, value) => {
     setDeliveryAddress((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCheckoutQtyDelta = (productId, delta) => {
+    const item = items.find((i) => i.id === productId);
+    if (!item) return;
+    const current = Math.max(1, item.quantity ?? 1);
+    if (delta < 0) {
+      if (current <= 1) {
+        removeFromCart(productId);
+      } else {
+        updateQuantity(productId, current - 1);
+      }
+    } else {
+      updateQuantity(productId, current + 1);
+    }
+  };
+
+  const handleCheckoutRemove = (productId) => {
+    removeFromCart(productId);
   };
 
   /** Сумма товаров в корзине в BYN (цены парсятся из строк, количество не меньше 1) */
@@ -249,15 +271,61 @@ const Checkout = () => {
                       >
                         {item.name}
                       </Link>
-                      <span className="checkout-order-item__qty">× {qty}</span>
-                      <span className="checkout-order-item__sum">
-                        {formatPrice(lineSum)} BYN
-                      </span>
+                      <div className="checkout-order-item__row">
+                        <div
+                          className="checkout-order-item__qty-controls"
+                          aria-label="Количество"
+                        >
+                          <button
+                            type="button"
+                            className="checkout-order-item__qty-btn"
+                            onClick={() =>
+                              handleCheckoutQtyDelta(item.id, -1)
+                            }
+                            aria-label="Уменьшить количество"
+                          >
+                            −
+                          </button>
+                          <span className="checkout-order-item__qty-value">
+                            {qty}
+                          </span>
+                          <button
+                            type="button"
+                            className="checkout-order-item__qty-btn"
+                            onClick={() =>
+                              handleCheckoutQtyDelta(item.id, 1)
+                            }
+                            aria-label="Увеличить количество"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <span className="checkout-order-item__sum">
+                          {formatPrice(lineSum)} BYN
+                        </span>
+                        <IconButton
+                          type="button"
+                          size="small"
+                          onClick={() => handleCheckoutRemove(item.id)}
+                          aria-label="Удалить из заказа"
+                          className="checkout-order-item__remove"
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </div>
                     </div>
                   </li>
                 );
               })}
             </ul>
+            <p className="checkout-order-items__add-more">
+              <Link
+                to={ROUTES.CATALOG}
+                className="checkout-order-items__add-more-link"
+              >
+                Добавить товары из каталога
+              </Link>
+            </p>
           </div>
         </div>
         <div className="checkout-right">
