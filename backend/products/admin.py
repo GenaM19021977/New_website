@@ -5,8 +5,38 @@
 Доступен по адресу /admin/ после создания суперпользователя.
 """
 
+import re
+from decimal import Decimal, ROUND_HALF_UP
+
 from django.contrib import admin
-from .models import CustomUser, ElectricBoiler, Delivery
+
+from .models import CustomUser, ElectricBoiler, Delivery, OrderHistory, OrderHistoryItem
+from .serializers import parse_boiler_price
+
+_CATALOG_CACHE_ATTR = "_turiki_admin_catalog_unit_cache"
+_UNSET = object()
+
+
+def _catalog_unit_tuple(obj):
+    """(Decimal|None, str|None): число BYN или текст цены из каталога по product_id."""
+    if obj is None or not getattr(obj, "product_id", None):
+        return None, None
+    cached = getattr(obj, _CATALOG_CACHE_ATTR, _UNSET)
+    if cached is not _UNSET:
+        return cached
+    boiler = ElectricBoiler.objects.filter(pk=obj.product_id).only("price").first()
+    if not boiler:
+        result = (None, None)
+        setattr(obj, _CATALOG_CACHE_ATTR, result)
+        return result
+    raw = boiler.price or ""
+    value = parse_boiler_price(raw)
+    if value == 0 and raw and not re.search(r"\d", str(raw)):
+        result = (None, str(raw).strip()[:80])
+    else:
+        result = (value, None)
+    setattr(obj, _CATALOG_CACHE_ATTR, result)
+    return result
 
 
 @admin.register(CustomUser)
@@ -223,6 +253,132 @@ class DeliveryAdmin(admin.ModelAdmin):
             {
                 "fields": ("value_number", "amount"),
                 "description": "Числовое значение и сумма (BYN) — при необходимости оставьте поля пустыми.",
+            },
+        ),
+    )
+
+
+class OrderHistoryItemInline(admin.TabularInline):
+    """Позиции заказа в карточке истории."""
+
+    model = OrderHistoryItem
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        "product_id",
+        "product_name",
+        "catalog_unit_price_byn",
+        "quantity",
+        "catalog_line_total_byn",
+    )
+
+    @admin.display(description="Цена за ед., BYN")
+    def catalog_unit_price_byn(self, obj):
+        value, text = _catalog_unit_tuple(obj)
+        if text is not None:
+            return text
+        if value is None:
+            return "—"
+        return f"{value:.2f}"
+
+    @admin.display(description="Сумма по строке, BYN")
+    def catalog_line_total_byn(self, obj):
+        value, text = _catalog_unit_tuple(obj)
+        if text is not None:
+            return text
+        if value is None:
+            return "—"
+        qty = obj.quantity or 0
+        total = (value * qty).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return f"{total:.2f}"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(OrderHistory)
+class OrderHistoryAdmin(admin.ModelAdmin):
+    """
+    История заказов: пользователь, доставка, адрес, суммы, способ оплаты, состав заказа.
+    """
+
+    list_display = (
+        "order_list_id",
+        "order_list_user",
+        "order_list_created_at",
+        "order_list_status",
+    )
+    list_display_links = ("order_list_id",)
+    list_filter = ("status", "delivery_type", "payment_method", "created_at")
+
+    @admin.display(description="ID", ordering="id")
+    def order_list_id(self, obj):
+        return obj.pk
+
+    @admin.display(description="ПОЛЬЗОВАТЕЛЬ", ordering="user__email")
+    def order_list_user(self, obj):
+        if obj.user_id:
+            return obj.user
+        return "—"
+
+    @admin.display(description="ДАТА ОФОРМЛЕНИЯ", ordering="created_at")
+    def order_list_created_at(self, obj):
+        return obj.created_at
+
+    @admin.display(description="СТАТУС ЗАКАЗА", ordering="status")
+    def order_list_status(self, obj):
+        return obj.get_status_display()
+
+    search_fields = (
+        "phone",
+        "city",
+        "street",
+        "comment",
+        "user__email",
+        "items__product_name",
+    )
+    readonly_fields = ("created_at",)
+    ordering = ("-created_at", "-id")
+    inlines = (OrderHistoryItemInline,)
+    date_hierarchy = "created_at"
+
+    fieldsets = (
+        (
+            "Заказ",
+            {
+                "fields": (
+                    "user",
+                    "created_at",
+                    "status",
+                    "payment_method",
+                    "delivery_type",
+                ),
+            },
+        ),
+        (
+            "Суммы, BYN",
+            {
+                "fields": ("products_subtotal", "delivery_cost", "total"),
+            },
+        ),
+        (
+            "Контакты",
+            {"fields": ("phone", "comment")},
+        ),
+        (
+            "Адрес доставки",
+            {
+                "fields": (
+                    "country",
+                    "region",
+                    "district",
+                    "city",
+                    "street",
+                    "house_number",
+                    "building_number",
+                    "apartment_number",
+                ),
+                "description": "При самовывозе поля адреса могут быть пустыми.",
             },
         ),
     )

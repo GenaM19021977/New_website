@@ -34,5 +34,7 @@ router.register("boilers", BoilersView, basename="boilers")
 # GET /delivery/ - условия доставки для модального окна «Информация о доставке»
 router.register("delivery", DeliveryView, basename="delivery")
 
+router.register("orders", OrderHistoryCreateView, basename="orders")
+
 # URL patterns, сгенерированные роутером
 urlpatterns = router.urls

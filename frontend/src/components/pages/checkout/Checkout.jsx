@@ -3,27 +3,30 @@
  *
  * Макет:
  *   Слева — позиции заказа из корзины (можно менять количество, удалить, перейти в каталог за новыми товарами).
- *   Справа — способ доставки, контакты, итоги.
+ *   Справа — доставка курьером (адрес), контакты, способ оплаты, итоги.
  *
- * Самовывоз: в итогах только сумма заказа (товары).
- * Курьер: сумма заказа, кнопка расчёта доставки, стоимость доставки, стоимость заказа (товары + доставка).
+ * Стоимость заказа (товары), расчёт доставки, стоимость доставки, итого к оплате. При оформлении сумма товаров сохраняется в БД как «Стоимость заказа, BYN».
+ * Поля адреса при JWT подтягиваются из GET me/.
+ * «Рассчитать доставку»: GET delivery/; см. computeCheckoutCourierDeliveryQuote (Брест id=2, id=1; не Брест id=4, id=3).
  *
- * Курьер:
- *   - Поля адреса совпадают с личным кабинетом; при наличии JWT подтягиваются из GET me/, но правки в форме
- *     не сохраняются в профиль — только для текущего оформления.
- *   - «Рассчитать доставку»: GET delivery/; см. computeCheckoutCourierDeliveryQuote (Брест id=2, id=1; не Брест id=4, id=3).
- *
- * Дальнейшие шаги оформления (оплата и т.д.) пока не реализованы — см. TODO в handleSubmit.
+ * POST /orders/ при «Оформить заказ» — order_history.products_subtotal = стоимость заказа по каталогу.
  */
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getCart, removeFromCart, updateQuantity } from "../../../utils/cart";
+import {
+  getCart,
+  removeFromCart,
+  updateQuantity,
+  clearCart,
+} from "../../../utils/cart";
 import { parsePrice, formatPrice } from "../../../utils/price";
 import {
   ROUTES,
@@ -36,6 +39,41 @@ import { API_BASE_URL } from "../../../config/api";
 import api from "../../../services/api";
 import { computeCheckoutCourierDeliveryQuote } from "../../../utils/deliveryCost";
 import "./Checkout.css";
+
+function formatOrderApiErrors(data) {
+  if (data == null || typeof data !== "object") {
+    return "Не удалось оформить заказ. Попробуйте позже.";
+  }
+  if (typeof data.detail === "string") return data.detail;
+  const parts = [];
+  const walk = (obj, prefix) => {
+    if (obj == null) return;
+    if (typeof obj === "string") {
+      parts.push(prefix ? `${prefix}: ${obj}` : obj);
+      return;
+    }
+    if (Array.isArray(obj)) {
+      obj.forEach((x) => walk(x, prefix));
+      return;
+    }
+    if (typeof obj !== "object") {
+      parts.push(String(obj));
+      return;
+    }
+    for (const [k, v] of Object.entries(obj)) {
+      const p = prefix ? `${prefix}.${k}` : k;
+      if (Array.isArray(v)) {
+        v.forEach((item) => walk(item, p));
+      } else if (typeof v === "object" && v !== null) {
+        walk(v, p);
+      } else {
+        parts.push(`${p}: ${v}`);
+      }
+    }
+  };
+  walk(data, "");
+  return parts.length ? parts.join("\n") : "Проверьте данные формы.";
+}
 
 /**
  * Нормализует URL картинки товара: абсолютные URL оставляем, относительные дополняем API_BASE_URL бэкенда.
@@ -52,10 +90,10 @@ function getImageUrl(raw) {
     : t;
 }
 
-/** Внутреннее значение переключателя «Самовывоз» */
-const DELIVERY_PICKUP = "pickup";
-/** Внутреннее значение переключателя «Курьером» */
-const DELIVERY_COURIER = "courier";
+/** Способ оплаты (один активен) */
+const PAYMENT_CASH_ON_RECEIPT = "cash_on_receipt";
+const PAYMENT_CARD_ONLINE = "card_online";
+const PAYMENT_CARD_ON_RECEIPT = "card_on_receipt";
 
 /**
  * Начальное состояние адреса доставки; имена полей совпадают с ответом GET me/ и телом PATCH me/update_profile/.
@@ -73,10 +111,9 @@ const initialDeliveryAddress = {
 
 const Checkout = () => {
   const [items, setItems] = useState([]);
-  const [delivery, setDelivery] = useState(DELIVERY_PICKUP);
   const [phone, setPhone] = useState("");
   const [comment, setComment] = useState("");
-  /** Адрес доставки для курьера: подставляется из профиля, можно править только в форме заказа */
+  /** Адрес доставки: подставляется из профиля, можно править только в форме заказа */
   const [deliveryAddress, setDeliveryAddress] = useState(
     initialDeliveryAddress,
   );
@@ -84,6 +121,8 @@ const Checkout = () => {
   /** BYN; по умолчанию 0,00 до пересчёта кнопкой «Рассчитать доставку». */
   const [courierDeliveryCostByn, setCourierDeliveryCostByn] = useState(0);
   const [deliveryCalcLoading, setDeliveryCalcLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_CASH_ON_RECEIPT);
+  const [orderSubmitLoading, setOrderSubmitLoading] = useState(false);
 
   /** Подписка на событие обновления корзины из других частей приложения */
   useEffect(() => {
@@ -92,10 +131,6 @@ const Checkout = () => {
     window.addEventListener("cart-updated", refresh);
     return () => window.removeEventListener("cart-updated", refresh);
   }, []);
-
-  useEffect(() => {
-    if (delivery !== DELIVERY_COURIER) setCourierDeliveryCostByn(0);
-  }, [delivery]);
 
   /**
    * Загрузка профиля для автозаполнения телефона и адреса (только при наличии access-токена).
@@ -164,8 +199,8 @@ const Checkout = () => {
   );
 
   useEffect(() => {
-    if (delivery === DELIVERY_COURIER) setCourierDeliveryCostByn(0);
-  }, [delivery, totalByn, deliveryAddress.city]);
+    setCourierDeliveryCostByn(0);
+  }, [totalByn, deliveryAddress.city]);
 
   const handleCourierDeliveryCalc = async () => {
     const city = (deliveryAddress.city || "").trim();
@@ -206,27 +241,52 @@ const Checkout = () => {
   );
 
   /**
-   * Отправка формы первого шага: валидация телефона (если заполнен) и обязательных полей адреса для курьера.
-   * Переход на оплату / создание заказа на бэкенде — в следующих задачах.
+   * Оформление: POST /orders/ — запись в order_history, стоимость заказа в products_subtotal.
    */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const phoneTrim = (phone || "").trim();
     if (phoneTrim && !PHONE_REGEX.test(phoneTrim)) {
       alert(PHONE_ERROR);
       return;
     }
-    if (delivery === DELIVERY_COURIER) {
-      const city = (deliveryAddress.city || "").trim();
-      const street = (deliveryAddress.street || "").trim();
-      const house = (deliveryAddress.house_number || "").trim();
-      if (!city || !street || !house) {
-        alert("Для доставки курьером укажите город, улицу и номер дома.");
-        return;
-      }
+    const city = (deliveryAddress.city || "").trim();
+    const street = (deliveryAddress.street || "").trim();
+    const house = (deliveryAddress.house_number || "").trim();
+    if (!city || !street || !house) {
+      alert("Укажите город, улицу и номер дома для доставки.");
+      return;
     }
-    // TODO: переход на следующий шаг (delivery, deliveryAddress, phone, comment)
-    alert("Следующий шаг оформления — в разработке.");
+    if (!items.length) {
+      alert("Корзина пуста.");
+      return;
+    }
+
+    const payload = {
+      payment_method: paymentMethod,
+      delivery_type: "courier",
+      phone: phoneTrim,
+      comment: (comment || "").trim(),
+      items: items.map((i) => ({
+        id: i.id,
+        quantity: Math.max(1, i.quantity || 1),
+      })),
+      delivery_address: { ...deliveryAddress },
+      courier_delivery_cost_byn:
+        Math.round(courierDeliveryCostByn * 100) / 100,
+      products_subtotal_byn: Math.round(totalByn * 100) / 100,
+    };
+
+    setOrderSubmitLoading(true);
+    try {
+      await api.post("orders/", payload);
+      clearCart();
+      alert("Ваш заказ успешно оформлен!");
+    } catch (err) {
+      alert(formatOrderApiErrors(err.response?.data));
+    } finally {
+      setOrderSubmitLoading(false);
+    }
   };
 
   if (items.length === 0) {
@@ -329,141 +389,123 @@ const Checkout = () => {
           </div>
         </div>
         <div className="checkout-right">
-          <h2 className="checkout-section-title">Способ доставки</h2>
-          <div className="checkout-delivery-options">
-            <button
-              type="button"
-              className={`checkout-delivery-option ${delivery === DELIVERY_PICKUP ? "checkout-delivery-option--active" : ""}`}
-              onClick={() => setDelivery(DELIVERY_PICKUP)}
-            >
-              Самовывоз
-            </button>
-            <button
-              type="button"
-              className={`checkout-delivery-option ${delivery === DELIVERY_COURIER ? "checkout-delivery-option--active" : ""}`}
-              onClick={() => setDelivery(DELIVERY_COURIER)}
-            >
-              Курьером
-            </button>
-          </div>
+          <h2 className="checkout-section-title">Оформление заказа</h2>
           <form onSubmit={handleSubmit} className="checkout-form">
-            {delivery === DELIVERY_COURIER && (
-              <div className="checkout-address-block">
-                <h3 className="checkout-address-title">Адрес доставки</h3>
-                <p className="checkout-address-hint">
-                  {profileLoaded ? (
-                    "Адрес из личного кабинета. При необходимости измените его только для этого заказа."
-                  ) : (
-                    <>
-                      Укажите адрес доставки. Чтобы подставить сохранённый
-                      адрес, войдите в аккаунт или заполните профиль в{" "}
-                      <Link
-                        to={ROUTES.CABINET}
-                        className="checkout-address-hint-link"
-                      >
-                        личном кабинете
-                      </Link>
-                      .
-                    </>
-                  )}
-                </p>
-                <div className="checkout-address-grid">
-                  <TextField
-                    select
-                    label="Страна"
-                    value={deliveryAddress.country}
-                    onChange={(e) => setAddressField("country", e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    className="checkout-field"
-                  >
-                    <MenuItem value="">
-                      <em>Не выбрано</em>
+            <div className="checkout-address-block">
+              <h3 className="checkout-address-title">Адрес доставки</h3>
+              <p className="checkout-address-hint">
+                {profileLoaded ? (
+                  "Адрес из личного кабинета. При необходимости измените его только для этого заказа."
+                ) : (
+                  <>
+                    Укажите адрес доставки. Чтобы подставить сохранённый адрес,
+                    войдите в аккаунт или заполните профиль в{" "}
+                    <Link
+                      to={ROUTES.CABINET}
+                      className="checkout-address-hint-link"
+                    >
+                      личном кабинете
+                    </Link>
+                    .
+                  </>
+                )}
+              </p>
+              <div className="checkout-address-grid">
+                <TextField
+                  select
+                  label="Страна"
+                  value={deliveryAddress.country}
+                  onChange={(e) => setAddressField("country", e.target.value)}
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  className="checkout-field"
+                >
+                  <MenuItem value="">
+                    <em>Не выбрано</em>
+                  </MenuItem>
+                  {COUNTRIES.map((c) => (
+                    <MenuItem key={c} value={c}>
+                      {c}
                     </MenuItem>
-                    {COUNTRIES.map((c) => (
-                      <MenuItem key={c} value={c}>
-                        {c}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    label="Область"
-                    value={deliveryAddress.region}
-                    onChange={(e) => setAddressField("region", e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    className="checkout-field"
-                  />
-                  <TextField
-                    label="Район"
-                    value={deliveryAddress.district}
-                    onChange={(e) =>
-                      setAddressField("district", e.target.value)
-                    }
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    className="checkout-field"
-                  />
-                  <TextField
-                    label="Город"
-                    value={deliveryAddress.city}
-                    onChange={(e) => setAddressField("city", e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    required
-                    className="checkout-field"
-                  />
-                  <TextField
-                    label="Улица"
-                    value={deliveryAddress.street}
-                    onChange={(e) => setAddressField("street", e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    required
-                    className="checkout-field"
-                  />
-                  <TextField
-                    label="Номер дома"
-                    value={deliveryAddress.house_number}
-                    onChange={(e) =>
-                      setAddressField("house_number", e.target.value)
-                    }
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    required
-                    className="checkout-field"
-                  />
-                  <TextField
-                    label="Корпус"
-                    value={deliveryAddress.building_number}
-                    onChange={(e) =>
-                      setAddressField("building_number", e.target.value)
-                    }
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    className="checkout-field"
-                  />
-                  <TextField
-                    label="Квартира"
-                    value={deliveryAddress.apartment_number}
-                    onChange={(e) =>
-                      setAddressField("apartment_number", e.target.value)
-                    }
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    className="checkout-field"
-                  />
-                </div>
+                  ))}
+                </TextField>
+                <TextField
+                  label="Область"
+                  value={deliveryAddress.region}
+                  onChange={(e) => setAddressField("region", e.target.value)}
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  className="checkout-field"
+                />
+                <TextField
+                  label="Район"
+                  value={deliveryAddress.district}
+                  onChange={(e) =>
+                    setAddressField("district", e.target.value)
+                  }
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  className="checkout-field"
+                />
+                <TextField
+                  label="Город"
+                  value={deliveryAddress.city}
+                  onChange={(e) => setAddressField("city", e.target.value)}
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  required
+                  className="checkout-field"
+                />
+                <TextField
+                  label="Улица"
+                  value={deliveryAddress.street}
+                  onChange={(e) => setAddressField("street", e.target.value)}
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  required
+                  className="checkout-field"
+                />
+                <TextField
+                  label="Номер дома"
+                  value={deliveryAddress.house_number}
+                  onChange={(e) =>
+                    setAddressField("house_number", e.target.value)
+                  }
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  required
+                  className="checkout-field"
+                />
+                <TextField
+                  label="Корпус"
+                  value={deliveryAddress.building_number}
+                  onChange={(e) =>
+                    setAddressField("building_number", e.target.value)
+                  }
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  className="checkout-field"
+                />
+                <TextField
+                  label="Квартира"
+                  value={deliveryAddress.apartment_number}
+                  onChange={(e) =>
+                    setAddressField("apartment_number", e.target.value)
+                  }
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  className="checkout-field"
+                />
               </div>
-            )}
+            </div>
             <TextField
               label="Номер телефона для связи"
               value={phone}
@@ -491,47 +533,89 @@ const Checkout = () => {
                   <span className="checkout-total-value">
                     {formatPrice(totalByn)} BYN
                   </span>
-                  <span className="checkout-total-label">Сумма заказа</span>
+                  <span className="checkout-total-label">Стоимость заказа</span>
                 </div>
-                {delivery === DELIVERY_COURIER && (
-                  <>
-                    <Button
-                      type="button"
-                      variant="outlined"
-                      className="checkout-delivery-calc-btn"
-                      startIcon={<LocalShippingIcon />}
-                      disabled={deliveryCalcLoading}
-                      onClick={handleCourierDeliveryCalc}
-                    >
-                      {deliveryCalcLoading
-                        ? "Расчёт…"
-                        : "Рассчитать доставку"}
-                    </Button>
-                    <div className="checkout-total-line">
-                      <span className="checkout-total-value checkout-total-value--delivery">
-                        {`${formatPrice(courierDeliveryCostByn)} BYN`}
-                      </span>
-                      <span className="checkout-total-label">
-                        Стоимость доставки
-                      </span>
-                    </div>
-                    <div className="checkout-total-line">
-                      <span className="checkout-total-value">
-                        {`${formatPrice(courierOrderGrandByn)} BYN`}
-                      </span>
-                      <span className="checkout-total-label">
-                        Стоимость заказа
-                      </span>
-                    </div>
-                  </>
-                )}
+                <Button
+                  type="button"
+                  variant="outlined"
+                  className="checkout-delivery-calc-btn"
+                  startIcon={<LocalShippingIcon />}
+                  disabled={deliveryCalcLoading}
+                  onClick={handleCourierDeliveryCalc}
+                >
+                  {deliveryCalcLoading
+                    ? "Расчёт…"
+                    : "Рассчитать доставку"}
+                </Button>
+                <div className="checkout-total-line">
+                  <span className="checkout-total-value checkout-total-value--delivery">
+                    {`${formatPrice(courierDeliveryCostByn)} BYN`}
+                  </span>
+                  <span className="checkout-total-label">
+                    Стоимость доставки
+                  </span>
+                </div>
+                <div className="checkout-total-line">
+                  <span className="checkout-total-value">
+                    {`${formatPrice(courierOrderGrandByn)} BYN`}
+                  </span>
+                  <span className="checkout-total-label">
+                    Итого к оплате
+                  </span>
+                </div>
+              </div>
+              <div className="checkout-payment-block">
+                <h3 className="checkout-payment-title">Способ оплаты</h3>
+                <div className="checkout-payment-options">
+                  <FormControlLabel
+                    className="checkout-payment-option"
+                    control={
+                      <Checkbox
+                        checked={paymentMethod === PAYMENT_CASH_ON_RECEIPT}
+                        onChange={() =>
+                          setPaymentMethod(PAYMENT_CASH_ON_RECEIPT)
+                        }
+                        disableRipple
+                      />
+                    }
+                    label="Наличными при получении"
+                  />
+                  <FormControlLabel
+                    className="checkout-payment-option"
+                    control={
+                      <Checkbox
+                        checked={paymentMethod === PAYMENT_CARD_ONLINE}
+                        onChange={() =>
+                          setPaymentMethod(PAYMENT_CARD_ONLINE)
+                        }
+                        disableRipple
+                      />
+                    }
+                    label="Банковской картой онлайн"
+                  />
+                  <FormControlLabel
+                    className="checkout-payment-option"
+                    control={
+                      <Checkbox
+                        checked={paymentMethod === PAYMENT_CARD_ON_RECEIPT}
+                        onChange={() =>
+                          setPaymentMethod(PAYMENT_CARD_ON_RECEIPT)
+                        }
+                        disableRipple
+                      />
+                    }
+                    label="Банковской картой при получении"
+                  />
+                </div>
               </div>
               <Button
                 type="submit"
                 variant="contained"
+                fullWidth
                 className="checkout-continue-btn"
+                disabled={orderSubmitLoading}
               >
-                Продолжить
+                {orderSubmitLoading ? "Отправка…" : "Оформить заказ"}
               </Button>
             </div>
           </form>
