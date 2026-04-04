@@ -4,6 +4,8 @@ API Views для аутентификации и управления польз
 """
 
 from rest_framework import viewsets, permissions, status
+
+from .authentication import OptionalJWTAuthentication
 from .serializers import (
     LoginSerializer,
     RegisterSerializer,
@@ -12,8 +14,11 @@ from .serializers import (
     PasswordChangeSerializer,
     ElectricBoilerSerializer,
     ElectricBoilerDetailSerializer,
+    DeliverySerializer,
+    OrderHistoryCreateSerializer,
+    OrderHistoryReadSerializer,
 )
-from .models import ElectricBoiler
+from .models import ElectricBoiler, Delivery
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -85,6 +90,51 @@ class BoilersView(viewsets.ViewSet):
             )
         serializer = ElectricBoilerDetailSerializer(boiler)
         return Response(serializer.data)
+
+
+class DeliveryView(viewsets.ViewSet):
+    """
+    Список условий доставки из таблицы Доставка.
+
+    Endpoint: GET /delivery/
+    Возвращает все записи (title, value_number, amount, sort_order) для модального окна.
+    """
+
+    permission_classes = [permissions.AllowAny]
+
+    def list(self, request):
+        qs = Delivery.objects.all().order_by("sort_order", "id")
+        serializer = DeliverySerializer(qs, many=True)
+        return Response(serializer.data)
+
+
+class OrderHistoryCreateView(viewsets.ViewSet):
+    """
+    POST /orders/ — сохранение заказа в историю.
+    products_subtotal в БД = «Стоимость заказа, BYN» (каталог ± products_subtotal_byn с checkout).
+    """
+
+    authentication_classes = [OptionalJWTAuthentication]
+    permission_classes = [permissions.AllowAny]
+
+    def list(self, request):
+        return Response(
+            {"detail": 'Метод "GET" не разрешён.'},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def create(self, request):
+        serializer = OrderHistoryCreateSerializer(
+            data=request.data,
+            context={"request": request},
+        )
+        if serializer.is_valid():
+            order = serializer.save()
+            return Response(
+                OrderHistoryReadSerializer(order).data,
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(viewsets.ViewSet):

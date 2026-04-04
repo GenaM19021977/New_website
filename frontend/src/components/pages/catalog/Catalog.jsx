@@ -7,9 +7,9 @@ import "./Catalog.css";
 /** Интервал опроса API для обновления списка при изменении данных в БД (мс) */
 const REFRESH_INTERVAL_MS = 45000;
 
-/** 5 рядов × 4 карточки в ряд = 20 карточек на странице */
+/** 5 рядов × 3 карточки в ряд = 15 карточек на странице */
 const ROWS_PER_PAGE = 5;
-const COLS_PER_ROW = 4;
+const COLS_PER_ROW = 3;
 const CARDS_PER_PAGE = ROWS_PER_PAGE * COLS_PER_ROW;
 
 /** Производитель в БД — третье слово в названии (как в API /manufacturers/) */
@@ -19,15 +19,77 @@ function getManufacturerSlug(name) {
 }
 
 const Catalog = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const manufacturerSlug = (searchParams.get("manufacturer") || "")
     .trim()
     .toLowerCase();
   const searchQuery = (searchParams.get("search") || "").trim().toLowerCase();
 
   const [products, setProducts] = useState([]);
+  const [manufacturers, setManufacturers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPowers, setSelectedPowers] = useState(() => new Set());
+
+  const [loadingManufacturers, setLoadingManufacturers] = useState(true);
+
+  const fetchManufacturers = useCallback(() => {
+    setLoadingManufacturers(true);
+    api
+      .get("manufacturers/")
+      .then((res) => {
+        setManufacturers(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => setManufacturers([]))
+      .finally(() => setLoadingManufacturers(false));
+  }, []);
+
+  useEffect(() => {
+    fetchManufacturers();
+  }, [fetchManufacturers]);
+
+  const powerOptions = useMemo(() => {
+    const s = new Set();
+    products.forEach((p) => {
+      const v = (p.power || "").trim();
+      if (v) s.add(v);
+    });
+    return Array.from(s).sort((a, b) =>
+      a.localeCompare(b, "ru", { sensitivity: "base" }),
+    );
+  }, [products]);
+
+  const manufacturerLabel = useMemo(() => {
+    const m = manufacturers.find((x) => x.slug === manufacturerSlug);
+    return m?.name || manufacturerSlug || "";
+  }, [manufacturers, manufacturerSlug]);
+
+  const togglePower = useCallback((value) => {
+    setSelectedPowers((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return next;
+    });
+  }, []);
+
+  const setManufacturerFilter = useCallback(
+    (slug) => {
+      setSearchParams((prev) => {
+        const n = new URLSearchParams(prev);
+        const s = (slug || "").trim().toLowerCase();
+        if (s) n.set("manufacturer", s);
+        else n.delete("manufacturer");
+        return n;
+      });
+    },
+    [setSearchParams],
+  );
+
+  const resetFilters = useCallback(() => {
+    setSelectedPowers(new Set());
+    setSearchParams(new URLSearchParams());
+  }, [setSearchParams]);
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -46,8 +108,11 @@ const Catalog = () => {
         );
       });
     }
+    if (selectedPowers.size > 0) {
+      result = result.filter((p) => selectedPowers.has((p.power || "").trim()));
+    }
     return result;
-  }, [products, manufacturerSlug, searchQuery]);
+  }, [products, manufacturerSlug, searchQuery, selectedPowers]);
 
   const fetchProducts = useCallback(() => {
     api
@@ -65,7 +130,7 @@ const Catalog = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [manufacturerSlug, searchQuery]);
+  }, [manufacturerSlug, searchQuery, selectedPowers]);
 
   useEffect(() => {
     setCurrentPage((p) => {
@@ -138,62 +203,191 @@ const Catalog = () => {
             {loading ? (
               <p className="catalog-loading">Загрузка…</p>
             ) : (
-              <>
-                {(manufacturerSlug || searchQuery) && (
-                  <p className="catalog-filter-hint">
-                    {manufacturerSlug && (
-                      <>
-                        Котлы производителя:{" "}
-                        <span className="catalog-filter-hint__slug">
-                          {manufacturerSlug}
-                        </span>
-                      </>
+              <div className="catalog-layout">
+                <aside
+                  className="catalog-filters"
+                  aria-label="Фильтры каталога"
+                >
+                  <h2 className="catalog-filters__title">Фильтры</h2>
+
+                  <fieldset className="catalog-filters__fieldset">
+                    <legend className="catalog-filters__legend">
+                      Производитель
+                    </legend>
+                    {loadingManufacturers ? (
+                      <p className="catalog-filters__muted">Загрузка…</p>
+                    ) : (
+                      <ul className="catalog-filters__list" role="list">
+                        <li>
+                          <button
+                            type="button"
+                            className={
+                              manufacturerSlug
+                                ? "catalog-filters__chip"
+                                : "catalog-filters__chip catalog-filters__chip--active"
+                            }
+                            onClick={() => setManufacturerFilter("")}
+                          >
+                            Все
+                          </button>
+                        </li>
+                        {manufacturers.map((m) => (
+                          <li key={m.slug}>
+                            <button
+                              type="button"
+                              className={
+                                manufacturerSlug === m.slug
+                                  ? "catalog-filters__chip catalog-filters__chip--active"
+                                  : "catalog-filters__chip"
+                              }
+                              onClick={() => setManufacturerFilter(m.slug)}
+                            >
+                              {m.name}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                    {manufacturerSlug && searchQuery && " · "}
-                    {searchQuery && (
-                      <>
-                        Поиск:{" "}
-                        <span className="catalog-filter-hint__slug">
-                          {searchQuery}
-                        </span>
-                      </>
-                    )}
+                  </fieldset>
+
+                  {powerOptions.length > 0 && (
+                    <fieldset className="catalog-filters__fieldset">
+                      <legend className="catalog-filters__legend">
+                        Мощность
+                      </legend>
+                      <ul
+                        className="catalog-filters__power-list"
+                        role="list"
+                      >
+                        {powerOptions.map((pw, idx) => {
+                          const id = `catalog-power-${idx}`;
+                          return (
+                            <li key={pw}>
+                              <label
+                                className="catalog-filters__check"
+                                htmlFor={id}
+                              >
+                                <input
+                                  id={id}
+                                  type="checkbox"
+                                  checked={selectedPowers.has(pw)}
+                                  onChange={() => togglePower(pw)}
+                                />
+                                <span>{pw}</span>
+                              </label>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </fieldset>
+                  )}
+
+                  <p className="catalog-filters__count" aria-live="polite">
+                    Найдено: {filteredProducts.length}
+                    {filteredProducts.length !== products.length
+                      ? ` из ${products.length}`
+                      : ""}
                   </p>
-                )}
-                <div className="catalog-cards catalog-cards-4">
-                  {paginatedProducts.map((product) => (
-                    <Card key={product.id} product={product} />
-                  ))}
-                </div>
-                {totalPages > 1 && (
-                  <nav
-                    className="catalog-pagination"
-                    aria-label="Пагинация каталога"
+
+                  <button
+                    type="button"
+                    className="catalog-filters__btn catalog-filters__btn--ghost"
+                    onClick={resetFilters}
+                    disabled={
+                      !manufacturerSlug &&
+                      !searchQuery &&
+                      selectedPowers.size === 0
+                    }
                   >
-                    <button
-                      type="button"
-                      className="catalog-pagination__btn"
-                      disabled={currentPage <= 1}
-                      onClick={() => setCurrentPage((p) => p - 1)}
-                      aria-label="Предыдущая страница"
-                    >
-                      Назад
-                    </button>
-                    <span className="catalog-pagination__info">
-                      Страница {currentPage} из {totalPages}
-                    </span>
-                    <button
-                      type="button"
-                      className="catalog-pagination__btn"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => p + 1)}
-                      aria-label="Следующая страница"
-                    >
-                      Вперёд
-                    </button>
-                  </nav>
-                )}
-              </>
+                    Сбросить фильтры
+                  </button>
+                </aside>
+
+                <div className="catalog-main">
+                  {(manufacturerSlug || searchQuery || selectedPowers.size > 0) && (
+                    <p className="catalog-filter-hint">
+                      {manufacturerSlug && (
+                        <>
+                          Производитель:{" "}
+                          <span className="catalog-filter-hint__slug">
+                            {manufacturerLabel || manufacturerSlug}
+                          </span>
+                        </>
+                      )}
+                      {manufacturerSlug &&
+                        (searchQuery || selectedPowers.size > 0) &&
+                        " · "}
+                      {searchQuery && (
+                        <>
+                          Поиск:{" "}
+                          <span className="catalog-filter-hint__slug">
+                            {searchQuery}
+                          </span>
+                        </>
+                      )}
+                      {searchQuery && selectedPowers.size > 0 && " · "}
+                      {selectedPowers.size > 0 && (
+                        <>
+                          Мощность:{" "}
+                          <span className="catalog-filter-hint__slug">
+                            {Array.from(selectedPowers).join(", ")}
+                          </span>
+                        </>
+                      )}
+                    </p>
+                  )}
+                  {filteredProducts.length === 0 ? (
+                    <p className="catalog-empty">
+                      По выбранным фильтрам ничего не найдено. Попробуйте изменить
+                      условия или{" "}
+                      <button
+                        type="button"
+                        className="catalog-empty__link"
+                        onClick={resetFilters}
+                      >
+                        сбросить фильтры
+                      </button>
+                      .
+                    </p>
+                  ) : (
+                    <>
+                      <div className="catalog-cards catalog-cards-3">
+                        {paginatedProducts.map((product) => (
+                          <Card key={product.id} product={product} />
+                        ))}
+                      </div>
+                      {totalPages > 1 && (
+                        <nav
+                          className="catalog-pagination"
+                          aria-label="Пагинация каталога"
+                        >
+                          <button
+                            type="button"
+                            className="catalog-pagination__btn"
+                            disabled={currentPage <= 1}
+                            onClick={() => setCurrentPage((p) => p - 1)}
+                            aria-label="Предыдущая страница"
+                          >
+                            Назад
+                          </button>
+                          <span className="catalog-pagination__info">
+                            Страница {currentPage} из {totalPages}
+                          </span>
+                          <button
+                            type="button"
+                            className="catalog-pagination__btn"
+                            disabled={currentPage >= totalPages}
+                            onClick={() => setCurrentPage((p) => p + 1)}
+                            aria-label="Следующая страница"
+                          >
+                            Вперёд
+                          </button>
+                        </nav>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </section>

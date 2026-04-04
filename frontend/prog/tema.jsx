@@ -12,7 +12,7 @@ export default function BoilerShopTemplate() {
           <div className="text-xl font-semibold tracking-wide">KATELKOF</div>
           <nav className="flex items-center gap-8 text-sm text-[#9FB0B8]">
             <a href="#catalog" className="hover:text-white">Каталог</a>
-            <a href="#selection" className="hover:text-white">Подбор</a>
+            <a href="#partners" className="hover:text-white">Наши партнеры</a>
             <a href="#brands" className="hover:text-white">Бренды</a>
             <a href="#contact" className="hover:text-white">Контакты</a>
           </nav>
@@ -63,16 +63,16 @@ export default function BoilerShopTemplate() {
         </div>
       </section>
 
-      {/* SELECTION */}
-      <section id="selection" className="py-32 max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-20">
+      {/* PARTNERS */}
+      <section id="partners" className="py-32 max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-20">
         <div>
           <div className="text-8xl font-bold text-white/5">01</div>
-          <h2 className="text-4xl font-serif mt-6">Какой котёл подойдёт вашему дому?</h2>
+          <h2 className="text-4xl font-serif mt-6">Наши партнеры</h2>
           <p className="mt-6 text-[#9FB0B8] max-w-md">
-            Подбор по площади дома, мощности, типу подключения и бюджету.
+            Компании и организации, с которыми мы сотрудничаем.
           </p>
           <button className="mt-8 flex items-center gap-2 text-[#C7A75A]">
-            Пройти подбор <ArrowRight size={16} />
+            Подробнее <ArrowRight size={16} />
           </button>
         </div>
         <img
@@ -142,7 +142,7 @@ export default function BoilerShopTemplate() {
           </div>
           <div>
             <p className="mb-2">Каталог</p>
-            <p className="mb-2">Подбор котла</p>
+            <p className="mb-2">Наши партнеры</p>
             <p>Контакты</p>
           </div>
           <div>

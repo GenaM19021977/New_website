@@ -382,3 +382,229 @@ class ElectricBoiler(models.Model):
 
         self.save()
         return self
+
+
+class Delivery(models.Model):
+    """
+    Модель для хранения сведений по доставке.
+
+    Структура: условия доставки. К каждому можно вручную внести числовое значение
+    (тариф, кг и т.п.) и сумму (BYN).
+    """
+
+    title = models.CharField(
+        max_length=300,
+        verbose_name="Название условия доставки",
+        help_text=(
+            "Checkout (курьер): id=2 — Брест, сумма меньше числового значения → стоимость из суммы строки; "
+            "id=1 — Брест, сумма больше числового значения → стоимость из суммы (после id=2); "
+            "id=4 — не Брест, сумма меньше числового значения → стоимость из суммы; "
+            "id=3 — не Брест, сумма больше числового значения → стоимость из суммы (после id=4). "
+            "Далее строки «По г. Брест…» / «По Республике Беларусь…» от/до. Прочее — для справки."
+        ),
+    )
+    value_number = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Числовое значение (BYN, кг и т.д.)",
+        help_text=(
+            "Для id=1 (Брест, больше), id=2 (Брест, меньше), id=3 (не Брест, больше), id=4 (не Брест, меньше): порог. "
+            "Для строк «…при сумме заказа от/до»: порог. Иначе — по смыслу названия."
+        ),
+    )
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Сумма",
+        help_text=(
+            "Для id=1…id=4 (правила checkout по Бресту / не Бресту): стоимость доставки BYN. "
+            "Для от/до — цена доставки (−1 менеджер, 0 бесплатно)."
+        ),
+    )
+    sort_order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name="Порядок отображения",
+        help_text="Меньшее значение — выше в списке",
+    )
+
+    class Meta:
+        db_table = "delivery"
+        verbose_name = "Доставка"
+        verbose_name_plural = "Доставка"
+        ordering = ["sort_order", "id"]
+
+    def __str__(self):
+        return self.title
+
+
+class OrderHistory(models.Model):
+    """
+    Запись истории оформленного заказа: пользователь, доставка, адрес, суммы, оплата.
+    Позиции корзины хранятся в связанной модели OrderHistoryItem.
+    """
+
+    class DeliveryType(models.TextChoices):
+        PICKUP = "pickup", "Самовывоз"
+        COURIER = "courier", "Курьером"
+
+    class PaymentMethod(models.TextChoices):
+        CASH_ON_RECEIPT = "cash_on_receipt", "Наличными при получении"
+        CARD_ONLINE = "card_online", "Банковской картой онлайн"
+        CARD_ON_RECEIPT = "card_on_receipt", "Банковской картой при получении"
+
+    class OrderStatus(models.TextChoices):
+        NEW = "new", "Новый"
+        PROCESSING = "processing", "В обработке"
+        SHIPPED = "shipped", "Отправлен"
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="order_history",
+        verbose_name="Пользователь",
+    )
+    delivery_type = models.CharField(
+        max_length=20,
+        choices=DeliveryType.choices,
+        verbose_name="Способ доставки",
+    )
+    country = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="Страна",
+    )
+    region = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="Область",
+    )
+    district = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="Район",
+    )
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="Город",
+    )
+    street = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="Улица",
+    )
+    house_number = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        verbose_name="Номер дома",
+    )
+    building_number = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        verbose_name="Корпус",
+    )
+    apartment_number = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        verbose_name="Квартира",
+    )
+    products_subtotal = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Стоимость заказа, BYN",
+    )
+    delivery_cost = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name="Стоимость доставки, BYN",
+    )
+    total = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Итого к оплате, BYN",
+    )
+    payment_method = models.CharField(
+        max_length=30,
+        choices=PaymentMethod.choices,
+        verbose_name="Способ оплаты",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=OrderStatus.choices,
+        default=OrderStatus.NEW,
+        verbose_name="Статус заказа",
+    )
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        verbose_name="Телефон для связи",
+    )
+    comment = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Комментарий к заказу",
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата оформления",
+    )
+
+    class Meta:
+        db_table = "order_history"
+        verbose_name = "Заказ"
+        verbose_name_plural = "История заказов"
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        if self.pk:
+            return f"Заказ №{self.pk} от {self.created_at:%d.%m.%Y %H:%M}"
+        return "Новый заказ"
+
+
+class OrderHistoryItem(models.Model):
+    """Одна позиция заказа (снимок товара на момент оформления)."""
+
+    order = models.ForeignKey(
+        OrderHistory,
+        on_delete=models.CASCADE,
+        related_name="items",
+        verbose_name="Заказ",
+    )
+    product_id = models.PositiveIntegerField(verbose_name="ID товара в каталоге")
+    product_name = models.CharField(max_length=300, verbose_name="Наименование товара")
+    unit_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Цена за ед., BYN",
+    )
+    quantity = models.PositiveIntegerField(verbose_name="Количество")
+    line_total = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Сумма по строке, BYN",
+    )
+
+    class Meta:
+        db_table = "order_history_item"
+        verbose_name = "Позиция заказа"
+        verbose_name_plural = "Позиции заказа"
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"{self.product_name} × {self.quantity}"

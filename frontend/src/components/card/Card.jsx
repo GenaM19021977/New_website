@@ -23,14 +23,26 @@ function getBoilerImageUrl(product) {
     : raw;
 }
 
+/** Есть ли в цене хотя бы одна цифра (числовая цена), иначе — текст */
+function isNumericPrice(price) {
+  return price != null && price !== "" && /\d/.test(String(price));
+}
+
 const Card = ({ product }) => {
   const { currency, convertPrice } = useCurrency();
   const imageSrc = getBoilerImageUrl(product) || defaultImage;
   const title = product?.name || "Котёл";
-  const priceDisplay =
-    product?.price != null && product?.price !== ""
+
+  const hasPrice = product?.price != null && product?.price !== "";
+  const numericPrice = hasPrice && isNumericPrice(product.price);
+  const priceInBYN = hasPrice
+    ? formatPriceWithCurrency(product.price, "BYN", null)
+    : null;
+  const priceInSelected =
+    hasPrice && currency !== "BYN"
       ? formatPriceWithCurrency(product.price, currency, convertPrice)
       : null;
+  const priceDisplayTextOnly = hasPrice && !numericPrice ? String(product.price).trim() : null;
 
   const handleImageError = (e) => {
     e.target.onerror = null;
@@ -66,7 +78,17 @@ const Card = ({ product }) => {
         />
         <div className={styles.card__body}>
           <h3 className={styles.card__title}>{title}</h3>
-          {priceDisplay && <p className={styles.card__price}>{priceDisplay}</p>}
+          {priceDisplayTextOnly != null && (
+            <p className={styles.card__price}>{priceDisplayTextOnly}</p>
+          )}
+          {numericPrice && priceInBYN && (
+            <p className={styles.card__price}>
+              {priceInBYN}
+              {priceInSelected != null && priceInSelected !== "" && (
+                <span className={styles.card__priceSecondary}> {priceInSelected}</span>
+              )}
+            </p>
+          )}
         </div>
       </Link>
       <div className={styles.card__actions}>

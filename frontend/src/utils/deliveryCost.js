@@ -1,0 +1,437 @@
+/**
+ * @file Курьерская доставка: вспомогательные функции для расстояния и денежного расчёта.
+ *
+ * Расстояние «по прямой»:
+ *   Используется, когда нет маршрута Яндекса или как запасной путь: геокодирование адреса
+ *   через публичный Photon (komoot), затем формула гаверсинуса между SHOP_LOCATION и точкой доставки.
+ *
+ * Стоимость доставки:
+ *   Берётся из тех же записей Django GET /delivery/, что показываются на странице «О нас»
+ *   во вкладке «Доставка». Названия строк (title) задают смысл числа value_number — см. parseCourierTariffFromDeliveryItems.
+ *
+ * Типичная логика магазинов, реализованная здесь:
+ *   - Пробег для оплаты округляется вверх до целых км («каждый начатый километр»).
+ *   - Фиксированная часть + км × тариф, затем применяются минимум/максимум итога.
+ *   - Опционально бесплатная доставка от суммы заказа.
+ */
+
+import { SHOP_LOCATION } from "../config/constants";
+
+/**
+ * Собирает одну строку запроса для геокодера (Photon) и для согласованности с полями формы.
+ * Если страна не указана, подставляется «Беларусь», чтобы снизить неоднозначность (например, «Брест»).
+ */
+export function buildDeliveryGeocodeQuery(addr) {
+  if (!addr) return "";
+  const house =
+    addr.house_number?.trim() &&
+    `д. ${addr.house_number.trim()}${addr.building_number?.trim() ? `, корп. ${addr.building_number.trim()}` : ""}`;
+  const country = (addr.country || "").trim();
+  const parts = [
+    country || "Беларусь",
+    addr.region,
+    addr.district,
+    addr.city,
+    addr.street,
+    house,
+    addr.apartment_number?.trim() && `кв. ${addr.apartment_number.trim()}`,
+  ]
+    .map((p) => (typeof p === "string" ? p.trim() : ""))
+    .filter(Boolean);
+  return parts.join(", ");
+}
+
+/**
+ * Расстояние между двумя точками на сфере (Земля ~6371 км радиус), результат в километрах.
+ * Не учитывает дороги — только кратчайшую дугу по поверхности.
+ */
+export function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Прямой HTTP-запрос к Photon: первый feature в выдаче — координаты [lon, lat] в GeoJSON.
+ */
+export async function geocodeWithPhoton(query, signal) {
+  const q = (query || "").trim();
+  if (!q) throw new Error("empty query");
+  const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lang=ru`;
+  const res = await fetch(url, { signal, headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error("geocode http error");
+  const data = await res.json();
+  const f = data.features?.[0];
+  if (!f?.geometry?.coordinates || f.geometry.coordinates.length < 2) {
+    throw new Error("geocode not found");
+  }
+  const [lon, lat] = f.geometry.coordinates;
+  return { lat, lon };
+}
+
+/** Безопасный разбор числа из API (строка с запятой или уже number). */
+function toNum(raw) {
+  if (raw == null || raw === "") return null;
+  const num = typeof raw === "number" ? raw : parseFloat(String(raw).replace(",", "."));
+  return Number.isNaN(num) ? null : num;
+}
+
+/**
+ * Преобразует список записей модели Delivery из бэкенда в параметры формулы стоимости.
+ *
+ * Правила сопоставления по подстрокам в title (регистр не важен):
+ * - Есть «км» / «километр» / шаблон «за км» → ratePerKm (BYN за один тарифицируемый км).
+ * - «бесплатн» и (доставк|курьер|заказ|свыше) → порог суммы заказа BYN, начиная с которого доставка 0.
+ * - «минимальн» → нижняя граница итоговой платы за доставку после расчёта.
+ * - «макс», «потолок», «не более» → верхняя граница итога.
+ * - «базов», «подъезд», «выезд», «фиксир» (и нет отдельной строки с км) → фиксированная надбавка BYN к сумме км×тариф.
+ *
+ * Первая подходящая запись по каждому типу выигрывает (порядок списка — как отдал API, обычно sort_order).
+ */
+export function parseCourierTariffFromDeliveryItems(items) {
+  const empty = {
+    ratePerKm: null,
+    fixedHandlingFee: 0,
+    minDeliveryFee: null,
+    maxDeliveryFee: null,
+    freeDeliveryOrderMin: null,
+  };
+  if (!Array.isArray(items) || items.length === 0) return empty;
+
+  let ratePerKm = null;
+  let fixedHandlingFee = 0;
+  let fixedSet = false;
+  let minDeliveryFee = null;
+  let maxDeliveryFee = null;
+  let freeDeliveryOrderMin = null;
+
+  for (const item of items) {
+    const title = String(item.title || "").toLowerCase();
+    const num = toNum(item.value_number);
+    if (num == null) continue;
+
+    const mentionsKm =
+      title.includes("км") || title.includes("километр") || /\/\s*км|за\s*км/.test(title);
+
+    if (mentionsKm) {
+      if (ratePerKm == null) ratePerKm = num;
+      continue;
+    }
+
+    if (
+      title.includes("бесплатн") &&
+      (title.includes("доставк") || title.includes("курьер") || title.includes("заказ") || title.includes("свыше"))
+    ) {
+      if (freeDeliveryOrderMin == null) freeDeliveryOrderMin = num;
+      continue;
+    }
+
+    if (title.includes("минимальн")) {
+      if (minDeliveryFee == null) minDeliveryFee = num;
+      continue;
+    }
+
+    if (title.includes("макс") || title.includes("потолок") || title.includes("не более")) {
+      if (maxDeliveryFee == null) maxDeliveryFee = num;
+      continue;
+    }
+
+    if (/базов|подъезд|выезд|фиксир/.test(title)) {
+      if (!fixedSet) {
+        fixedHandlingFee = num;
+        fixedSet = true;
+      }
+      continue;
+    }
+  }
+
+  return {
+    ratePerKm,
+    fixedHandlingFee: Number(fixedHandlingFee) || 0,
+    minDeliveryFee,
+    maxDeliveryFee,
+    freeDeliveryOrderMin,
+  };
+}
+
+/** Округление денег до 2 знаков (копейки). */
+function roundMoney(n) {
+  return Math.round(n * 100) / 100;
+}
+
+/** Запись Delivery: Брест и сумма заказа больше порога → amount этой строки. */
+const DELIVERY_ROW_ID_BREST_ORDER_OVER = 1;
+/** Запись Delivery: Брест и сумма заказа меньше порога → amount этой строки. */
+const DELIVERY_ROW_ID_BREST_ORDER_UNDER = 2;
+/** Запись Delivery: не Брест (город указан) и сумма больше порога → amount этой строки. */
+const DELIVERY_ROW_ID_NON_BREST_ORDER_OVER = 3;
+/** Запись Delivery: не Брест (город указан) и сумма меньше порога → amount этой строки. */
+const DELIVERY_ROW_ID_NON_BREST_ORDER_UNDER = 4;
+
+/** В поле «Город» указан г. Брест (не область). */
+export function isDeliveryCityBrest(cityRaw) {
+  let c = String(cityRaw ?? "")
+    .trim()
+    .toLowerCase();
+  c = c.replace(/^г\.?\s*/u, "").trim();
+  if (!c) return false;
+  if (/област/u.test(c)) return false;
+  return c === "брест" || /^брест\b/u.test(c);
+}
+
+const RE_BREST_ORDER_OT =
+  /по\s+г\.?\s*брест[\s\S]*?при\s+сумме\s+заказа\s+от\b/iu;
+const RE_BREST_ORDER_DO =
+  /по\s+г\.?\s*брест[\s\S]*?при\s+сумме\s+заказа\s+до\b/iu;
+const RE_RB_ORDER_OT =
+  /по\s+республике\s+беларус[ьи][\s\S]*?при\s+сумме\s+заказа\s+от\b/iu;
+const RE_RB_ORDER_DO =
+  /по\s+республике\s+беларус[ьи][\s\S]*?при\s+сумме\s+заказа\s+до\b/iu;
+
+function pickOtThenDoRow(otCandidates, doCandidates, order) {
+  const otOk = otCandidates
+    .filter((x) => order >= x.threshold)
+    .sort(
+      (a, b) =>
+        b.threshold - a.threshold ||
+        a.sort - b.sort ||
+        (a.row.id ?? 0) - (b.row.id ?? 0),
+    );
+  if (otOk.length) return otOk[0];
+  const doOk = doCandidates
+    .filter((x) => order <= x.threshold)
+    .sort(
+      (a, b) =>
+        a.threshold - b.threshold ||
+        a.sort - b.sort ||
+        (a.row.id ?? 0) - (b.row.id ?? 0),
+    );
+  return doOk.length ? doOk[0] : null;
+}
+
+/**
+ * Стоимость курьерской доставки checkout по GET /delivery/.
+ * Брест: id=2 (сумма &lt; порог), затем id=1 (сумма &gt; порог).
+ * Не Брест (город заполнен): id=4 (сумма &lt; порог), затем id=3 (сумма &gt; порог).
+ * Иначе строки «По г. Брест… / По Республике Беларусь…» (от/до).
+ */
+export function computeCheckoutCourierDeliveryQuote(
+  deliveryItems,
+  orderSubtotalByn,
+  cityRaw,
+) {
+  const zone = isDeliveryCityBrest(cityRaw) ? "brest" : "belarus";
+  const empty = (noRule) => ({
+    amount: null,
+    needsManager: false,
+    noRule,
+    zone,
+  });
+
+  if (!Array.isArray(deliveryItems) || deliveryItems.length === 0) {
+    return empty(true);
+  }
+
+  const order = Math.max(0, Number(orderSubtotalByn) || 0);
+
+  const rowFixed = deliveryItems.find(
+    (r) => Number(r.id) === DELIVERY_ROW_ID_BREST_ORDER_UNDER,
+  );
+  if (rowFixed && isDeliveryCityBrest(cityRaw)) {
+    const threshold = toNum(rowFixed.value_number);
+    const fee = toNum(rowFixed.amount);
+    if (threshold != null && fee != null && order < threshold) {
+      if (fee === -1) {
+        return { amount: null, needsManager: true, noRule: false, zone };
+      }
+      if (fee === 0) {
+        return { amount: 0, needsManager: false, noRule: false, zone };
+      }
+      return {
+        amount: roundMoney(fee),
+        needsManager: false,
+        noRule: false,
+        zone,
+      };
+    }
+  }
+
+  const rowOver = deliveryItems.find(
+    (r) => Number(r.id) === DELIVERY_ROW_ID_BREST_ORDER_OVER,
+  );
+  if (rowOver && isDeliveryCityBrest(cityRaw)) {
+    const thresholdOver = toNum(rowOver.value_number);
+    const feeOver = toNum(rowOver.amount);
+    if (thresholdOver != null && feeOver != null && order > thresholdOver) {
+      if (feeOver === -1) {
+        return { amount: null, needsManager: true, noRule: false, zone };
+      }
+      if (feeOver === 0) {
+        return { amount: 0, needsManager: false, noRule: false, zone };
+      }
+      return {
+        amount: roundMoney(feeOver),
+        needsManager: false,
+        noRule: false,
+        zone,
+      };
+    }
+  }
+
+  const cityTrim = String(cityRaw ?? "").trim();
+  const rowNonBrestUnder = deliveryItems.find(
+    (r) => Number(r.id) === DELIVERY_ROW_ID_NON_BREST_ORDER_UNDER,
+  );
+  if (rowNonBrestUnder && cityTrim && !isDeliveryCityBrest(cityRaw)) {
+    const th4 = toNum(rowNonBrestUnder.value_number);
+    const fee4 = toNum(rowNonBrestUnder.amount);
+    if (th4 != null && fee4 != null && order < th4) {
+      if (fee4 === -1) {
+        return { amount: null, needsManager: true, noRule: false, zone };
+      }
+      if (fee4 === 0) {
+        return { amount: 0, needsManager: false, noRule: false, zone };
+      }
+      return {
+        amount: roundMoney(fee4),
+        needsManager: false,
+        noRule: false,
+        zone,
+      };
+    }
+  }
+
+  const rowNonBrestOver = deliveryItems.find(
+    (r) => Number(r.id) === DELIVERY_ROW_ID_NON_BREST_ORDER_OVER,
+  );
+  if (rowNonBrestOver && cityTrim && !isDeliveryCityBrest(cityRaw)) {
+    const th3 = toNum(rowNonBrestOver.value_number);
+    const fee3 = toNum(rowNonBrestOver.amount);
+    if (th3 != null && fee3 != null && order > th3) {
+      if (fee3 === -1) {
+        return { amount: null, needsManager: true, noRule: false, zone };
+      }
+      if (fee3 === 0) {
+        return { amount: 0, needsManager: false, noRule: false, zone };
+      }
+      return {
+        amount: roundMoney(fee3),
+        needsManager: false,
+        noRule: false,
+        zone,
+      };
+    }
+  }
+
+  const reOt = zone === "brest" ? RE_BREST_ORDER_OT : RE_RB_ORDER_OT;
+  const reDo = zone === "brest" ? RE_BREST_ORDER_DO : RE_RB_ORDER_DO;
+
+  const otRows = [];
+  const doRows = [];
+
+  for (const row of deliveryItems) {
+    const title = String(row.title || "");
+    const threshold = toNum(row.value_number);
+    const rowFee = toNum(row.amount);
+    if (threshold == null || rowFee == null) continue;
+    const sort = Number(row.sort_order) || 0;
+    const entry = { row, threshold, fee: rowFee, sort };
+    if (reOt.test(title)) otRows.push(entry);
+    else if (reDo.test(title)) doRows.push(entry);
+  }
+
+  if (otRows.length === 0 && doRows.length === 0) {
+    return empty(true);
+  }
+
+  const chosen = pickOtThenDoRow(otRows, doRows, order);
+  if (!chosen) {
+    return empty(true);
+  }
+
+  const fee = chosen.fee;
+  if (fee === -1) {
+    return { amount: null, needsManager: true, noRule: false, zone };
+  }
+  if (fee === 0) {
+    return { amount: 0, needsManager: false, noRule: false, zone };
+  }
+
+  return {
+    amount: roundMoney(fee),
+    needsManager: false,
+    noRule: false,
+    zone,
+  };
+}
+
+/**
+ * Сколько полных «тарифных» километров выставить клиенту: ceil(факт), 0 если расстояние нулевое.
+ * Используется вместе с фактическим расстоянием от Яндекса или по прямой.
+ */
+export function billableDistanceKm(actualKm) {
+  const d = Math.max(0, Number(actualKm) || 0);
+  if (d <= 0) return 0;
+  return Math.ceil(d);
+}
+
+/**
+ * Полная стоимость курьерской доставки и величина billableKm для подписи на экране.
+ *
+ * @param {number} actualDistanceKm — километры «как пришли» из маршрута или гаверсинуса
+ * @param {ReturnType<typeof parseCourierTariffFromDeliveryItems>} tariff
+ * @param {number} orderSubtotalByn — сумма товаров в корзине без доставки
+ * @returns {{ amount: number, billableKm: number, isFreeByOrder: boolean } | null} null, если в админке не задан тариф за км
+ */
+export function computeCourierDeliveryQuote(actualDistanceKm, tariff, orderSubtotalByn) {
+  if (!tariff || tariff.ratePerKm == null) return null;
+
+  const order = Math.max(0, Number(orderSubtotalByn) || 0);
+  if (
+    tariff.freeDeliveryOrderMin != null &&
+    order >= Number(tariff.freeDeliveryOrderMin)
+  ) {
+    const billableKm = billableDistanceKm(actualDistanceKm);
+    return { amount: 0, billableKm, isFreeByOrder: true };
+  }
+
+  const billableKm = billableDistanceKm(actualDistanceKm);
+  const rate = Number(tariff.ratePerKm) || 0;
+  const fixed = Number(tariff.fixedHandlingFee) || 0;
+
+  let subtotal = fixed + billableKm * rate;
+
+  if (tariff.minDeliveryFee != null) {
+    subtotal = Math.max(subtotal, Number(tariff.minDeliveryFee));
+  }
+  if (tariff.maxDeliveryFee != null) {
+    subtotal = Math.min(subtotal, Number(tariff.maxDeliveryFee));
+  }
+
+  return {
+    amount: roundMoney(subtotal),
+    billableKm,
+    isFreeByOrder: false,
+  };
+}
+
+/**
+ * @deprecated Предпочтительно computeCourierDeliveryQuote — там есть billableKm и флаг бесплатной доставки.
+ */
+export function computeCourierDeliveryCost(distanceKm, tariff, orderSubtotalByn = 0) {
+  const q = computeCourierDeliveryQuote(distanceKm, tariff, orderSubtotalByn);
+  return q ? q.amount : null;
+}
+
+/**
+ * Километры по прямой от магазина (SHOP_LOCATION) до точки доставки по её широте/долготе.
+ */
+export function distanceFromShopKm(destLat, destLon) {
+  return haversineDistanceKm(SHOP_LOCATION.lat, SHOP_LOCATION.lon, destLat, destLon);
+}

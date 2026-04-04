@@ -20,13 +20,24 @@ export function formatPrice(num) {
   return decPart ? `${formatted},${decPart}` : formatted;
 }
 
-/** Форматирует цену с указанием валюты. Конвертирует из BYN если передан convertPrice. */
+/**
+ * Форматирует цену с указанием валюты. Конвертирует из BYN если передан convertPrice.
+ * Если в значении нет ни одной цифры (например "По запросу", "Цена уточняется"),
+ * возвращает этот текст как есть — для отображения в карточке товара.
+ */
 export function formatPriceWithCurrency(priceStrOrNum, currency, convertPrice) {
-  let num = typeof priceStrOrNum === "number" ? priceStrOrNum : parsePrice(priceStrOrNum);
-  if (convertPrice && typeof convertPrice === "function") {
-    num = convertPrice(num);
+  if (priceStrOrNum == null || priceStrOrNum === "") return "";
+  if (typeof priceStrOrNum === "number") {
+    let num = priceStrOrNum;
+    if (convertPrice && typeof convertPrice === "function") num = convertPrice(num);
+    const formatted = formatPrice(num);
+    return formatted ? `${formatted} ${currency || "BYN"}` : "";
   }
+  const s = String(priceStrOrNum).trim();
+  if (!s) return "";
+  if (!/\d/.test(s)) return s; // в базе текст без цифр — показываем как есть
+  let num = parsePrice(priceStrOrNum);
+  if (convertPrice && typeof convertPrice === "function") num = convertPrice(num);
   const formatted = formatPrice(num);
-  if (!formatted) return "";
-  return `${formatted} ${currency || "BYN"}`;
+  return formatted ? `${formatted} ${currency || "BYN"}` : "";
 }

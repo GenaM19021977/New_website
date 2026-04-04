@@ -36,14 +36,163 @@
 }
 
 .checkout-left {
-  min-height: 400px;
+  min-height: 200px;
 }
 
-.checkout-image-placeholder {
-  width: 100%;
-  aspect-ratio: 4/3;
+.checkout-order-items {
   background-color: var(--color-bg-card);
   border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(159, 176, 184, 0.2);
+}
+
+.checkout-order-items__title {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.checkout-order-items__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.checkout-order-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(159, 176, 184, 0.15);
+}
+
+.checkout-order-item:last-child {
+  border-bottom: none;
+}
+
+.checkout-order-item__image {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--color-bg-dark);
+}
+
+.checkout-order-item__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.checkout-order-item__image-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(159, 176, 184, 0.2);
+}
+
+.checkout-order-item__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.checkout-order-item__name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-decoration: none;
+  line-height: 1.3;
+}
+
+.checkout-order-item__name:hover {
+  color: var(--color-accent);
+}
+
+.checkout-order-item__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.checkout-order-item__qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-bg-dark);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.checkout-order-item__qty-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.checkout-order-item__qty-btn:hover {
+  background-color: rgba(199, 167, 90, 0.2);
+}
+
+.checkout-order-item__qty-value {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.checkout-order-item__sum {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-left: auto;
+}
+
+.checkout-order-item__remove {
+  color: var(--color-text-muted) !important;
+  margin-left: 0;
+}
+
+.checkout-order-item__remove:hover {
+  color: #e57373 !important;
+}
+
+.checkout-order-items__add-more {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(159, 176, 184, 0.2);
+}
+
+.checkout-order-items__add-more-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.checkout-order-items__add-more-link:hover {
+  text-decoration: underline;
 }
 
 .checkout-right {
@@ -59,41 +208,53 @@
   color: var(--color-text);
 }
 
-.checkout-delivery-options {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.checkout-delivery-option {
-  flex: 1;
-  min-width: 140px;
-  padding: 14px 20px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  background-color: var(--color-bg-card);
-  border: 1px solid rgba(159, 176, 184, 0.3);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
-}
-
-.checkout-delivery-option:hover {
-  border-color: var(--color-accent);
-  color: var(--color-text);
-}
-
-.checkout-delivery-option--active {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background-color: rgba(199, 167, 90, 0.08);
-}
-
 .checkout-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* Адрес доставки при выборе «Курьером» */
+.checkout-address-block {
+  padding: 16px;
+  border-radius: 12px;
+  background-color: var(--color-bg-card);
+  border: 1px solid rgba(159, 176, 184, 0.2);
+}
+
+.checkout-address-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.checkout-address-hint {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.checkout-address-hint-link {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.checkout-address-hint-link:hover {
+  text-decoration: underline;
+}
+
+.checkout-address-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 599px) {
+  .checkout-address-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .checkout-field .MuiOutlinedInput-root {
@@ -109,23 +270,142 @@
   color: var(--color-text-muted);
 }
 
+.checkout-payment-block {
+  padding: 16px;
+  border-radius: 12px;
+  background-color: var(--color-bg-card);
+  border: 1px solid rgba(159, 176, 184, 0.2);
+}
+
+.checkout-payment-title {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.checkout-payment-options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.checkout-payment-option {
+  margin: 0 !important;
+  margin-left: 0 !important;
+  align-items: flex-start;
+}
+
+.checkout-payment-option .MuiFormControlLabel-label {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.checkout-payment-option .MuiCheckbox-root {
+  padding: 6px 10px 6px 6px;
+  color: rgba(159, 176, 184, 0.55);
+}
+
+.checkout-payment-option .MuiCheckbox-root:hover {
+  background-color: rgba(159, 176, 184, 0.06);
+}
+
+.checkout-payment-option .MuiCheckbox-root.Mui-checked {
+  color: var(--color-accent);
+}
+
 .checkout-bottom {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
   margin-top: 8px;
-  flex-wrap: wrap;
 }
 
 .checkout-total {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+.checkout-total-line {
+  display: flex;
+  flex-direction: column;
   gap: 4px;
+}
+
+.checkout-total-line--compact {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.checkout-total-sublabel {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.checkout-total-meta {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* Подписи маршрута «От / До» и пояснения под блоком расстояния (курьер) */
+.checkout-route-notes {
+  margin: -4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkout-route-notes .checkout-total-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.checkout-total-note {
+  margin: -4px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.checkout-total-warning {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--color-error, #ef4444);
+}
+
+.checkout-total-divider {
+  border: none;
+  border-top: 1px solid rgba(159, 176, 184, 0.25);
+  margin: 4px 0 0;
 }
 
 .checkout-total-value {
   font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* Вторая строка — сумма доставки (чуть меньше акцента) */
+.checkout-total-value.checkout-total-value--delivery {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.checkout-total-value.checkout-total-value--grand {
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--color-accent);
 }
@@ -135,10 +415,34 @@
   color: var(--color-text-muted);
 }
 
+.checkout-delivery-calc-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  border-color: rgba(159, 176, 184, 0.45) !important;
+  color: var(--color-text) !important;
+  gap: 8px;
+}
+
+.checkout-delivery-calc-btn:hover {
+  border-color: var(--color-accent) !important;
+  background-color: rgba(159, 176, 184, 0.08) !important;
+}
+
+.checkout-delivery-calc-btn .MuiButton-startIcon {
+  margin-right: 4px;
+}
+
+.checkout-delivery-calc-btn .MuiSvgIcon-root {
+  font-size: 1.35rem;
+}
+
 .checkout-continue-btn {
   background-color: var(--color-accent) !important;
   color: var(--color-bg-dark) !important;
   padding: 12px 28px !important;
+  text-transform: none !important;
 }
 
 .checkout-continue-btn:hover {

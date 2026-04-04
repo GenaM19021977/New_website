@@ -41,6 +41,13 @@
   color: var(--color-accent);
 }
 
+/* Цена в выбранной валюте (при выборе не BYN) — шрифт на 30% меньше */
+.card__priceSecondary {
+  font-size: 0.7em;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
 .card__actions {
   padding: 0 16px 16px;
   display: flex;

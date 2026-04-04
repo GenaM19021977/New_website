@@ -31,5 +31,10 @@ router.register("manufacturers", ManufacturersView, basename="manufacturers")
 # GET /boilers/ - все товары (котлы) для страницы Каталог
 router.register("boilers", BoilersView, basename="boilers")
 
+# GET /delivery/ - условия доставки для модального окна «Информация о доставке»
+router.register("delivery", DeliveryView, basename="delivery")
+
+router.register("orders", OrderHistoryCreateView, basename="orders")
+
 # URL patterns, сгенерированные роутером
 urlpatterns = router.urls
