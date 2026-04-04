@@ -5,38 +5,9 @@
 Доступен по адресу /admin/ после создания суперпользователя.
 """
 
-import re
-from decimal import Decimal, ROUND_HALF_UP
-
 from django.contrib import admin
 
 from .models import CustomUser, ElectricBoiler, Delivery, OrderHistory, OrderHistoryItem
-from .serializers import parse_boiler_price
-
-_CATALOG_CACHE_ATTR = "_turiki_admin_catalog_unit_cache"
-_UNSET = object()
-
-
-def _catalog_unit_tuple(obj):
-    """(Decimal|None, str|None): число BYN или текст цены из каталога по product_id."""
-    if obj is None or not getattr(obj, "product_id", None):
-        return None, None
-    cached = getattr(obj, _CATALOG_CACHE_ATTR, _UNSET)
-    if cached is not _UNSET:
-        return cached
-    boiler = ElectricBoiler.objects.filter(pk=obj.product_id).only("price").first()
-    if not boiler:
-        result = (None, None)
-        setattr(obj, _CATALOG_CACHE_ATTR, result)
-        return result
-    raw = boiler.price or ""
-    value = parse_boiler_price(raw)
-    if value == 0 and raw and not re.search(r"\d", str(raw)):
-        result = (None, str(raw).strip()[:80])
-    else:
-        result = (value, None)
-    setattr(obj, _CATALOG_CACHE_ATTR, result)
-    return result
 
 
 @admin.register(CustomUser)
@@ -264,33 +235,12 @@ class OrderHistoryItemInline(admin.TabularInline):
     model = OrderHistoryItem
     extra = 0
     can_delete = False
+    exclude = ("unit_price", "line_total")
     readonly_fields = (
         "product_id",
         "product_name",
-        "catalog_unit_price_byn",
         "quantity",
-        "catalog_line_total_byn",
     )
-
-    @admin.display(description="Цена за ед., BYN")
-    def catalog_unit_price_byn(self, obj):
-        value, text = _catalog_unit_tuple(obj)
-        if text is not None:
-            return text
-        if value is None:
-            return "—"
-        return f"{value:.2f}"
-
-    @admin.display(description="Сумма по строке, BYN")
-    def catalog_line_total_byn(self, obj):
-        value, text = _catalog_unit_tuple(obj)
-        if text is not None:
-            return text
-        if value is None:
-            return "—"
-        qty = obj.quantity or 0
-        total = (value * qty).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-        return f"{total:.2f}"
 
     def has_add_permission(self, request, obj=None):
         return False
