@@ -261,7 +261,6 @@ export default function Header(props) {
   const menuItems = [
     { label: "О нас", path: ROUTES.ABOUT },
     { label: "Каталог", path: ROUTES.CATALOG },
-    { label: "Наши партнеры", path: ROUTES.PARTNERS },
     { label: "Бренды", path: ROUTES.BRANDS },
     { label: "Контакты", path: ROUTES.CONTACTS },
     { label: "Корзина", path: ROUTES.CART },
@@ -496,13 +495,6 @@ export default function Header(props) {
                     : null}
                 </div>
               </div>
-              <Link
-                to={ROUTES.PARTNERS}
-                className="header-link"
-                onClick={scrollToTop}
-              >
-                Наши партнеры
-              </Link>
               <Link
                 to={ROUTES.BRANDS}
                 className="header-link"

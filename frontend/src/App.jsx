@@ -14,7 +14,6 @@ import Home from "./components/pages/home/Home";
 import About from "./components/pages/about/About";
 import Catalog from "./components/pages/catalog/Catalog";
 import ProductDetail from "./components/pages/product/ProductDetail";
-import Partners from "./components/pages/partners/Partners";
 import Brands from "./components/pages/brands/Brands";
 import Contacts from "./components/pages/contacts/Contacts";
 import PersonalCabinet from "./components/pages/cabinet/PersonalCabinet";
@@ -28,7 +27,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { ROUTES } from "./config/constants";
 
-/** При смене маршрута прокручивает страницу вверх (для ссылок: Домашняя, О нас, Каталог, Наши партнеры, Бренды, Контакты, логотип). */
+/** При смене маршрута прокручивает страницу вверх (для ссылок: Домашняя, О нас, Каталог, Бренды, Контакты, логотип). */
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -84,16 +83,9 @@ function App() {
         />
         <Route
           path="/selection"
-          element={<Navigate to={ROUTES.PARTNERS} replace />}
+          element={<Navigate to={ROUTES.HOME} replace />}
         />
-        <Route
-          path={ROUTES.PARTNERS}
-          element={
-            <Header>
-              <Partners />
-            </Header>
-          }
-        />
+        <Route path="/partners" element={<Navigate to={ROUTES.HOME} replace />} />
         <Route
           path={ROUTES.BRANDS}
           element={

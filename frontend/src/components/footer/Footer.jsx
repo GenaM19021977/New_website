@@ -110,7 +110,6 @@ export default function Footer() {
                             {/* <li><Link to="/installation">Монтаж отопления в Бресте</Link></li> */}
                             <li><Link to={ROUTES.ABOUT}>О нас</Link></li>
                             <li><Link to={ROUTES.CATALOG}>Каталог</Link></li>
-                            <li><Link to={ROUTES.PARTNERS}>Наши партнеры</Link></li>
                             <li><Link to={ROUTES.BRANDS}>Бренды</Link></li>
                             <li><Link to={ROUTES.CONTACTS}>Контакты</Link></li>
                             {/* <li><Link to="/order">Оформление заказа</Link></li>
