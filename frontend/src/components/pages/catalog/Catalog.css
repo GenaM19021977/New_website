@@ -24,6 +24,194 @@
   margin-top: 24px;
 }
 
+/* Сетка: слева фильтры, справа карточки */
+.catalog-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 8px;
+}
+
+@media (min-width: 992px) {
+  .catalog-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 40px;
+  }
+}
+
+.catalog-filters {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 20px 20px 24px;
+  background-color: var(--color-bg-card);
+  border: 1px solid rgba(159, 176, 184, 0.25);
+  border-radius: 12px;
+}
+
+@media (min-width: 992px) {
+  .catalog-filters {
+    width: 280px;
+    max-width: 280px;
+    position: sticky;
+    top: 100px;
+    align-self: flex-start;
+  }
+}
+
+.catalog-filters__title {
+  margin: 0 0 20px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.catalog-filters__btn {
+  padding: 10px 16px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.catalog-filters__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.catalog-filters__btn--ghost {
+  width: 100%;
+  margin-top: 8px;
+  color: var(--color-text-muted);
+  background: transparent;
+  border-color: rgba(159, 176, 184, 0.35);
+}
+
+.catalog-filters__btn--ghost:hover:not(:disabled) {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.catalog-filters__fieldset {
+  margin: 0 0 20px;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.catalog-filters__legend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.catalog-filters__muted {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.catalog-filters__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.catalog-filters__chip {
+  display: inline-block;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(159, 176, 184, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.catalog-filters__chip:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.catalog-filters__chip--active {
+  background-color: rgba(199, 167, 90, 0.18);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.catalog-filters__power-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.catalog-filters__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.catalog-filters__check input {
+  margin-top: 3px;
+  flex-shrink: 0;
+  accent-color: var(--color-accent);
+}
+
+.catalog-filters__count {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.catalog-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.catalog-empty {
+  margin-top: 24px;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.catalog-empty__link {
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.catalog-empty__link:hover {
+  color: var(--color-text);
+}
+
 .catalog-filter-hint {
   margin-top: 16px;
   margin-bottom: 0;
@@ -36,25 +224,29 @@
   font-weight: 600;
 }
 
+.catalog-main .catalog-cards {
+  margin-top: 24px;
+}
+
 .catalog-cards {
   display: grid;
   gap: 24px;
   margin-top: 40px;
 }
 
-.catalog-cards-4 {
+.catalog-cards-3 {
   grid-template-columns: 1fr;
 }
 
 @media (min-width: 576px) {
-  .catalog-cards-4 {
+  .catalog-cards-3 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (min-width: 992px) {
-  .catalog-cards-4 {
-    grid-template-columns: repeat(4, 1fr);
+  .catalog-cards-3 {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
