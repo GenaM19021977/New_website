@@ -51,6 +51,7 @@ const Catalog = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedPower, setSelectedPower] = useState("");
+  const [selectedHeatingArea, setSelectedHeatingArea] = useState("");
   const [priceFromInput, setPriceFromInput] = useState("");
   const [priceToInput, setPriceToInput] = useState("");
 
@@ -93,6 +94,17 @@ const Catalog = () => {
     );
   }, [products]);
 
+  const heatingAreaOptions = useMemo(() => {
+    const s = new Set();
+    products.forEach((p) => {
+      const v = (p.heating_area || "").trim();
+      if (v) s.add(v);
+    });
+    return Array.from(s).sort((a, b) =>
+      a.localeCompare(b, "ru", { sensitivity: "base" }),
+    );
+  }, [products]);
+
   const manufacturerLabel = useMemo(() => {
     const m = manufacturers.find((x) => x.slug === manufacturerSlug);
     return m?.name || manufacturerSlug || "";
@@ -113,6 +125,7 @@ const Catalog = () => {
 
   const resetFilters = useCallback(() => {
     setSelectedPower("");
+    setSelectedHeatingArea("");
     setPriceFromInput("");
     setPriceToInput("");
     setSearchParams(new URLSearchParams());
@@ -140,6 +153,11 @@ const Catalog = () => {
         (p) => (p.power || "").trim() === selectedPower,
       );
     }
+    if (selectedHeatingArea) {
+      result = result.filter(
+        (p) => (p.heating_area || "").trim() === selectedHeatingArea,
+      );
+    }
     if (priceFilterActive) {
       result = result.filter((p) => {
         const n = getNumericCatalogPrice(p);
@@ -155,6 +173,7 @@ const Catalog = () => {
     manufacturerSlug,
     searchQuery,
     selectedPower,
+    selectedHeatingArea,
     priceFilterActive,
     priceMinBound,
     priceMaxBound,
@@ -180,6 +199,7 @@ const Catalog = () => {
     manufacturerSlug,
     searchQuery,
     selectedPower,
+    selectedHeatingArea,
     priceFromInput,
     priceToInput,
   ]);
@@ -189,6 +209,15 @@ const Catalog = () => {
       setSelectedPower("");
     }
   }, [powerOptions, selectedPower]);
+
+  useEffect(() => {
+    if (
+      selectedHeatingArea &&
+      !heatingAreaOptions.includes(selectedHeatingArea)
+    ) {
+      setSelectedHeatingArea("");
+    }
+  }, [heatingAreaOptions, selectedHeatingArea]);
 
   useEffect(() => {
     setCurrentPage((p) => {
@@ -355,7 +384,7 @@ const Catalog = () => {
                   {powerOptions.length > 0 && (
                     <fieldset className="catalog-filters__fieldset">
                       <legend className="catalog-filters__legend">
-                        Мощность, кВт
+                        Мощность, KВт
                       </legend>
                       <select
                         id="catalog-power-select"
@@ -368,6 +397,28 @@ const Catalog = () => {
                         {powerOptions.map((pw) => (
                           <option key={pw} value={pw}>
                             {pw}
+                          </option>
+                        ))}
+                      </select>
+                    </fieldset>
+                  )}
+
+                  {heatingAreaOptions.length > 0 && (
+                    <fieldset className="catalog-filters__fieldset">
+                      <legend className="catalog-filters__legend">
+                        Отапливаемая площадь, м²
+                      </legend>
+                      <select
+                        id="catalog-heating-area-select"
+                        className="catalog-filters__select"
+                        aria-label="Отапливаемая площадь, м²"
+                        value={selectedHeatingArea}
+                        onChange={(e) => setSelectedHeatingArea(e.target.value)}
+                      >
+                        <option value="">Все значения</option>
+                        {heatingAreaOptions.map((area) => (
+                          <option key={area} value={area}>
+                            {area}
                           </option>
                         ))}
                       </select>
@@ -389,6 +440,7 @@ const Catalog = () => {
                       !manufacturerSlug &&
                       !searchQuery &&
                       !selectedPower &&
+                      !selectedHeatingArea &&
                       !priceFromInput.trim() &&
                       !priceToInput.trim()
                     }
@@ -401,6 +453,7 @@ const Catalog = () => {
                   {(manufacturerSlug ||
                     searchQuery ||
                     selectedPower ||
+                    selectedHeatingArea ||
                     priceFilterActive) && (
                     <p className="catalog-filter-hint">
                       {manufacturerSlug && (
@@ -412,7 +465,10 @@ const Catalog = () => {
                         </>
                       )}
                       {manufacturerSlug &&
-                        (searchQuery || selectedPower || priceFilterActive) &&
+                        (searchQuery ||
+                          selectedPower ||
+                          selectedHeatingArea ||
+                          priceFilterActive) &&
                         " · "}
                       {searchQuery && (
                         <>
@@ -423,7 +479,9 @@ const Catalog = () => {
                         </>
                       )}
                       {searchQuery &&
-                        (selectedPower || priceFilterActive) &&
+                        (selectedPower ||
+                          selectedHeatingArea ||
+                          priceFilterActive) &&
                         " · "}
                       {selectedPower && (
                         <>
@@ -433,7 +491,18 @@ const Catalog = () => {
                           </span>
                         </>
                       )}
-                      {selectedPower && priceFilterActive && " · "}
+                      {selectedPower &&
+                        (selectedHeatingArea || priceFilterActive) &&
+                        " · "}
+                      {selectedHeatingArea && (
+                        <>
+                          Площадь, м²:{" "}
+                          <span className="catalog-filter-hint__slug">
+                            {selectedHeatingArea}
+                          </span>
+                        </>
+                      )}
+                      {selectedHeatingArea && priceFilterActive && " · "}
                       {priceFilterActive && (
                         <>
                           Цена, BYN:{" "}

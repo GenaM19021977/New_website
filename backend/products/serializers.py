@@ -41,6 +41,7 @@ class ElectricBoilerSerializer(serializers.ModelSerializer):
             "name",
             "price",
             "power",
+            "heating_area",
             "product_url",
             "image_1",
             "image_2",
