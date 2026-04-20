@@ -8,7 +8,7 @@ const Contacts = () => {
     <main className="page-main contacts-page">
       <div className="page-container">
         <section className="page-section" id="contacts" aria-labelledby="contacts-heading">
-          <span className="section-number" aria-hidden>06</span>
+          <span className="section-number" aria-hidden>05</span>
           <h1 id="contacts-heading" className="page-section-heading">
             Контакты
           </h1>

@@ -25,6 +25,8 @@ export const ROUTES = {
     PRODUCT: '/catalog/:id',
     productById: (id) => `/catalog/${id}`,
     BRANDS: '/brands',
+    BRAND: '/brands/:slug',
+    brandBySlug: (slug) => `/brands/${slug}`,
     CONTACTS: '/contacts',
     CABINET: '/cabinet',
     CART: '/cart',

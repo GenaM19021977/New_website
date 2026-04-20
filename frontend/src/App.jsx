@@ -15,6 +15,7 @@ import About from "./components/pages/about/About";
 import Catalog from "./components/pages/catalog/Catalog";
 import ProductDetail from "./components/pages/product/ProductDetail";
 import Brands from "./components/pages/brands/Brands";
+import BrandDetail from "./components/pages/brands/BrandDetail";
 import Contacts from "./components/pages/contacts/Contacts";
 import PersonalCabinet from "./components/pages/cabinet/PersonalCabinet";
 import Cart from "./components/pages/cart/Cart";
@@ -85,12 +86,23 @@ function App() {
           path="/selection"
           element={<Navigate to={ROUTES.HOME} replace />}
         />
-        <Route path="/partners" element={<Navigate to={ROUTES.HOME} replace />} />
+        <Route
+          path="/partners"
+          element={<Navigate to={ROUTES.HOME} replace />}
+        />
         <Route
           path={ROUTES.BRANDS}
           element={
             <Header>
               <Brands />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.BRAND}
+          element={
+            <Header>
+              <BrandDetail />
             </Header>
           }
         />
