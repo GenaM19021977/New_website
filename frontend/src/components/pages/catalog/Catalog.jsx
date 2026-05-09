@@ -179,19 +179,22 @@ const Catalog = () => {
     priceMaxBound,
   ]);
 
-  const fetchProducts = useCallback(() => {
+  const loadBoilers = useCallback(({ silent } = {}) => {
+    if (!silent) setLoading(true);
     api
       .get("boilers/")
       .then((res) => {
         setProducts(Array.isArray(res.data) ? res.data : []);
       })
       .catch(() => setProducts([]))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!silent) setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    loadBoilers();
+  }, [loadBoilers]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -241,26 +244,21 @@ const Catalog = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      api
-        .get("boilers/")
-        .then((res) => {
-          setProducts(Array.isArray(res.data) ? res.data : []);
-        })
-        .catch(() => setProducts([]));
+      loadBoilers({ silent: true });
     }, REFRESH_INTERVAL_MS);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [loadBoilers]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        fetchProducts();
+        loadBoilers({ silent: true });
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [fetchProducts]);
+  }, [loadBoilers]);
 
   return (
     <main className="page-main catalog-page">

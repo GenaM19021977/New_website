@@ -8,6 +8,7 @@
 import axios from 'axios';
 import { API_BASE_URL, API_TIMEOUT, PUBLIC_ENDPOINTS } from '../config/api';
 import { STORAGE_KEYS } from '../config/constants';
+import { dispatchAuthChanged } from '../utils/authEvents';
 
 // Создание настроенного экземпляра Axios
 const api = axios.create({
@@ -47,6 +48,22 @@ api.interceptors.request.use(
     },
     (error) => {
         // Обработка ошибок при настройке запроса
+        return Promise.reject(error);
+    }
+);
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const status = error.response?.status;
+        const hadAuth =
+            error.config?.headers?.Authorization != null &&
+            error.config.headers.Authorization !== "";
+        if (status === 401 && hadAuth) {
+            localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+            dispatchAuthChanged();
+        }
         return Promise.reject(error);
     }
 );

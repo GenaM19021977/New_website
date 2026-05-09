@@ -12,6 +12,9 @@ export const STORAGE_KEYS = {
     CURRENCY: 'turiki_currency',
 };
 
+/** Имя события window: смена access/refresh токена в этой вкладке (вход/выход). */
+export const AUTH_CHANGED_EVENT = "turiki-auth-changed";
+
 // Доступные валюты
 export const CURRENCIES = ['BYN', 'RUB', 'USD', 'EUR'];
 

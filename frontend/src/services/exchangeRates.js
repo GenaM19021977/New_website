@@ -5,9 +5,6 @@
 
 const NBRB_API = "https://api.nbrb.by/exrates/rates?periodicity=0";
 
-/** Коды валют в API НБРБ */
-const CURRENCY_IDS = { USD: 431, EUR: 451, RUB: 456 };
-
 /**
  * Загружает курсы валют с API НБРБ
  * @returns {Promise<{USD: {rate: number, scale: number}, EUR: {...}, RUB: {...}}>}

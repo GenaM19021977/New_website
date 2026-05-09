@@ -12,8 +12,15 @@
   "terminal.integrated.profiles.windows": {
     "PowerShell (venv auto)": {
       "path": "powershell.exe",
-      "args": ["-NoExit", "-ExecutionPolicy", "Bypass", "-File", "activate-venv.ps1"],
+      "args": [
+        "-NoExit",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "activate-venv.ps1"
+      ],
       "cwd": "${workspaceFolder}"
     }
-  }
+  },
+  "cursorpyright.analysis.extraPaths": ["${workspaceFolder}/backend"]
 }
