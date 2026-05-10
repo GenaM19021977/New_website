@@ -18,6 +18,7 @@ import Brands from "./components/pages/brands/Brands";
 import BrandDetail from "./components/pages/brands/BrandDetail";
 import Contacts from "./components/pages/contacts/Contacts";
 import PersonalCabinet from "./components/pages/cabinet/PersonalCabinet";
+import MyOrders from "./components/pages/cabinet/MyOrders";
 import Cart from "./components/pages/cart/Cart";
 import Checkout from "./components/pages/checkout/Checkout";
 import Favorites from "./components/pages/favorites/Favorites";
@@ -119,6 +120,14 @@ function App() {
           element={
             <Header>
               <PersonalCabinet />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.MY_ORDERS}
+          element={
+            <Header>
+              <MyOrders />
             </Header>
           }
         />

@@ -9,9 +9,9 @@ const Contacts = () => {
       <div className="page-container">
         <section className="page-section" id="contacts" aria-labelledby="contacts-heading">
           <span className="section-number" aria-hidden>05</span>
-          <h1 id="contacts-heading" className="page-section-heading">
+          {/* <h1 id="contacts-heading" className="page-section-heading">
             Контакты
-          </h1>
+          </h1> */}
           <p className="page-section-text">
             Свяжитесь с нами: адрес, режим работы. г. Брест, ул. Гоголя 89, Пн–Вс с 9:00 до 19:00.
           </p>

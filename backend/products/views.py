@@ -18,7 +18,7 @@ from .serializers import (
     OrderHistoryCreateSerializer,
     OrderHistoryReadSerializer,
 )
-from .models import ElectricBoiler, Delivery
+from .models import ElectricBoiler, Delivery, OrderHistory
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -110,7 +110,8 @@ class DeliveryView(viewsets.ViewSet):
 
 class OrderHistoryCreateView(viewsets.ViewSet):
     """
-    POST /orders/ — сохранение заказа в историю.
+    GET /orders/ — список заказов текущего пользователя (JWT обязателен).
+    POST /orders/ — сохранение заказа в историю (гость или пользователь).
     products_subtotal в БД = «Стоимость заказа, BYN» (каталог ± products_subtotal_byn с checkout).
     """
 
@@ -118,10 +119,16 @@ class OrderHistoryCreateView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
 
     def list(self, request):
-        return Response(
-            {"detail": 'Метод "GET" не разрешён.'},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Требуется авторизация."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        qs = OrderHistory.objects.filter(user=request.user).prefetch_related(
+            "items",
         )
+        serializer = OrderHistoryReadSerializer(qs, many=True)
+        return Response(serializer.data)
 
     def create(self, request):
         serializer = OrderHistoryCreateSerializer(

@@ -8,7 +8,7 @@
  * - Выход из аккаунта
  */
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -24,6 +24,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import api from "../../../services/api";
 import { useForm, Controller } from "react-hook-form";
 import MyTextField from "../../forms/MyTextField";
@@ -230,6 +231,18 @@ const PersonalCabinet = () => {
                 InputProps={{ readOnly: true }}
                 className="cabinet-email-field"
               />
+            </div>
+
+            <div className="cabinet-section-block">
+              <Button
+                variant="outlined"
+                component={Link}
+                to={ROUTES.MY_ORDERS}
+                startIcon={<ReceiptLongIcon />}
+                className="cabinet-section-btn"
+              >
+                Мои заказы
+              </Button>
             </div>
 
             <div className="cabinet-section-block">

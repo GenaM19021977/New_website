@@ -7,7 +7,7 @@
  *
  * Стоимость заказа (товары), расчёт доставки, стоимость доставки, итого к оплате. При оформлении сумма товаров сохраняется в БД как «Стоимость заказа, BYN».
  * Поля адреса при JWT подтягиваются из GET me/.
- * «Рассчитать доставку»: GET delivery/; см. computeCheckoutCourierDeliveryQuote (Брест id=2, id=1; не Брест id=4, id=3).
+ * Стоимость доставки считается автоматически при изменении города и суммы заказа (GET delivery/, computeCheckoutCourierDeliveryQuote).
  *
  * POST /orders/ при «Оформить заказ» — order_history.products_subtotal = стоимость заказа по каталогу.
  */
@@ -19,7 +19,6 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   getCart,
@@ -118,9 +117,11 @@ const Checkout = () => {
     initialDeliveryAddress,
   );
   const [profileLoaded, setProfileLoaded] = useState(false);
-  /** BYN; по умолчанию 0,00 до пересчёта кнопкой «Рассчитать доставку». */
+  /** BYN; обновляется автоматически при смене города и суммы заказа */
   const [courierDeliveryCostByn, setCourierDeliveryCostByn] = useState(0);
   const [deliveryCalcLoading, setDeliveryCalcLoading] = useState(false);
+  /** Подсказка, если автоматический тариф недоступен (без всплывающих alert) */
+  const [deliveryQuoteNote, setDeliveryQuoteNote] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_CASH_ON_RECEIPT);
   const [orderSubmitLoading, setOrderSubmitLoading] = useState(false);
 
@@ -198,41 +199,64 @@ const Checkout = () => {
     0,
   );
 
+  /**
+   * Автоматический расчёт доставки: город + сумма заказа.
+   * Задержка, чтобы не дергать API на каждый символ в поле «Город».
+   */
   useEffect(() => {
-    setCourierDeliveryCostByn(0);
-  }, [totalByn, deliveryAddress.city]);
-
-  const handleCourierDeliveryCalc = async () => {
     const city = (deliveryAddress.city || "").trim();
     if (!city) {
-      alert("Укажите город в адресе доставки.");
+      setCourierDeliveryCostByn(0);
+      setDeliveryQuoteNote(null);
+      setDeliveryCalcLoading(false);
       return;
     }
-    setDeliveryCalcLoading(true);
-    try {
-      const res = await api.get("delivery/");
-      const rules = Array.isArray(res.data) ? res.data : [];
-      const quote = computeCheckoutCourierDeliveryQuote(rules, totalByn, city);
-      if (quote.noRule) {
-        alert(
-          "Нет подходящей строки в админке «Доставка» для вашего города и суммы заказа.",
+
+    let cancelled = false;
+    setDeliveryQuoteNote(null);
+
+    const timer = setTimeout(async () => {
+      if (cancelled) return;
+      setDeliveryCalcLoading(true);
+      try {
+        const res = await api.get("delivery/");
+        if (cancelled) return;
+        const rules = Array.isArray(res.data) ? res.data : [];
+        const quote = computeCheckoutCourierDeliveryQuote(
+          rules,
+          totalByn,
+          city,
         );
-        setCourierDeliveryCostByn(0);
-        return;
+        if (quote.noRule) {
+          setCourierDeliveryCostByn(0);
+          setDeliveryQuoteNote(
+            "Нет тарифа для выбранного города и суммы заказа. Уточните условия у менеджера.",
+          );
+          return;
+        }
+        if (quote.needsManager) {
+          setCourierDeliveryCostByn(0);
+          setDeliveryQuoteNote("Стоимость доставки уточняется у менеджера.");
+          return;
+        }
+        setCourierDeliveryCostByn(quote.amount ?? 0);
+      } catch {
+        if (!cancelled) {
+          setCourierDeliveryCostByn(0);
+          setDeliveryQuoteNote(
+            "Не удалось загрузить условия доставки. Попробуйте позже.",
+          );
+        }
+      } finally {
+        if (!cancelled) setDeliveryCalcLoading(false);
       }
-      if (quote.needsManager) {
-        alert("Стоимость доставки уточняется у менеджера.");
-        setCourierDeliveryCostByn(0);
-        return;
-      }
-      setCourierDeliveryCostByn(quote.amount ?? 0);
-    } catch {
-      alert("Не удалось загрузить условия доставки. Попробуйте позже.");
-      setCourierDeliveryCostByn(0);
-    } finally {
-      setDeliveryCalcLoading(false);
-    }
-  };
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [deliveryAddress.city, totalByn]);
 
   /** Товары + доставка (доставка по умолчанию 0 BYN). */
   const courierOrderGrandByn = useMemo(
@@ -535,18 +559,11 @@ const Checkout = () => {
                   </span>
                   <span className="checkout-total-label">Стоимость заказа</span>
                 </div>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  className="checkout-delivery-calc-btn"
-                  startIcon={<LocalShippingIcon />}
-                  disabled={deliveryCalcLoading}
-                  onClick={handleCourierDeliveryCalc}
-                >
+                <p className="checkout-delivery-auto-hint">
                   {deliveryCalcLoading
-                    ? "Расчёт…"
-                    : "Рассчитать доставку"}
-                </Button>
+                    ? "Расчёт доставки…"
+                    : "Стоимость доставки считается автоматически по городу и сумме заказа."}
+                </p>
                 <div className="checkout-total-line">
                   <span className="checkout-total-value checkout-total-value--delivery">
                     {`${formatPrice(courierDeliveryCostByn)} BYN`}
@@ -555,6 +572,11 @@ const Checkout = () => {
                     Стоимость доставки
                   </span>
                 </div>
+                {deliveryQuoteNote ? (
+                  <p className="checkout-delivery-note" role="status">
+                    {deliveryQuoteNote}
+                  </p>
+                ) : null}
                 <div className="checkout-total-line">
                   <span className="checkout-total-value">
                     {`${formatPrice(courierOrderGrandByn)} BYN`}

@@ -38,11 +38,11 @@ const Brands = () => {
           <span className="section-number" aria-hidden>
             04
           </span>
-          <h1 id="brands-heading" className="page-section-heading">
+          {/* <h1 id="brands-heading" className="page-section-heading">
             Бренды
-          </h1>
+          </h1> */}
           <p className="page-section-text">
-            Проверенные производители отопительного оборудования из каталога.
+            Проверенные производители отопительного оборудования.
           </p>
           {loadingManufacturers ? (
             <p className="brands-loading">Загрузка брендов...</p>

@@ -32,6 +32,8 @@ export const ROUTES = {
     brandBySlug: (slug) => `/brands/${slug}`,
     CONTACTS: '/contacts',
     CABINET: '/cabinet',
+    /** История заказов (из личного кабинета) */
+    MY_ORDERS: '/cabinet/orders',
     CART: '/cart',
     CHECKOUT: '/checkout',
     FAVORITES: '/favorites',

@@ -356,3 +356,99 @@
 .about-payment-modal-list li {
   margin-bottom: 4px;
 }
+
+/* Модальное окно «Гарантия» */
+.about-warranty-modal .MuiDialog-paper {
+  border-radius: 12px;
+  background-color: var(--color-bg-card, #1a2332);
+  color: var(--color-text, #f1f5f9);
+  max-width: 900px;
+}
+
+.about-warranty-modal-title {
+  position: relative;
+  padding: 16px 24px !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.about-warranty-modal-close {
+  position: absolute !important;
+  top: 8px;
+  right: 8px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.about-warranty-modal-close:hover {
+  color: #fff;
+}
+
+.about-warranty-modal-content {
+  padding: 24px !important;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.about-warranty-doc-title {
+  margin: 0 0 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-text, #f1f5f9);
+}
+
+.about-warranty-section-title {
+  margin: 1.25rem 0 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--color-text, #f1f5f9);
+}
+
+.about-warranty-section-title:first-of-type {
+  margin-top: 0;
+}
+
+.about-warranty-modal-lead {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text, #f1f5f9);
+  line-height: 1.5;
+}
+
+.about-warranty-modal-text {
+  margin: 0 0 12px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.about-warranty-modal-text:last-child {
+  margin-bottom: 0;
+}
+
+.about-warranty-modal-list {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.about-warranty-modal-list li {
+  margin-bottom: 6px;
+}
+
+.about-warranty-modal-list:last-of-type {
+  margin-bottom: 12px;
+}
+
+.about-warranty-modal-note {
+  margin: 16px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+}

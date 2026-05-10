@@ -11,6 +11,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import iconDelivery from "../../../images/img_social/free-icon-fast-delivery-5465975.png";
 import iconPayment from "../../../images/img_social/free-icon-secure-payment-11338230.png";
 import iconPartners from "../../../images/img_social/free-icon-partner-11445175.png";
+import iconWarranty from "../../../images/img_social/9549528.png";
 import api from "../../../services/api";
 import "./About.css";
 
@@ -38,6 +39,7 @@ function finalizeDeliveryLine(body) {
 const About = () => {
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [warrantyModalOpen, setWarrantyModalOpen] = useState(false);
   const [deliveryItems, setDeliveryItems] = useState([]);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
   const [deliveryError, setDeliveryError] = useState(null);
@@ -275,7 +277,7 @@ const About = () => {
             <div
               className="about-page-buttons"
               role="toolbar"
-              aria-label="Оплата, доставка, партнёры"
+              aria-label="Оплата, доставка, партнёры, гарантия"
             >
               <button
                 type="button"
@@ -305,6 +307,15 @@ const About = () => {
                 <img src={iconPartners} alt="" width={48} height={48} />
                 <span>Партнеры</span>
               </a>
+              <button
+                type="button"
+                className="about-action-btn"
+                aria-label="Гарантия"
+                onClick={() => setWarrantyModalOpen(true)}
+              >
+                <img src={iconWarranty} alt="" width={48} height={48} />
+                <span>Гарантия</span>
+              </button>
             </div>
           </div>
         </section>
@@ -473,6 +484,186 @@ const About = () => {
             для сверки с выпиской из карт-счёта с целью подтверждения
             совершённых операций в случае возникновения такой необходимости в
             спорных ситуациях.
+          </p>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={warrantyModalOpen}
+        onClose={() => setWarrantyModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        className="about-warranty-modal"
+        PaperProps={{ className: "about-warranty-modal-paper" }}
+      >
+        <DialogTitle className="about-warranty-modal-title">
+          Гарантия
+          <IconButton
+            aria-label="Закрыть"
+            onClick={() => setWarrantyModalOpen(false)}
+            className="about-warranty-modal-close"
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent className="about-warranty-modal-content">
+          <h2 className="about-warranty-doc-title">
+            Гарантийные обязательства при покупке электроотопительного
+            оборудования
+          </h2>
+
+          <h3 className="about-warranty-section-title">1. Гарантийный срок</h3>
+          <p className="about-warranty-modal-text">
+            <strong>1.1.</strong> Гарантийный срок на новое электроотопительное
+            оборудование составляет 24 (двадцать четыре) месяца со дня передачи
+            товара Покупателю, если иное не указано в документации к конкретному
+            изделию.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>1.2.</strong> В случае отсутствия документов,
+            подтверждающих дату приобретения, гарантийный срок исчисляется с
+            даты изготовления оборудования, указанной на заводской табличке
+            (шильдике).
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            2. Условия предоставления гарантии
+          </h3>
+          <p className="about-warranty-modal-text">
+            Гарантийные обязательства действительны при одновременном соблюдении
+            следующих условий:
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>2.1. Надлежащее оформление документов:</strong> Покупатель
+            имеет оригинал гарантийного талона установленного образца с
+            указанием модели, серийного номера, даты продажи и печати продавца,
+            а также товарный (кассовый) чек.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>2.2. Правильный монтаж:</strong> Установка оборудования
+            выполнена в строгом соответствии с требованиями завода-изготовителя
+            (указаны в руководстве по эксплуатации).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>2.3. Ввод в эксплуатацию:</strong> Первый пуск и наладка
+            оборудования произведены специализированной организацией
+            (сертифицированным специалистом), что подтверждается отметкой в
+            гарантийном талоне.
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            3. Что делает Продавец/Изготовитель
+          </h3>
+          <p className="about-warranty-modal-text">
+            <strong>3.1.</strong> В течение всего гарантийного срока
+            Продавец/Изготовитель обязуется своими силами и за свой счет
+            устранять производственные дефекты оборудования.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>3.2.</strong> В случае выявления заводского брака, не
+            позволяющего устранить неисправность, производится замена
+            оборудования на аналогичное (если модель снята с производства, на
+            равноценное по характеристикам).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>3.3.</strong> Ремонт осуществляется авторизованным сервисным
+            центром.
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            4. Гарантия не распространяется
+          </h3>
+          <p className="about-warranty-modal-text">
+            <strong>4.1.</strong> На расходные материалы и быстроизнашивающиеся
+            детали (при наличии таковых в конструкции, например: уплотнители,
+            если они есть).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>4.2.</strong> При нарушении правил эксплуатации, указанных в
+            руководстве пользователя (подключение к сети с несоответствующим
+            напряжением, попадание жидкости, перегрев, работа без
+            теплоносителя, использование некачественной воды, если это
+            предусмотрено конструкцией).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>4.3.</strong> При наличии механических повреждений, следов
+            самостоятельного ремонта, вскрытия или изменения конструкции
+            оборудования.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>4.4.</strong> При неквалифицированном монтаже, если
+            оборудование требует профессиональной установки.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>4.5.</strong> В случае форс-мажорных обстоятельств
+            (стихийные бедствия, скачки напряжения в электросети свыше
+            допустимых норм — при отсутствии стабилизатора, если это
+            предусмотрено инструкцией).
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            5. Порядок действий при наступлении гарантийного случая
+          </h3>
+          <p className="about-warranty-modal-text">
+            <strong>5.1.</strong> Покупатель уведомляет Продавца или напрямую
+            обращается в авторизованный сервисный центр (контакты указаны в
+            документации).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>5.2.</strong> При себе необходимо иметь:
+          </p>
+          <ul className="about-warranty-modal-list">
+            <li>заполненный гарантийный талон;</li>
+            <li>документ, подтверждающий покупку (чек);</li>
+            <li>
+              акт ввода в эксплуатацию (если требуется инструкцией).
+            </li>
+          </ul>
+          <p className="about-warranty-modal-text">
+            <strong>5.3.</strong> Оборудование передается в сервисный центр в
+            чистом виде и в комплектации, соответствующей заводской (если
+            требуется).
+          </p>
+
+          <h3 className="about-warranty-section-title">6. Особые условия</h3>
+          <p className="about-warranty-modal-text">
+            <strong>6.1.</strong> Срок гарантии на замененные компоненты
+            составляет 6 месяцев, но не более оставшегося гарантийного срока на
+            само оборудование.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>6.2.</strong> Проведение планового технического обслуживания
+            (чистка, проверка контактов, замена фильтров, если они есть) не
+            входит в гарантийные обязательства и оплачивается отдельно.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>6.3.</strong> Изготовитель не несет ответственности за
+            неудобства, вызванные невозможностью использовать оборудование в
+            период его ремонта.
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            Рекомендации по использованию
+          </h3>
+          <ul className="about-warranty-modal-list">
+            <li>
+              <strong>Адаптация:</strong> указывайте точные сроки гарантии на
+              конкретную модель (например: «Электрокотел мощностью 9 кВт — 3
+              года»).
+            </li>
+            <li>
+              <strong>Сервисная сеть:</strong> желательно приложить список адресов
+              сервисных центров.
+            </li>
+            <li>
+              <strong>Требования к монтажу:</strong> если установка критична —
+              продублируйте требование о наличии лицензии у монтажников.
+            </li>
+          </ul>
+          <p className="about-warranty-modal-note">
+            Этот текст составлен на основе обобщения российской и международной
+            практики производителей климатического и отопительного оборудования
+            и соответствует стандартам, принятым в отрасли.
           </p>
         </DialogContent>
       </Dialog>

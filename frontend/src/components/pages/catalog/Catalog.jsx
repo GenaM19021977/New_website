@@ -271,9 +271,9 @@ const Catalog = () => {
           <span className="section-number" aria-hidden>
             03
           </span>
-          <h1 id="catalog-heading" className="page-section-heading">
+          {/* <h1 id="catalog-heading" className="page-section-heading">
             Каталог
-          </h1>
+          </h1> */}
           <p className="page-section-text">
             Каталог отопительного оборудования: котлы, водонагреватели, насосы и
             сопутствующие товары.
