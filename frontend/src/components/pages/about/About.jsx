@@ -108,10 +108,12 @@ const About = () => {
           <span className="section-number" aria-hidden>
             02
           </span>
-          {/* <h1 id="about-heading" className="page-section-heading">
-            О нас
-          </h1> */}
-          <article className="about-page-article" lang="ru">
+          <div className="about-page-columns">
+            <div className="about-page-columns-main">
+              {/* <h1 id="about-heading" className="page-section-heading">
+                О нас
+              </h1> */}
+              <article className="about-page-article" lang="ru">
             <p>
               Электрическое отопление для частного дома — это современное,
               экологичное и безопасное решение, которое завоевывает всё большую
@@ -268,36 +270,42 @@ const About = () => {
               Если появятся вопросы на каком-то из этапов, спрашивайте — я
               постараюсь помочь.
             </p>
-          </article>
-          <div className="about-page-buttons">
-            <button
-              type="button"
-              className="about-action-btn"
-              aria-label="Оплата"
-              onClick={() => setPaymentModalOpen(true)}
+              </article>
+            </div>
+            <div
+              className="about-page-buttons"
+              role="toolbar"
+              aria-label="Оплата, доставка, партнёры"
             >
-              <img src={iconPayment} alt="" width={48} height={48} />
-              <span>Оплата</span>
-            </button>
-            <button
-              type="button"
-              className="about-action-btn"
-              aria-label="Доставка"
-              onClick={() => setDeliveryModalOpen(true)}
-            >
-              <img src={iconDelivery} alt="" width={48} height={48} />
-              <span>Доставка</span>
-            </button>
-            <a
-              className="about-action-btn about-action-btn--link"
-              href="https://kotelkov.by/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Партнеры — открыть сайт kotelkov.by"
-            >
-              <img src={iconPartners} alt="" width={48} height={48} />
-              <span>Партнеры</span>
-            </a>
+              <button
+                type="button"
+                className="about-action-btn"
+                aria-label="Оплата"
+                onClick={() => setPaymentModalOpen(true)}
+              >
+                <img src={iconPayment} alt="" width={48} height={48} />
+                <span>Оплата</span>
+              </button>
+              <button
+                type="button"
+                className="about-action-btn"
+                aria-label="Доставка"
+                onClick={() => setDeliveryModalOpen(true)}
+              >
+                <img src={iconDelivery} alt="" width={48} height={48} />
+                <span>Доставка</span>
+              </button>
+              <a
+                className="about-action-btn about-action-btn--link"
+                href="https://kotelkov.by/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Партнеры — открыть сайт kotelkov.by"
+              >
+                <img src={iconPartners} alt="" width={48} height={48} />
+                <span>Партнеры</span>
+              </a>
+            </div>
           </div>
         </section>
       </div>
