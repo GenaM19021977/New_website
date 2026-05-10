@@ -153,20 +153,38 @@ const MyOrders = () => {
                   </p>
                 ) : null}
                 {order.items?.length ? (
-                  <ul className="my-orders-items">
-                    {order.items.map((line, idx) => {
-                      const name = (line.product_name || "").trim();
-                      const qty = Math.max(
-                        1,
-                        Number(line.quantity) || 1,
-                      );
-                      return (
-                        <li key={`${order.id}-${line.product_id}-${idx}`}>
-                          {name} - {qty} шт.
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <>
+                    <ul className="my-orders-items">
+                      {order.items.map((line, idx) => {
+                        const name = (line.product_name || "").trim();
+                        const qty = Math.max(
+                          1,
+                          Number(line.quantity) || 1,
+                        );
+                        return (
+                          <li key={`${order.id}-${line.product_id}-${idx}`}>
+                            {name} - {qty} шт.
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    {order.status === "new" ? (
+                      <p className="my-orders-accepted-msg" role="status">
+                        Ваш заказ принят!
+                      </p>
+                    ) : null}
+                    {order.status === "processing" ? (
+                      <p className="my-orders-accepted-msg" role="status">
+                        Мы готовим Ваш заказ к отправке!
+                      </p>
+                    ) : null}
+                    {order.status === "shipped" ? (
+                      <p className="my-orders-accepted-msg" role="status">
+                        Ваш заказ отправлен по указанному Вами адресу. Наш курьер
+                        свяжется с Вами!
+                      </p>
+                    ) : null}
+                  </>
                 ) : null}
               </li>
             ))}
