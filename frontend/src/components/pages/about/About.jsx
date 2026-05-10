@@ -9,7 +9,8 @@ import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import iconDelivery from "../../../images/img_social/free-icon-fast-delivery-5465975.png";
-import iconPayment from "../../../images/img_social/free-icon-money-box-14022258.png";
+import iconPayment from "../../../images/img_social/free-icon-secure-payment-11338230.png";
+import iconPartners from "../../../images/img_social/free-icon-partner-11445175.png";
 import api from "../../../services/api";
 import "./About.css";
 
@@ -131,6 +132,16 @@ const About = () => {
               <img src={iconDelivery} alt="" width={48} height={48} />
               <span>Доставка</span>
             </button>
+            <a
+              className="about-action-btn about-action-btn--link"
+              href="https://kotelkov.by/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Партнеры — открыть сайт kotelkov.by"
+            >
+              <img src={iconPartners} alt="" width={48} height={48} />
+              <span>Партнеры</span>
+            </a>
           </div>
         </section>
       </div>

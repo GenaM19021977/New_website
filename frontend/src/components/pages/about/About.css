@@ -48,6 +48,11 @@
   transform: translateY(-1px);
 }
 
+.about-action-btn--link {
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
 .about-action-btn img {
   flex-shrink: 0;
 }
