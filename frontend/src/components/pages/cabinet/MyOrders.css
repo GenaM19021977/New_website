@@ -56,6 +56,13 @@
   margin-bottom: 10px;
 }
 
+.my-orders-card-id-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
 .my-orders-card-id {
   font-weight: 700;
   color: var(--color-text);
@@ -71,6 +78,19 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-accent);
+}
+
+.my-orders-card-status--canceled {
+  color: var(--color-text-muted);
+}
+
+.my-orders-cancel-btn {
+  text-transform: none !important;
+  flex-shrink: 0;
+}
+
+.my-orders-canceled-msg {
+  color: var(--color-text-muted);
 }
 
 .my-orders-card-sum {
@@ -111,3 +131,4 @@
   font-weight: 600;
   color: var(--color-accent);
 }
+

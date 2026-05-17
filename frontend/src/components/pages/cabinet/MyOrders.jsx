@@ -13,7 +13,10 @@ const ORDER_STATUS_LABELS = {
   new: "Новый",
   processing: "В обработке",
   shipped: "Отправлен",
+  canceled_by_user: "Отменён пользователем",
 };
+
+const CANCELABLE_STATUSES = new Set(["new", "processing"]);
 
 const PAYMENT_LABELS = {
   cash_on_receipt: "Наличными при получении",
@@ -47,6 +50,36 @@ const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cancelingId, setCancelingId] = useState(null);
+  const [cancelError, setCancelError] = useState(null);
+
+  const handleCancelOrder = async (orderId) => {
+    if (
+      !window.confirm(
+        "Отменить заказ? Статус изменится на «Отменён пользователем».",
+      )
+    ) {
+      return;
+    }
+    setCancelingId(orderId);
+    setCancelError(null);
+    try {
+      const res = await api.delete(`orders/${orderId}/`);
+      const updated = res.data;
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, ...updated } : o)),
+      );
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      setCancelError(
+        typeof detail === "string"
+          ? detail
+          : "Не удалось отменить заказ. Попробуйте позже.",
+      );
+    } finally {
+      setCancelingId(null);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
@@ -99,6 +132,7 @@ const MyOrders = () => {
           </div>
           <h1 className="page-section-heading my-orders-heading">Мои заказы</h1>
           {error ? <p className="my-orders-error">{error}</p> : null}
+          {cancelError ? <p className="my-orders-error">{cancelError}</p> : null}
           {!error && orders.length === 0 ? (
             <p className="my-orders-empty">
               У вас пока нет оформленных заказов.{" "}
@@ -111,11 +145,34 @@ const MyOrders = () => {
             {orders.map((order) => (
               <li key={order.id} className="my-orders-card">
                 <div className="my-orders-card-head">
-                  <span className="my-orders-card-id">Заказ №{order.id}</span>
+                  <div className="my-orders-card-id-row">
+                    <span className="my-orders-card-id">Заказ №{order.id}</span>
+                    {CANCELABLE_STATUSES.has(order.status) ? (
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        color="inherit"
+                        size="small"
+                        className="my-orders-cancel-btn"
+                        disabled={cancelingId === order.id}
+                        onClick={() => handleCancelOrder(order.id)}
+                      >
+                        {cancelingId === order.id
+                          ? "Отмена…"
+                          : "Отменить заказ"}
+                      </Button>
+                    ) : null}
+                  </div>
                   <span className="my-orders-card-date">
                     {formatOrderDate(order.created_at)}
                   </span>
-                  <span className="my-orders-card-status">
+                  <span
+                    className={`my-orders-card-status${
+                      order.status === "canceled_by_user"
+                        ? " my-orders-card-status--canceled"
+                        : ""
+                    }`}
+                  >
                     {ORDER_STATUS_LABELS[order.status] || order.status}
                   </span>
                 </div>
@@ -157,10 +214,7 @@ const MyOrders = () => {
                     <ul className="my-orders-items">
                       {order.items.map((line, idx) => {
                         const name = (line.product_name || "").trim();
-                        const qty = Math.max(
-                          1,
-                          Number(line.quantity) || 1,
-                        );
+                        const qty = Math.max(1, Number(line.quantity) || 1);
                         return (
                           <li key={`${order.id}-${line.product_id}-${idx}`}>
                             {name} - {qty} шт.
@@ -180,8 +234,16 @@ const MyOrders = () => {
                     ) : null}
                     {order.status === "shipped" ? (
                       <p className="my-orders-accepted-msg" role="status">
-                        Ваш заказ отправлен по указанному Вами адресу. Наш курьер
-                        свяжется с Вами!
+                        Ваш заказ отправлен по указанному Вами адресу. Наш
+                        курьер свяжется с Вами!
+                      </p>
+                    ) : null}
+                    {order.status === "canceled_by_user" ? (
+                      <p
+                        className="my-orders-accepted-msg my-orders-canceled-msg"
+                        role="status"
+                      >
+                        Заказ отменён пользователем.
                       </p>
                     ) : null}
                   </>

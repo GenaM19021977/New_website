@@ -460,6 +460,7 @@ class OrderHistory(models.Model):
         NEW = "new", "Новый"
         PROCESSING = "processing", "В обработке"
         SHIPPED = "shipped", "Отправлен"
+        CANCELED_BY_USER = "canceled_by_user", "Отменен пользователем"
 
     user = models.ForeignKey(
         CustomUser,

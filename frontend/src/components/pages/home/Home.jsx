@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import Card from '../../card/Card';
+import Carousel3D from '../../carousel/Carousel3D';
 import { ROUTES } from '../../../config/constants';
 import './Home.css';
 
@@ -19,6 +19,12 @@ const Home = () => {
           <Link to={ROUTES.ABOUT} className="home-hero-cta">
             О компании
           </Link>
+        </div>
+      </section>
+
+      <section className="home-carousel-section" aria-label="Галерея котлов">
+        <div className="page-container">
+          <Carousel3D />
         </div>
       </section>
     </main>

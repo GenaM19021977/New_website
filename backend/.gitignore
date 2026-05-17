@@ -25,6 +25,7 @@ venv/
 ENV/
 env/
 .venv
+venv
 
 # Django
 *.log
@@ -37,6 +38,7 @@ db.sqlite3-journal
 
 # Environment variables
 .env
+env
 .env.local
 .env.*.local
 

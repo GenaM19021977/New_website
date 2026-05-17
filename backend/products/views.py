@@ -112,6 +112,7 @@ class OrderHistoryCreateView(viewsets.ViewSet):
     """
     GET /orders/ — список заказов текущего пользователя (JWT обязателен).
     POST /orders/ — сохранение заказа в историю (гость или пользователь).
+    DELETE /orders/{pk}/ — отмена своего заказа (статус «Отменен пользователем»).
     products_subtotal в БД = «Стоимость заказа, BYN» (каталог ± products_subtotal_byn с checkout).
     """
 
@@ -142,6 +143,44 @@ class OrderHistoryCreateView(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        """Отмена заказа владельцем: статус canceled_by_user, запись остаётся в истории."""
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Требуется авторизация."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        try:
+            order = OrderHistory.objects.prefetch_related("items").get(pk=pk)
+        except OrderHistory.DoesNotExist:
+            return Response(
+                {"detail": "Заказ не найден."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if order.user_id != request.user.id:
+            return Response(
+                {"detail": "Заказ не найден."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if order.status == OrderHistory.OrderStatus.SHIPPED:
+            return Response(
+                {
+                    "detail": "Нельзя отменить заказ, который уже отправлен.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if order.status == OrderHistory.OrderStatus.CANCELED_BY_USER:
+            return Response(
+                {"detail": "Заказ уже отменён."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        order.status = OrderHistory.OrderStatus.CANCELED_BY_USER
+        order.save(update_fields=["status"])
+        return Response(
+            OrderHistoryReadSerializer(order).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class LoginView(viewsets.ViewSet):
