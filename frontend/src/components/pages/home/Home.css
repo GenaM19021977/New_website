@@ -9,7 +9,7 @@
 
 .home-hero {
   position: relative;
-  min-height: 70vh;
+  min-height: min(100vh, 900px);
   display: flex;
   align-items: center;
   background-image: url('../../../images/87168176238132.png');
@@ -26,8 +26,44 @@
 
 .home-hero-content {
   position: relative;
+  width: 100%;
   padding-top: var(--section-padding-y);
   padding-bottom: var(--section-padding-y);
+}
+
+.home-hero-layout {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+}
+
+.home-hero-text {
+  min-width: 0;
+}
+
+.home-hero-carousel {
+  min-width: 0;
+  width: 100%;
+}
+
+.home-hero-carousel .carousel-3d {
+  max-width: none;
+}
+
+.home-hero-carousel .carousel-3d-viewport {
+  background: rgba(11, 20, 25, 0.4);
+}
+
+.home-hero-carousel .carousel-3d-stage {
+  height: min(42vw, 360px);
+  min-height: 260px;
+}
+
+@media (min-width: 900px) {
+  .home-hero-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 40px 48px;
+  }
 }
 
 .home-hero-label {
@@ -71,12 +107,6 @@
 .home-hero-cta:hover {
   background-color: var(--color-accent);
   color: var(--color-bg-dark);
-}
-
-.home-carousel-section {
-  padding-top: var(--section-padding-y);
-  padding-bottom: var(--section-padding-y);
-  background-color: var(--color-bg-dark);
 }
 
 .home-section {
