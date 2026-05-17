@@ -36,5 +36,7 @@ router.register("delivery", DeliveryView, basename="delivery")
 
 router.register("orders", OrderHistoryCreateView, basename="orders")
 
+router.register("user-questions", UserQuestionView, basename="user-questions")
+
 # URL patterns, сгенерированные роутером
 urlpatterns = router.urls

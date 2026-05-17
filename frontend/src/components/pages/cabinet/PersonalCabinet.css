@@ -143,6 +143,64 @@
   margin-top: 24px;
 }
 
+.cabinet-questions-empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.cabinet-questions-empty a {
+  color: var(--color-accent);
+}
+
+.cabinet-questions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cabinet-questions-item {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background-color: var(--color-bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cabinet-questions-date {
+  margin: 0 0 8px;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.cabinet-questions-q,
+.cabinet-questions-a {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--color-text);
+  white-space: pre-wrap;
+}
+
+.cabinet-questions-a {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cabinet-questions-a strong,
+.cabinet-questions-q strong {
+  color: var(--color-accent);
+}
+
+.cabinet-questions-pending {
+  margin: 10px 0 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
 .cabinet-section-content .MuiTextField-root,
 .cabinet-section-content .MuiFormControl-root {
   width: 100%;

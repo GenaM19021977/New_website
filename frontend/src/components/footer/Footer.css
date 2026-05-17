@@ -425,3 +425,41 @@
     font-size: 20px;
   }
 }
+
+.footer-orders-auth-dialog .MuiDialog-paper {
+  border-radius: 8px;
+  background-color: #1a2332;
+  max-width: 420px;
+}
+
+.footer-orders-auth-dialog__content {
+  padding-top: 24px !important;
+  color: var(--color-text, #f1f5f9);
+}
+
+.footer-orders-auth-dialog__message {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.footer-orders-auth-dialog .MuiDialogActions-root.footer-orders-auth-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center !important;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  padding: 8px 24px 24px !important;
+  box-sizing: border-box;
+}
+
+.footer-orders-auth-dialog__btn {
+  text-transform: none !important;
+}
+
+.footer-orders-auth-dialog__btn--secondary {
+  color: var(--color-accent, #0db39e) !important;
+  border-color: var(--color-accent, #0db39e) !important;
+}

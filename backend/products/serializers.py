@@ -513,3 +513,42 @@ class OrderHistoryReadSerializer(serializers.ModelSerializer):
             "apartment_number",
             "items",
         )
+
+
+class UserQuestionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserQuestion
+        fields = ("user_name", "email", "phone", "question")
+
+    def validate_user_name(self, value):
+        name = (value or "").strip()
+        if not name:
+            raise serializers.ValidationError("Укажите имя.")
+        return name
+
+    def validate_question(self, value):
+        text = (value or "").strip()
+        if not text:
+            raise serializers.ValidationError("Укажите текст вопроса.")
+        return text
+
+    def create(self, validated_data):
+        return UserQuestion.objects.create(
+            user=self.context["request"].user,
+            **validated_data,
+        )
+
+
+class UserQuestionReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserQuestion
+        fields = (
+            "id",
+            "user_name",
+            "email",
+            "phone",
+            "question",
+            "admin_answer",
+            "created_at",
+        )
+        read_only_fields = fields

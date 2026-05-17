@@ -8,7 +8,12 @@
  * 4. Плавающие кнопки - чат, телефон, прокрутка вверх
  */
 
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
 import './Footer.css';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -17,7 +22,8 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SendIcon from '@mui/icons-material/Send';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import MenuIcon from '@mui/icons-material/Menu';
-import { ROUTES } from '../../config/constants';
+import { ROUTES, AUTH_REQUIRED_ORDERS } from '../../config/constants';
+import { isAuth } from '../../utils/cart';
 import logoHeader from '../../images/logo-header.png';
 import iconVk from '../../images/img_social/free-icon-vk-2504953.png';
 import iconFacebook from '../../images/img_social/free-icon-facebook-2504903.png';
@@ -25,6 +31,18 @@ import iconWhatsapp from '../../images/img_social/free-icon-whatsapp-2504957.png
 import iconInstagram from '../../images/img_social/free-icon-instagram-1409946.png';
 
 export default function Footer() {
+    const navigate = useNavigate();
+    const [ordersAuthOpen, setOrdersAuthOpen] = useState(false);
+
+    const handleOrdersHistoryClick = (e) => {
+        e.preventDefault();
+        if (isAuth()) {
+            navigate(ROUTES.MY_ORDERS);
+            return;
+        }
+        setOrdersAuthOpen(true);
+    };
+
     // Функция для прокрутки страницы вверх
     const scrollToTop = () => {
         window.scrollTo({
@@ -85,7 +103,7 @@ export default function Footer() {
                             </div>
                             <div className="contact-item">
                                 <EmailIcon className="contact-icon" />
-                                <a href="mailto:info@kotelkov.by">info@kotelkov.by</a>
+                                <a href="mailto:malchewski@mail.ru">malchewski@mail.ru</a>
                             </div>
                             <div className="contact-item">
                                 <LocationOnIcon className="contact-icon" />
@@ -149,7 +167,14 @@ export default function Footer() {
                         <ul className="footer-links-list">
                             <li><Link to={ROUTES.CABINET}>Личный кабинет</Link></li>
                             <li><Link to={ROUTES.FAVORITES}>Избранное</Link></li>
-                            <li><Link to="/orders">История заказа</Link></li>
+                            <li>
+                                <a
+                                    href={ROUTES.MY_ORDERS}
+                                    onClick={handleOrdersHistoryClick}
+                                >
+                                    История заказов
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -194,6 +219,42 @@ export default function Footer() {
                     </div>
                 </div>
             </div>
+
+            <Dialog
+                open={ordersAuthOpen}
+                onClose={() => setOrdersAuthOpen(false)}
+                className="footer-orders-auth-dialog"
+                aria-labelledby="footer-orders-auth-title"
+            >
+                <DialogContent className="footer-orders-auth-dialog__content">
+                    <p id="footer-orders-auth-title" className="footer-orders-auth-dialog__message">
+                        {AUTH_REQUIRED_ORDERS}
+                    </p>
+                </DialogContent>
+                <DialogActions
+                    className="footer-orders-auth-dialog__actions"
+                    sx={{ justifyContent: 'center', width: '100%' }}
+                >
+                    <Button
+                        component={Link}
+                        to={ROUTES.LOGIN}
+                        variant="contained"
+                        className="footer-orders-auth-dialog__btn"
+                        onClick={() => setOrdersAuthOpen(false)}
+                    >
+                        Войти
+                    </Button>
+                    <Button
+                        component={Link}
+                        to={ROUTES.REGISTER}
+                        variant="outlined"
+                        className="footer-orders-auth-dialog__btn footer-orders-auth-dialog__btn--secondary"
+                        onClick={() => setOrdersAuthOpen(false)}
+                    >
+                        Регистрация
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Плавающие кнопки */}
             <div className="floating-buttons">

@@ -25,6 +25,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
 import api from "../../../services/api";
 import { useForm, Controller } from "react-hook-form";
 import MyTextField from "../../forms/MyTextField";
@@ -41,6 +42,8 @@ const PersonalCabinet = () => {
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [myQuestions, setMyQuestions] = useState([]);
+  const [questionsOpen, setQuestionsOpen] = useState(true);
 
   const { handleSubmit: handlePersonalSubmit, control: personalControl, reset: resetPersonal } = useForm({
     defaultValues: {
@@ -91,6 +94,17 @@ const PersonalCabinet = () => {
       })
       .finally(() => setLoading(false));
   }, [navigate, resetPersonal]);
+
+  useEffect(() => {
+    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    if (!token) return;
+    api
+      .get("user-questions/")
+      .then((res) => {
+        setMyQuestions(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => setMyQuestions([]));
+  }, []);
 
   const handleCopyEmail = () => {
     if (user?.email) {
@@ -243,6 +257,57 @@ const PersonalCabinet = () => {
               >
                 Мои заказы
               </Button>
+            </div>
+
+            <div className="cabinet-section-block">
+              <Button
+                variant="outlined"
+                startIcon={<QuestionAnswerIcon />}
+                onClick={() => setQuestionsOpen(!questionsOpen)}
+                className="cabinet-section-btn"
+              >
+                Мои вопросы и ответы
+              </Button>
+              <Collapse in={questionsOpen}>
+                <div className="cabinet-section-content cabinet-questions">
+                  {myQuestions.length === 0 ? (
+                    <p className="cabinet-questions-empty">
+                      Вы ещё не задавали вопросов.{" "}
+                      <Link to={ROUTES.CONTACTS}>Задать вопрос</Link>
+                    </p>
+                  ) : (
+                    <ul className="cabinet-questions-list">
+                      {myQuestions.map((item) => (
+                        <li key={item.id} className="cabinet-questions-item">
+                          <p className="cabinet-questions-date">
+                            {item.created_at
+                              ? new Date(item.created_at).toLocaleString("ru-RU", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : ""}
+                          </p>
+                          <p className="cabinet-questions-q">
+                            <strong>Вопрос:</strong> {item.question}
+                          </p>
+                          {(item.admin_answer || "").trim() ? (
+                            <p className="cabinet-questions-a">
+                              <strong>Ответ:</strong> {item.admin_answer}
+                            </p>
+                          ) : (
+                            <p className="cabinet-questions-pending">
+                              Ожидает ответа администратора
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </Collapse>
             </div>
 
             <div className="cabinet-section-block">

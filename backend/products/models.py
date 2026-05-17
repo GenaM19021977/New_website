@@ -609,3 +609,50 @@ class OrderHistoryItem(models.Model):
 
     def __str__(self):
         return f"{self.product_name} × {self.quantity}"
+
+
+class UserQuestion(models.Model):
+    """Вопрос пользователя с сайта и ответ администратора."""
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="questions",
+        verbose_name="Пользователь",
+    )
+    user_name = models.CharField(max_length=200, verbose_name="Имя пользователя")
+    email = models.EmailField(max_length=254, verbose_name="Адрес электронной почты")
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        verbose_name="Контактный телефон",
+    )
+    question = models.TextField(verbose_name="Вопрос пользователя")
+    admin_answer = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Ответ администратора",
+    )
+    answer_email_sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Ответ отправлен на e-mail",
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания",
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Дата обновления",
+    )
+
+    class Meta:
+        db_table = "user_question"
+        verbose_name = "Вопрос пользователя"
+        verbose_name_plural = "Вопросы пользователей"
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        return f"Вопрос от {self.user_name} ({self.created_at:%d.%m.%Y})"

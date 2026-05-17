@@ -211,3 +211,27 @@ SIMPLE_JWT = {
     ),  # Класс токена
     "TOKEN_TYPE_CLAIM": "token_type",  # Имя claim для типа токена
 }
+
+# ==================== EMAIL ====================
+# Ответы на вопросы пользователей (см. products/question_email.py).
+# Mail.ru: smtp.mail.ru, порт 465 (SSL) или 587 (TLS), пароль приложения из настроек почты.
+
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "465"))
+EMAIL_HOST_USER = (os.getenv("EMAIL_HOST_USER", "") or "").strip()
+EMAIL_HOST_PASSWORD = (os.getenv("EMAIL_HOST_PASSWORD", "") or "").strip()
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "30"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True").lower() in ("true", "1", "yes")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "malchewski@mail.ru")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+SITE_NAME = os.getenv("SITE_NAME", "Kotelkov.by")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+FRONTEND_CABINET_URL = os.getenv(
+    "FRONTEND_CABINET_URL",
+    f"{FRONTEND_URL}/cabinet",
+)

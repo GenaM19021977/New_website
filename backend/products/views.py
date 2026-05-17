@@ -17,8 +17,10 @@ from .serializers import (
     DeliverySerializer,
     OrderHistoryCreateSerializer,
     OrderHistoryReadSerializer,
+    UserQuestionCreateSerializer,
+    UserQuestionReadSerializer,
 )
-from .models import ElectricBoiler, Delivery, OrderHistory
+from .models import ElectricBoiler, Delivery, OrderHistory, UserQuestion
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -181,6 +183,33 @@ class OrderHistoryCreateView(viewsets.ViewSet):
             OrderHistoryReadSerializer(order).data,
             status=status.HTTP_200_OK,
         )
+
+
+class UserQuestionView(viewsets.ViewSet):
+    """
+    GET /user-questions/ — вопросы текущего пользователя (JWT обязателен).
+    POST /user-questions/ — отправка вопроса (JWT обязателен).
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+        qs = UserQuestion.objects.filter(user=request.user)
+        serializer = UserQuestionReadSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = UserQuestionCreateSerializer(
+            data=request.data,
+            context={"request": request},
+        )
+        if serializer.is_valid():
+            question = serializer.save()
+            return Response(
+                UserQuestionReadSerializer(question).data,
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(viewsets.ViewSet):
