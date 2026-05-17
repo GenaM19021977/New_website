@@ -363,7 +363,12 @@ class UserQuestionAdmin(admin.ModelAdmin):
     )
     actions = ("send_answer_email_action",)
     list_display_links = ("id", "user_name")
-    list_filter = ("created_at",)
+    list_filter = (
+        "user_name",
+        "email",
+        "created_at",
+        "answer_email_sent_at",
+    )
     search_fields = (
         "user_name",
         "email",
