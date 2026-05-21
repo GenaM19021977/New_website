@@ -155,6 +155,33 @@ class PasswordChangeSerializer(serializers.Serializer):
         return attrs
 
 
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Запрос письма для восстановления пароля по email."""
+
+    email = serializers.CharField()
+
+    def validate_email(self, value):
+        if not value or "@" not in str(value):
+            raise serializers.ValidationError("Некорректный адрес электронной почты!")
+        return value.strip()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Установка нового пароля по ссылке из письма (uid + token)."""
+
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(required=True, min_length=8, write_only=True)
+    new_password2 = serializers.CharField(required=True, min_length=8, write_only=True)
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["new_password2"]:
+            raise serializers.ValidationError(
+                {"new_password2": "Пароли не совпадают"}
+            )
+        return attrs
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     """
     Сериализатор для регистрации нового пользователя

@@ -12,6 +12,8 @@ from .serializers import (
     UserSerializer,
     UserUpdateSerializer,
     PasswordChangeSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
     ElectricBoilerSerializer,
     ElectricBoilerDetailSerializer,
     DeliverySerializer,
@@ -25,10 +27,54 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+from django.conf import settings
+import logging
+import threading
 
+from django.db import close_old_connections
+
+from .password_reset_email import send_password_reset_email, build_password_reset_url
+
+logger = logging.getLogger(__name__)
 
 # Получаем модель пользователя из настроек Django
 User = get_user_model()
+
+PASSWORD_RESET_REQUEST_MESSAGE = (
+    "Если указанный email зарегистрирован, на него отправлена "
+    "инструкция по восстановлению пароля."
+)
+
+
+def _send_password_reset_email_async(user_id: int) -> None:
+    """Отправка письма в фоне, чтобы API ответил сразу (SMTP может занимать >5 с)."""
+
+    def task():
+        close_old_connections()
+        try:
+            user = User.objects.get(pk=user_id)
+            send_password_reset_email(user)
+        except Exception:
+            logger.exception(
+                "Background password reset email failed for user_id=%s",
+                user_id,
+            )
+            if settings.DEBUG:
+                try:
+                    user = User.objects.get(pk=user_id)
+                    logger.error(
+                        "DEV: ссылка сброса пароля (если SMTP недоступен): %s",
+                        build_password_reset_url(user),
+                    )
+                except Exception:
+                    pass
+        finally:
+            close_old_connections()
+
+    threading.Thread(target=task, daemon=True).start()
 
 
 class ManufacturersView(viewsets.ViewSet):
@@ -210,6 +256,68 @@ class UserQuestionView(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetView(viewsets.ViewSet):
+    """
+    Восстановление пароля при забытом пароле.
+
+    POST /password-reset/request/ — письмо со ссылкой (не раскрывает, есть ли email в БД).
+    POST /password-reset/confirm/ — новый пароль по uid и token из ссылки.
+    """
+
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=["post"], url_path="request")
+    def request_reset(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data["email"]
+        user = User.objects.filter(email__iexact=email).first()
+        if user and user.is_active:
+            _send_password_reset_email_async(user.pk)
+
+        return Response({"message": PASSWORD_RESET_REQUEST_MESSAGE})
+
+    @action(detail=False, methods=["post"], url_path="confirm")
+    def confirm_reset(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        uidb64 = serializer.validated_data["uid"]
+        token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["new_password"]
+
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response(
+                {"detail": "Ссылка для сброса пароля недействительна или устарела."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not user.is_active:
+            return Response(
+                {"detail": "Ссылка для сброса пароля недействительна или устарела."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not default_token_generator.check_token(user, token):
+            return Response(
+                {"detail": "Ссылка для сброса пароля недействительна или устарела."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+
+        return Response(
+            {"message": "Пароль успешно изменён. Теперь вы можете войти с новым паролем."}
+        )
 
 
 class LoginView(viewsets.ViewSet):

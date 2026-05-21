@@ -41,6 +41,12 @@
   width: 100%;
 }
 
+/* Поля ввода: метка сверху, без вертикального сжатия из-за align-items: center */
+.auth-item:has(.MuiTextField-root),
+.auth-item:has(.MuiFormControl-root) {
+  align-items: stretch;
+}
+
 .auth-title {
   font-size: 1.5rem;
   font-weight: 600;
@@ -73,6 +79,39 @@
   color: #0db39e;
 }
 
+.auth-forgot-password {
+  justify-content: flex-end !important;
+  margin-top: -8px;
+  margin-bottom: 8px !important;
+}
+
+.auth-hint {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-message {
+  width: 100%;
+}
+
+.auth-message p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-message--success p {
+  color: #7dcea0;
+}
+
+.auth-message--error p {
+  color: #f48fb1;
+}
+
 /* Кнопка в форме */
 .auth-box .myButton,
 .auth-box .MuiButton-root {
@@ -89,14 +128,38 @@
 /* Поля формы — как в AuthModal */
 .auth-box .auth-item .MuiInputLabel-root {
   color: rgba(255, 255, 255, 0.7);
+  z-index: 1;
 }
 
 .auth-box .auth-item .MuiInputLabel-root.Mui-focused {
   color: #ffffff;
 }
 
+/* Поднятая метка (при вводе / фокусе) — не перекрывается полем и autofill */
+.auth-box .auth-item .MuiInputLabel-root.MuiInputLabel-shrink {
+  transform: translate(14px, -9px) scale(0.75);
+  background-color: #1a2332;
+  padding: 0 6px;
+  line-height: 1.2;
+}
+
+.auth-box .auth-item .MuiOutlinedInput-root {
+  margin-top: 2px;
+}
+
 .auth-box .auth-item .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
   border-color: rgba(255, 255, 255, 0.5);
+}
+
+.auth-box .auth-item .MuiOutlinedInput-input:-webkit-autofill,
+.auth-box .auth-item .MuiOutlinedInput-input:-webkit-autofill:hover,
+.auth-box .auth-item .MuiOutlinedInput-input:-webkit-autofill:focus,
+.auth-box .auth-item .MuiOutlinedInput-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px #1a2332 inset !important;
+  box-shadow: 0 0 0 100px #1a2332 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .auth-box .auth-item .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
@@ -119,6 +182,14 @@
 /* Поля пароля — белая рамка и надпись */
 .auth-box .auth-password-field .MuiInputLabel-root {
   color: #ffffff !important;
+  z-index: 1;
+}
+
+.auth-box .auth-password-field .MuiInputLabel-root.MuiInputLabel-shrink {
+  transform: translate(14px, -9px) scale(0.75);
+  background-color: #1a2332;
+  padding: 0 6px;
+  line-height: 1.2;
 }
 
 .auth-box .auth-password-field .MuiInputLabel-root.Mui-focused {

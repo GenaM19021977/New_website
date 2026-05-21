@@ -20,10 +20,15 @@ export default function MyTextField(props) {
           value={value || ''}
           label={label}
           variant="outlined"
-          className={"myForm"}
+          className="myForm"
           error={!!error}
           helperText={error?.message}
           required={rules?.required}
+          slotProps={{
+            inputLabel: {
+              shrink: Boolean(value),
+            },
+          }}
         />
       )
       }

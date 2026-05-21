@@ -235,3 +235,13 @@ FRONTEND_CABINET_URL = os.getenv(
     "FRONTEND_CABINET_URL",
     f"{FRONTEND_URL}/cabinet",
 )
+FRONTEND_LOGIN_URL = os.getenv(
+    "FRONTEND_LOGIN_URL",
+    f"{FRONTEND_URL}/login",
+)
+FRONTEND_PASSWORD_RESET_URL = os.getenv(
+    "FRONTEND_PASSWORD_RESET_URL",
+    f"{FRONTEND_URL}/reset-password",
+)
+# Срок действия ссылки сброса пароля (секунды), по умолчанию 24 часа
+PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT", str(60 * 60 * 24)))

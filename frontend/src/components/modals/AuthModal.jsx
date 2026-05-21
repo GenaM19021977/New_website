@@ -21,7 +21,7 @@ import MyPassField from '../forms/MyPassField';
 import MyButton from '../forms/MyButton';
 import { useForm, Controller } from 'react-hook-form';
 import api from '../../services/api';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS, ROUTES, PHONE_REGEX, PHONE_ERROR, EMAIL_ERROR } from '../../config/constants';
 import './AuthModal.css';
 
@@ -239,6 +239,16 @@ const AuthModal = ({ open, onClose }) => {
                                     name="password"
                                     control={control}
                                 />
+                            </Box>
+
+                            <Box className="auth-field-box auth-modal-forgot">
+                                <Link
+                                    to={ROUTES.FORGOT_PASSWORD}
+                                    className="auth-link"
+                                    onClick={handleClose}
+                                >
+                                    Забыли пароль?
+                                </Link>
                             </Box>
 
                             <Box className="auth-field-box">

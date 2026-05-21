@@ -38,5 +38,8 @@ router.register("orders", OrderHistoryCreateView, basename="orders")
 
 router.register("user-questions", UserQuestionView, basename="user-questions")
 
+# POST /password-reset/request/ и POST /password-reset/confirm/
+router.register("password-reset", PasswordResetView, basename="password-reset")
+
 # URL patterns, сгенерированные роутером
 urlpatterns = router.urls

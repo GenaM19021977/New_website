@@ -2,7 +2,7 @@
  * Страница входа (Login)
  */
 import './Login.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Box } from '@mui/material';
 import MyTextField from '../../forms/MyTextField';
@@ -14,6 +14,8 @@ import { dispatchAuthChanged } from '../../../utils/authEvents';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const successMessage = location.state?.passwordResetSuccess;
   const { handleSubmit, control } = useForm();
 
   const submission = (data) => {
@@ -44,6 +46,11 @@ const Login = () => {
             <Box className="auth-item">
               <h1 className="auth-title">Вход в кабинет</h1>
             </Box>
+            {successMessage && (
+              <Box className="auth-item auth-message auth-message--success">
+                <p>{successMessage}</p>
+              </Box>
+            )}
             <Box className="auth-item">
               <MyTextField
                 label="Email"
@@ -58,6 +65,11 @@ const Login = () => {
             </Box>
             <Box className="auth-item auth-password-field">
               <MyPassField label="Пароль" name="password" control={control} />
+            </Box>
+            <Box className="auth-item auth-forgot-password">
+              <Link to={ROUTES.FORGOT_PASSWORD} className="auth-link">
+                Забыли пароль?
+              </Link>
             </Box>
             <Box className="auth-item">
               <MyButton type="submit" label="Войти" />

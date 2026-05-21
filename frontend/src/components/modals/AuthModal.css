@@ -117,3 +117,18 @@
     color: #ffffff !important;
 }
 
+.auth-modal-forgot {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.auth-modal-forgot .auth-link {
+    color: #9FB0B8;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.auth-modal-forgot .auth-link:hover {
+    color: #0db39e;
+}
+

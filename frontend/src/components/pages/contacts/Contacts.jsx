@@ -246,7 +246,7 @@ const Contacts = () => {
                   </a>
                 </div>
                 <p className="contacts-email">
-                  <a href="mailto:info@kotelkov.by">info@kotelkov.by</a>
+                  <a href="mailto:malchewski@mail.ru">malchewski@mail.ru</a>
                 </p>
               </>
             ) : null}

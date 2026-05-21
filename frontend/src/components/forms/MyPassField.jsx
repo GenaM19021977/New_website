@@ -34,7 +34,12 @@ export default function MyPassField(props) {
         fieldState: { error }
       }) => (
         <FormControl variant="outlined" className={"myForm"}>
-          <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>
+          <InputLabel
+            htmlFor="outlined-adornment-password"
+            shrink={Boolean(value)}
+          >
+            {label}
+          </InputLabel>
           <OutlinedInput
             id="outlined-adornment-password"
             onChange={onChange}
