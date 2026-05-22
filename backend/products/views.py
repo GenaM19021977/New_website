@@ -14,6 +14,7 @@ from .serializers import (
     PasswordChangeSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
+    GoogleAuthSerializer,
     ElectricBoilerSerializer,
     ElectricBoilerDetailSerializer,
     DeliverySerializer,
@@ -37,6 +38,11 @@ import threading
 from django.db import close_old_connections
 
 from .password_reset_email import send_password_reset_email, build_password_reset_url
+from .google_auth import (
+    GoogleAuthError,
+    verify_google_id_token,
+    authenticate_or_create_user_from_google,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -317,6 +323,44 @@ class PasswordResetView(viewsets.ViewSet):
 
         return Response(
             {"message": "Пароль успешно изменён. Теперь вы можете войти с новым паролем."}
+        )
+
+
+class GoogleAuthView(viewsets.ViewSet):
+    """
+    Вход и регистрация через Google (ID token с фронтенда).
+
+    Endpoint: POST /auth/google/
+    Body: { "id_token": "<JWT от Google Identity Services>" }
+    """
+
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request):
+        serializer = GoogleAuthSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            idinfo = verify_google_id_token(serializer.validated_data["id_token"])
+            user = authenticate_or_create_user_from_google(idinfo)
+        except GoogleAuthError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.is_active:
+            return Response(
+                {"detail": "Учётная запись отключена."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            },
+            status=status.HTTP_200_OK,
         )
 
 

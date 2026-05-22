@@ -12,8 +12,10 @@ class CustomUserManager(BaseUserManager):
 
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        # Хэширование пароля перед сохранением
-        user.set_password(password)
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
         user.save(using=self._db)
         return user
 
@@ -34,6 +36,14 @@ class CustomUser(AbstractUser):  # пользовательская модель
     )
     avatar = models.ImageField(
         upload_to="avatars/", null=True, blank=True, verbose_name="Аватар"
+    )
+    google_id = models.CharField(
+        max_length=255,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name="Google ID",
+        help_text="Идентификатор пользователя в Google (sub из ID token)",
     )
 
     # Адресные данные

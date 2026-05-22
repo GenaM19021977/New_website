@@ -18,6 +18,7 @@ export const PUBLIC_ENDPOINTS = [
     'register/',
     'login/',
     'password-reset/',
+    'auth/google/',
     'manufacturers/',
     'boilers/',
     'delivery/',

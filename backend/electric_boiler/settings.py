@@ -17,8 +17,8 @@ from datetime import timedelta
 # Определение базовой директории проекта (два уровня выше от settings.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Загрузка переменных окружения из .env файла
-load_dotenv()
+# Загрузка переменных окружения из backend/.env (не зависит от cwd при запуске)
+load_dotenv(BASE_DIR / ".env")
 
 # ==================== БЕЗОПАСНОСТЬ ====================
 
@@ -243,5 +243,8 @@ FRONTEND_PASSWORD_RESET_URL = os.getenv(
     "FRONTEND_PASSWORD_RESET_URL",
     f"{FRONTEND_URL}/reset-password",
 )
+
+# Google Sign-In (OAuth 2.0 Client ID типа «Web application»)
+GOOGLE_OAUTH_CLIENT_ID = (os.getenv("GOOGLE_OAUTH_CLIENT_ID", "") or "").strip()
 # Срок действия ссылки сброса пароля (секунды), по умолчанию 24 часа
 PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT", str(60 * 60 * 24)))

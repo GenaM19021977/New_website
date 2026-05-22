@@ -132,3 +132,15 @@
     color: #0db39e;
 }
 
+.auth-google-block {
+    margin-bottom: 8px;
+}
+
+.auth-modal-google-error {
+    margin: 0;
+    color: #f48fb1;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.4;
+}
+

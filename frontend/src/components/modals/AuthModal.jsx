@@ -22,7 +22,9 @@ import MyButton from '../forms/MyButton';
 import { useForm, Controller } from 'react-hook-form';
 import api from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS, ROUTES, PHONE_REGEX, PHONE_ERROR, EMAIL_ERROR } from '../../config/constants';
+import { ROUTES, PHONE_REGEX, PHONE_ERROR, EMAIL_ERROR } from '../../config/constants';
+import { saveAuthTokens } from '../../utils/authTokens';
+import GoogleSignInButton from '../auth/GoogleSignInButton';
 import './AuthModal.css';
 
 const AuthModal = ({ open, onClose }) => {
@@ -41,6 +43,23 @@ const AuthModal = ({ open, onClose }) => {
     // Отслеживание значения пароля для валидации подтверждения
     const password = watch("password");
 
+    const [googleError, setGoogleError] = useState(null);
+
+    const finishAuthSuccess = () => {
+        handleClose();
+        navigate(ROUTES.HOME);
+        window.location.reload();
+    };
+
+    const handleGoogleAuthSuccess = () => {
+        setGoogleError(null);
+        finishAuthSuccess();
+    };
+
+    const handleGoogleAuthError = (message) => {
+        setGoogleError(message || null);
+    };
+
     /**
      * Обработчик смены вкладки
      * 
@@ -49,8 +68,9 @@ const AuthModal = ({ open, onClose }) => {
      */
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
-        reset(); // Сброс формы при смене вкладки
-        setAvatarPreview(null); // Сброс превью аватара при смене вкладки
+        reset();
+        setAvatarPreview(null);
+        setGoogleError(null);
         // Сброс input файла
         const fileInput = document.getElementById('avatar-upload');
         if (fileInput) {
@@ -64,7 +84,8 @@ const AuthModal = ({ open, onClose }) => {
     const handleClose = () => {
         reset(); // Сброс формы при закрытии
         setAvatarPreview(null); // Сброс превью аватара
-        setActiveTab(0); // Возврат к первой вкладке
+        setActiveTab(0);
+        setGoogleError(null);
         // Сброс input файла
         const fileInput = document.getElementById('avatar-upload');
         if (fileInput) {
@@ -104,22 +125,8 @@ const AuthModal = ({ open, onClose }) => {
             password: data.password,
         })
             .then((response) => {
-                console.log(response);
-
-                // Сохранение JWT токенов в localStorage
-                if (response.data.access) {
-                    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.data.access);
-                }
-                if (response.data.refresh) {
-                    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refresh);
-                }
-
-                // Закрытие модального окна и обновление страницы
-                handleClose();
-
-                // Перенаправление на главную страницу
-                navigate(ROUTES.HOME);
-                window.location.reload(); // Перезагрузка для обновления состояния авторизации
+                saveAuthTokens(response.data);
+                finishAuthSuccess();
             })
             .catch((error) => {
                 console.error('Login error:', error);
@@ -160,20 +167,8 @@ const AuthModal = ({ open, onClose }) => {
                 });
             })
             .then((response) => {
-                // Сохранение JWT токенов в localStorage
-                if (response.data.access) {
-                    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.data.access);
-                }
-                if (response.data.refresh) {
-                    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refresh);
-                }
-                
-                // Закрытие модального окна
-                handleClose();
-                
-                // Перенаправление на главную страницу
-                navigate(ROUTES.HOME);
-                window.location.reload(); // Перезагрузка для обновления состояния авторизации
+                saveAuthTokens(response.data);
+                finishAuthSuccess();
             })
             .catch((error) => {
                 console.error('Registration error:', error);
@@ -216,6 +211,21 @@ const AuthModal = ({ open, onClose }) => {
             </DialogTitle>
 
             <DialogContent className="auth-modal-content">
+                <Box className="auth-form-box auth-google-block">
+                    <GoogleSignInButton
+                        key={activeTab}
+                        mode={activeTab === 1 ? 'signup' : 'signin'}
+                        onSuccess={handleGoogleAuthSuccess}
+                        onError={handleGoogleAuthError}
+                    />
+                    {googleError && (
+                        <p className="auth-modal-google-error">{googleError}</p>
+                    )}
+                    <div className="auth-divider" role="separator">
+                        <span>или</span>
+                    </div>
+                </Box>
+
                 {/* Вкладка Авторизация */}
                 {activeTab === 0 && (
                     <form onSubmit={handleSubmit(handleLogin)}>

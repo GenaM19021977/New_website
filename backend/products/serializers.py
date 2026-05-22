@@ -166,6 +166,12 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         return value.strip()
 
 
+class GoogleAuthSerializer(serializers.Serializer):
+    """Вход / регистрация через Google ID token (GIS)."""
+
+    id_token = serializers.CharField(write_only=True)
+
+
 class PasswordResetConfirmSerializer(serializers.Serializer):
     """Установка нового пароля по ссылке из письма (uid + token)."""
 
