@@ -1,0 +1,52 @@
+/**
+ * Боковая панель FILTER в списках моделей — всегда справа от таблицы.
+ */
+
+#changelist .changelist-form-container {
+  flex-direction: row-reverse !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-start !important;
+}
+
+#changelist .changelist-form-container > div:not(#changelist-filter) {
+  flex: 1 1 auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  order: 0 !important;
+}
+
+#changelist #changelist-filter {
+  flex: 0 0 260px !important;
+  order: 0 !important;
+  margin: 0 24px 0 0 !important;
+  border-left: none !important;
+  border-right: 1px solid var(--hairline-color, #e0e0e0);
+  padding-left: 12px;
+  box-sizing: border-box;
+}
+
+#changelist-filter li.selected {
+  border-left: none !important;
+  border-right: 5px solid var(--hairline-color, #e0e0e0);
+  padding-left: 0 !important;
+  padding-right: 10px !important;
+  margin-left: 0 !important;
+  margin-right: -15px !important;
+}
+
+@media (max-width: 1200px) {
+  #changelist .changelist-form-container {
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+  }
+
+  #changelist #changelist-filter {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 16px 0 !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--hairline-color, #e0e0e0);
+    padding-left: 0;
+    padding-bottom: 12px;
+  }
+}
