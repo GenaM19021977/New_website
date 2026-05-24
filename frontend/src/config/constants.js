@@ -24,6 +24,9 @@ export const ROUTES = {
     ABOUT: '/about',
     LOGIN: '/login',
     REGISTER: '/register',
+    /** Страница входа и регистрации (вкладки, как в модальном окне) */
+    AUTH: '/auth',
+    authWithTab: (tab) => (tab === 'register' ? '/auth?tab=register' : '/auth'),
     FORGOT_PASSWORD: '/forgot-password',
     RESET_PASSWORD: '/reset-password',
     CATALOG: '/catalog',

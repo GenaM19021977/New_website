@@ -27,6 +27,7 @@ import Header from "./components/header/Header";
 import Login from "./components/pages/login/Login";
 import ForgotPassword from "./components/pages/login/ForgotPassword";
 import ResetPassword from "./components/pages/login/ResetPassword";
+import AuthPage from "./components/pages/auth/AuthPage";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { ROUTES } from "./config/constants";
@@ -48,6 +49,7 @@ function App() {
         {/* Публичные маршруты без Header */}
         <Route path={ROUTES.LOGIN} element={<Login />} />
         <Route path={ROUTES.REGISTER} element={<Register />} />
+        <Route path={ROUTES.AUTH} element={<AuthPage />} />
         <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
         <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
 

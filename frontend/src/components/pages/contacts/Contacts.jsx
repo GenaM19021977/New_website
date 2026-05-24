@@ -2,7 +2,7 @@
  * Страница "Контакты" — вкладки «Контакты» и «Часто задаваемые вопросы».
  */
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Accordion from "@mui/material/Accordion";
@@ -87,7 +87,10 @@ const FAQ_ITEMS = [
 ];
 
 const Contacts = () => {
-  const [activeTab, setActiveTab] = useState(0);
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(() =>
+    location.state?.contactsTab === 1 ? 1 : 0
+  );
   const [authenticated, setAuthenticated] = useState(() => isAuth());
   const [questionName, setQuestionName] = useState("");
   const [questionEmail, setQuestionEmail] = useState("");
@@ -118,6 +121,12 @@ const Contacts = () => {
       .catch(() => {})
       .finally(() => setProfileLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (location.state?.contactsTab === 1) {
+      setActiveTab(1);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const syncAuth = () => {
@@ -407,13 +416,15 @@ const Contacts = () => {
                     </p>
                     <div className="contacts-ask-guest-actions">
                       <Link
-                        to={ROUTES.LOGIN}
+                        to={ROUTES.AUTH}
+                        state={{ from: ROUTES.CONTACTS, contactsTab: 1 }}
                         className="contacts-ask-guest-btn contacts-ask-guest-btn--primary"
                       >
                         Войти
                       </Link>
                       <Link
-                        to={ROUTES.REGISTER}
+                        to={ROUTES.authWithTab("register")}
+                        state={{ from: ROUTES.CONTACTS, contactsTab: 1 }}
                         className="contacts-ask-guest-btn contacts-ask-guest-btn--secondary"
                       >
                         Регистрация

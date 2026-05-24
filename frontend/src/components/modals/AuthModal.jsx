@@ -6,7 +6,7 @@
  * 2. Регистрация - форма регистрации
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -27,9 +27,21 @@ import { saveAuthTokens } from '../../utils/authTokens';
 import GoogleSignInButton from '../auth/GoogleSignInButton';
 import './AuthModal.css';
 
-const AuthModal = ({ open, onClose }) => {
+const AuthModal = ({
+    open,
+    onClose,
+    initialTab = 0,
+    fullScreen = false,
+    returnTo = null,
+}) => {
     // Состояние активной вкладки (0 - Авторизация, 1 - Регистрация)
-    const [activeTab, setActiveTab] = useState(0);
+    const [activeTab, setActiveTab] = useState(initialTab);
+
+    useEffect(() => {
+        if (open) {
+            setActiveTab(initialTab);
+        }
+    }, [open, initialTab]);
     
     // Состояние для превью аватара
     const [avatarPreview, setAvatarPreview] = useState(null);
@@ -46,8 +58,12 @@ const AuthModal = ({ open, onClose }) => {
     const [googleError, setGoogleError] = useState(null);
 
     const finishAuthSuccess = () => {
-        handleClose();
-        navigate(ROUTES.HOME);
+        if (fullScreen) {
+            navigate(returnTo || ROUTES.HOME, { replace: true });
+        } else {
+            handleClose();
+            navigate(returnTo || ROUTES.HOME);
+        }
         window.location.reload();
     };
 
@@ -196,7 +212,8 @@ const AuthModal = ({ open, onClose }) => {
             onClose={handleClose}
             maxWidth="sm"
             fullWidth
-            className="auth-modal"
+            fullScreen={fullScreen}
+            className={fullScreen ? 'auth-modal auth-modal--page' : 'auth-modal'}
         >
             <DialogTitle className="auth-modal-title">
                 <Tabs

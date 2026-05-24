@@ -198,7 +198,7 @@ export default function Footer() {
 
                     {/* Копирайт */}
                     <div className="footer-copyright">
-                        <p>Отопительное оборудование в Бресте - Kotelkov.by © 2025</p>
+                        <p>Отопительное оборудование в Бресте - Kotelkov.by © 2026</p>
                         <p>Создание и продвижение сайта - InternetSozdateli</p>
                     </div>
 
