@@ -7,7 +7,7 @@
  * 3. Нижняя секция - каталог, поиск, пользователь и корзина
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -28,7 +28,7 @@ import IconButton from "@mui/material/IconButton";
 import Footer from "../footer/Footer";
 import AuthModal from "../modals/AuthModal";
 import api from "../../services/api";
-import { STORAGE_KEYS, ROUTES, CURRENCIES } from "../../config/constants";
+import { STORAGE_KEYS, ROUTES, CURRENCIES, AUTH_CHANGED_EVENT } from "../../config/constants";
 import { useCurrency } from "../../context/CurrencyContext";
 import { getCartCount } from "../../utils/cart";
 import { getFavoritesCount } from "../../utils/favorites";
@@ -40,7 +40,6 @@ export default function Header(props) {
 
   // Поиск: запрос и результаты в модальном окне
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchProducts, setSearchProducts] = useState([]);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
 
@@ -55,7 +54,6 @@ export default function Header(props) {
 
   // Состояние для управления адаптивным меню
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   // Список производителей котлов из БД для выпадающего меню «Каталог»
   const [manufacturers, setManufacturers] = useState([]);
@@ -69,10 +67,7 @@ export default function Header(props) {
   // Выбранная валюта из контекста
   const { currency, setCurrency } = useCurrency();
 
-  /**
-   * Функция для загрузки данных пользователя
-   */
-  const loadUserData = () => {
+  const loadUserData = useCallback(() => {
     const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
     if (token) {
       api
@@ -83,7 +78,6 @@ export default function Header(props) {
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
-          // Если токен невалиден, очищаем состояние
           if (error.response?.status === 401) {
             localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
             localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
@@ -95,43 +89,19 @@ export default function Header(props) {
       setIsAuthenticated(false);
       setUser(null);
     }
-  };
+  }, []);
 
-  /**
-   * Проверка размера экрана для адаптивного меню
-   * Меню появляется когда ширина экрана меньше 768px
-   */
   useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-
+    const syncCart = () => setCartCount(getCartCount());
+    const syncFav = () => setFavoritesCount(getFavoritesCount());
+    syncCart();
+    syncFav();
+    window.addEventListener("cart-updated", syncCart);
+    window.addEventListener("favorites-updated", syncFav);
     return () => {
-      window.removeEventListener("resize", checkScreenSize);
+      window.removeEventListener("cart-updated", syncCart);
+      window.removeEventListener("favorites-updated", syncFav);
     };
-  }, []);
-
-  /**
-   * Обновление счётчика корзины
-   */
-  useEffect(() => {
-    setCartCount(getCartCount());
-    const handler = () => setCartCount(getCartCount());
-    window.addEventListener("cart-updated", handler);
-    return () => window.removeEventListener("cart-updated", handler);
-  }, []);
-
-  /**
-   * Обновление счётчика избранного
-   */
-  useEffect(() => {
-    setFavoritesCount(getFavoritesCount());
-    const handler = () => setFavoritesCount(getFavoritesCount());
-    window.addEventListener("favorites-updated", handler);
-    return () => window.removeEventListener("favorites-updated", handler);
   }, []);
 
   /**
@@ -156,29 +126,16 @@ export default function Header(props) {
   useEffect(() => {
     loadUserData();
 
-    // Проверка токена при изменении localStorage
-    const handleStorageChange = () => {
-      loadUserData();
-    };
+    const handleStorageChange = () => loadUserData();
 
     window.addEventListener("storage", handleStorageChange);
-
-    // Проверка каждую секунду (для отслеживания изменений в той же вкладке)
-    const interval = setInterval(() => {
-      const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-      if (token && !user) {
-        loadUserData();
-      } else if (!token && user) {
-        setIsAuthenticated(false);
-        setUser(null);
-      }
-    }, 1000);
+    window.addEventListener(AUTH_CHANGED_EVENT, loadUserData);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
+      window.removeEventListener(AUTH_CHANGED_EVENT, loadUserData);
     };
-  }, []);
+  }, [loadUserData]);
 
   /**
    * Обработчик открытия модального окна авторизации
@@ -210,11 +167,22 @@ export default function Header(props) {
 
   const scrollToTop = () => window.scrollTo(0, 0);
 
-  // Загрузка товаров для поиска при первом вводе
   const [allProducts, setAllProducts] = useState([]);
   const [productsFetched, setProductsFetched] = useState(false);
 
-  const fetchProductsForSearch = () => {
+  const searchQueryNorm = useMemo(
+    () => (searchQuery || "").trim().toLowerCase(),
+    [searchQuery],
+  );
+
+  const searchProducts = useMemo(() => {
+    if (!searchQueryNorm) return [];
+    return allProducts.filter((p) =>
+      (p.name || "").toLowerCase().includes(searchQueryNorm),
+    );
+  }, [allProducts, searchQueryNorm]);
+
+  const fetchProductsForSearch = useCallback(() => {
     if (productsFetched) return;
     setSearchLoading(true);
     api
@@ -225,23 +193,16 @@ export default function Header(props) {
       })
       .catch(() => setAllProducts([]))
       .finally(() => setSearchLoading(false));
-  };
+  }, [productsFetched]);
 
-  // Фильтрация товаров по названию при вводе, показ модального окна
   useEffect(() => {
-    const query = (searchQuery || "").trim().toLowerCase();
-    if (!query) {
-      setSearchProducts([]);
+    if (!searchQueryNorm) {
       setSearchModalOpen(false);
       return;
     }
     fetchProductsForSearch();
-    const matches = allProducts.filter((p) =>
-      (p.name || "").toLowerCase().includes(query),
-    );
-    setSearchProducts(matches);
     setSearchModalOpen(true);
-  }, [searchQuery, allProducts]);
+  }, [searchQueryNorm, fetchProductsForSearch]);
 
   const handleSearchProductClick = (product) => {
     navigate(ROUTES.productById(product.id));
@@ -261,7 +222,6 @@ export default function Header(props) {
   const menuItems = [
     { label: "О нас", path: ROUTES.ABOUT },
     { label: "Каталог", path: ROUTES.CATALOG },
-    { label: "Наши партнеры", path: ROUTES.PARTNERS },
     { label: "Бренды", path: ROUTES.BRANDS },
     { label: "Контакты", path: ROUTES.CONTACTS },
     { label: "Корзина", path: ROUTES.CART },
@@ -496,13 +456,6 @@ export default function Header(props) {
                     : null}
                 </div>
               </div>
-              <Link
-                to={ROUTES.PARTNERS}
-                className="header-link"
-                onClick={scrollToTop}
-              >
-                Наши партнеры
-              </Link>
               <Link
                 to={ROUTES.BRANDS}
                 className="header-link"

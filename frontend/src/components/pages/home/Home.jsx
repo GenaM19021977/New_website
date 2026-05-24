@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import Card from '../../card/Card';
+import Carousel3D from '../../carousel/Carousel3D';
 import { ROUTES } from '../../../config/constants';
 import './Home.css';
 
@@ -9,16 +9,24 @@ const Home = () => {
       <section className="home-hero" aria-labelledby="hero-title">
         <div className="home-hero-overlay" />
         <div className="page-container home-hero-content">
-          <span className="home-hero-label">— КОТЛЫ И ОТОПЛЕНИЕ</span>
-          <h1 id="hero-title" className="home-hero-title">
-            Надёжное отопительное оборудование для частного дома
-          </h1>
-          <p className="home-hero-desc">
-            Энергоэффективные и безопасные решения. Каталог, доставка, монтаж, гарантия.
-          </p>
-          <Link to={ROUTES.ABOUT} className="home-hero-cta">
-            О компании
-          </Link>
+          <div className="home-hero-layout">
+            <div className="home-hero-text">
+              <span className="home-hero-label">— КОТЛЫ И ОТОПЛЕНИЕ</span>
+              <h1 id="hero-title" className="home-hero-title">
+                Надёжное отопительное оборудование для частного дома
+              </h1>
+              <p className="home-hero-desc">
+                Энергоэффективные и безопасные решения. Каталог, доставка, монтаж,
+                гарантия.
+              </p>
+              <Link to={ROUTES.ABOUT} className="home-hero-cta">
+                О компании
+              </Link>
+            </div>
+            <div className="home-hero-carousel" aria-label="Галерея котлов">
+              <Carousel3D />
+            </div>
+          </div>
         </div>
       </section>
     </main>

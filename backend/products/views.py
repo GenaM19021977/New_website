@@ -12,21 +12,75 @@ from .serializers import (
     UserSerializer,
     UserUpdateSerializer,
     PasswordChangeSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
+    GoogleAuthSerializer,
     ElectricBoilerSerializer,
     ElectricBoilerDetailSerializer,
     DeliverySerializer,
     OrderHistoryCreateSerializer,
     OrderHistoryReadSerializer,
+    UserQuestionCreateSerializer,
+    UserQuestionReadSerializer,
 )
-from .models import ElectricBoiler, Delivery
+from .models import ElectricBoiler, Delivery, OrderHistory, UserQuestion
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+from django.conf import settings
+import logging
+import threading
 
+from django.db import close_old_connections
+
+from .password_reset_email import send_password_reset_email, build_password_reset_url
+from .google_auth import (
+    GoogleAuthError,
+    verify_google_id_token,
+    authenticate_or_create_user_from_google,
+)
+
+logger = logging.getLogger(__name__)
 
 # Получаем модель пользователя из настроек Django
 User = get_user_model()
+
+PASSWORD_RESET_REQUEST_MESSAGE = (
+    "Если указанный email зарегистрирован, на него отправлена "
+    "инструкция по восстановлению пароля."
+)
+
+
+def _send_password_reset_email_async(user_id: int) -> None:
+    """Отправка письма в фоне, чтобы API ответил сразу (SMTP может занимать >5 с)."""
+
+    def task():
+        close_old_connections()
+        try:
+            user = User.objects.get(pk=user_id)
+            send_password_reset_email(user)
+        except Exception:
+            logger.exception(
+                "Background password reset email failed for user_id=%s",
+                user_id,
+            )
+            if settings.DEBUG:
+                try:
+                    user = User.objects.get(pk=user_id)
+                    logger.error(
+                        "DEV: ссылка сброса пароля (если SMTP недоступен): %s",
+                        build_password_reset_url(user),
+                    )
+                except Exception:
+                    pass
+        finally:
+            close_old_connections()
+
+    threading.Thread(target=task, daemon=True).start()
 
 
 class ManufacturersView(viewsets.ViewSet):
@@ -110,7 +164,9 @@ class DeliveryView(viewsets.ViewSet):
 
 class OrderHistoryCreateView(viewsets.ViewSet):
     """
-    POST /orders/ — сохранение заказа в историю.
+    GET /orders/ — список заказов текущего пользователя (JWT обязателен).
+    POST /orders/ — сохранение заказа в историю (гость или пользователь).
+    DELETE /orders/{pk}/ — отмена своего заказа (статус «Отменен пользователем»).
     products_subtotal в БД = «Стоимость заказа, BYN» (каталог ± products_subtotal_byn с checkout).
     """
 
@@ -118,10 +174,16 @@ class OrderHistoryCreateView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
 
     def list(self, request):
-        return Response(
-            {"detail": 'Метод "GET" не разрешён.'},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Требуется авторизация."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        qs = OrderHistory.objects.filter(user=request.user).prefetch_related(
+            "items",
         )
+        serializer = OrderHistoryReadSerializer(qs, many=True)
+        return Response(serializer.data)
 
     def create(self, request):
         serializer = OrderHistoryCreateSerializer(
@@ -135,6 +197,171 @@ class OrderHistoryCreateView(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        """Отмена заказа владельцем: статус canceled_by_user, запись остаётся в истории."""
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Требуется авторизация."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        try:
+            order = OrderHistory.objects.prefetch_related("items").get(pk=pk)
+        except OrderHistory.DoesNotExist:
+            return Response(
+                {"detail": "Заказ не найден."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if order.user_id != request.user.id:
+            return Response(
+                {"detail": "Заказ не найден."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if order.status == OrderHistory.OrderStatus.SHIPPED:
+            return Response(
+                {
+                    "detail": "Нельзя отменить заказ, который уже отправлен.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if order.status == OrderHistory.OrderStatus.CANCELED_BY_USER:
+            return Response(
+                {"detail": "Заказ уже отменён."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        order.status = OrderHistory.OrderStatus.CANCELED_BY_USER
+        order.save(update_fields=["status"])
+        return Response(
+            OrderHistoryReadSerializer(order).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class UserQuestionView(viewsets.ViewSet):
+    """
+    GET /user-questions/ — вопросы текущего пользователя (JWT обязателен).
+    POST /user-questions/ — отправка вопроса (JWT обязателен).
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+        qs = UserQuestion.objects.filter(user=request.user)
+        serializer = UserQuestionReadSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = UserQuestionCreateSerializer(
+            data=request.data,
+            context={"request": request},
+        )
+        if serializer.is_valid():
+            question = serializer.save()
+            return Response(
+                UserQuestionReadSerializer(question).data,
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetView(viewsets.ViewSet):
+    """
+    Восстановление пароля при забытом пароле.
+
+    POST /password-reset/request/ — письмо со ссылкой (не раскрывает, есть ли email в БД).
+    POST /password-reset/confirm/ — новый пароль по uid и token из ссылки.
+    """
+
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=["post"], url_path="request")
+    def request_reset(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data["email"]
+        user = User.objects.filter(email__iexact=email).first()
+        if user and user.is_active:
+            _send_password_reset_email_async(user.pk)
+
+        return Response({"message": PASSWORD_RESET_REQUEST_MESSAGE})
+
+    @action(detail=False, methods=["post"], url_path="confirm")
+    def confirm_reset(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        uidb64 = serializer.validated_data["uid"]
+        token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["new_password"]
+
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response(
+                {"detail": "Ссылка для сброса пароля недействительна или устарела."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not user.is_active:
+            return Response(
+                {"detail": "Ссылка для сброса пароля недействительна или устарела."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not default_token_generator.check_token(user, token):
+            return Response(
+                {"detail": "Ссылка для сброса пароля недействительна или устарела."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+
+        return Response(
+            {"message": "Пароль успешно изменён. Теперь вы можете войти с новым паролем."}
+        )
+
+
+class GoogleAuthView(viewsets.ViewSet):
+    """
+    Вход и регистрация через Google (ID token с фронтенда).
+
+    Endpoint: POST /auth/google/
+    Body: { "id_token": "<JWT от Google Identity Services>" }
+    """
+
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request):
+        serializer = GoogleAuthSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            idinfo = verify_google_id_token(serializer.validated_data["id_token"])
+            user = authenticate_or_create_user_from_google(idinfo)
+        except GoogleAuthError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.is_active:
+            return Response(
+                {"detail": "Учётная запись отключена."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class LoginView(viewsets.ViewSet):

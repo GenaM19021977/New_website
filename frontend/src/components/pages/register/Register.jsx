@@ -10,6 +10,7 @@ import MyPassField from '../../forms/MyPassField';
 import MyButton from '../../forms/MyButton';
 import api from '../../../services/api';
 import { STORAGE_KEYS, ROUTES, EMAIL_ERROR } from '../../../config/constants';
+import { dispatchAuthChanged } from '../../../utils/authEvents';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const Register = () => {
         if (response.data.refresh) {
           localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refresh);
         }
+        dispatchAuthChanged();
         navigate(ROUTES.HOME);
       })
       .catch((error) => {

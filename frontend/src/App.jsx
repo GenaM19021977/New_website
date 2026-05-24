@@ -14,21 +14,25 @@ import Home from "./components/pages/home/Home";
 import About from "./components/pages/about/About";
 import Catalog from "./components/pages/catalog/Catalog";
 import ProductDetail from "./components/pages/product/ProductDetail";
-import Partners from "./components/pages/partners/Partners";
 import Brands from "./components/pages/brands/Brands";
+import BrandDetail from "./components/pages/brands/BrandDetail";
 import Contacts from "./components/pages/contacts/Contacts";
 import PersonalCabinet from "./components/pages/cabinet/PersonalCabinet";
+import MyOrders from "./components/pages/cabinet/MyOrders";
 import Cart from "./components/pages/cart/Cart";
 import Checkout from "./components/pages/checkout/Checkout";
 import Favorites from "./components/pages/favorites/Favorites";
 import PurchaseAuthGuard from "./components/auth/PurchaseAuthGuard";
 import Header from "./components/header/Header";
 import Login from "./components/pages/login/Login";
+import ForgotPassword from "./components/pages/login/ForgotPassword";
+import ResetPassword from "./components/pages/login/ResetPassword";
+import AuthPage from "./components/pages/auth/AuthPage";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { ROUTES } from "./config/constants";
 
-/** При смене маршрута прокручивает страницу вверх (для ссылок: Домашняя, О нас, Каталог, Наши партнеры, Бренды, Контакты, логотип). */
+/** При смене маршрута прокручивает страницу вверх (для ссылок: Домашняя, О нас, Каталог, Бренды, Контакты, логотип). */
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -45,6 +49,9 @@ function App() {
         {/* Публичные маршруты без Header */}
         <Route path={ROUTES.LOGIN} element={<Login />} />
         <Route path={ROUTES.REGISTER} element={<Register />} />
+        <Route path={ROUTES.AUTH} element={<AuthPage />} />
+        <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
+        <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
 
         {/* Перенаправление с корня на /home */}
         <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
@@ -84,21 +91,25 @@ function App() {
         />
         <Route
           path="/selection"
-          element={<Navigate to={ROUTES.PARTNERS} replace />}
+          element={<Navigate to={ROUTES.HOME} replace />}
         />
         <Route
-          path={ROUTES.PARTNERS}
-          element={
-            <Header>
-              <Partners />
-            </Header>
-          }
+          path="/partners"
+          element={<Navigate to={ROUTES.HOME} replace />}
         />
         <Route
           path={ROUTES.BRANDS}
           element={
             <Header>
               <Brands />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.BRAND}
+          element={
+            <Header>
+              <BrandDetail />
             </Header>
           }
         />
@@ -115,6 +126,14 @@ function App() {
           element={
             <Header>
               <PersonalCabinet />
+            </Header>
+          }
+        />
+        <Route
+          path={ROUTES.MY_ORDERS}
+          element={
+            <Header>
+              <MyOrders />
             </Header>
           }
         />

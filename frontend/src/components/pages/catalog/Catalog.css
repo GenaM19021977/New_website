@@ -67,6 +67,53 @@
   color: var(--color-text);
 }
 
+.catalog-filters__hint {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.catalog-filters__price-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.catalog-filters__price-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.catalog-filters__price-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.catalog-filters__number-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 1rem;
+  color: var(--color-text);
+  background-color: var(--color-bg-dark);
+  border: 1px solid rgba(159, 176, 184, 0.35);
+  border-radius: 8px;
+}
+
+.catalog-filters__number-input::placeholder {
+  color: rgba(159, 176, 184, 0.5);
+}
+
+.catalog-filters__number-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(199, 167, 90, 0.2);
+}
+
 .catalog-filters__btn {
   padding: 10px 16px;
   font-size: 0.9375rem;
@@ -151,31 +198,27 @@
   color: var(--color-accent);
 }
 
-.catalog-filters__power-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-height: 220px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.catalog-filters__check {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 0.875rem;
+.catalog-filters__select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 36px 10px 12px;
+  font-size: 1rem;
   color: var(--color-text);
+  background-color: var(--color-bg-dark);
+  border: 1px solid rgba(159, 176, 184, 0.35);
+  border-radius: 8px;
   cursor: pointer;
-  line-height: 1.35;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239fb0b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 
-.catalog-filters__check input {
-  margin-top: 3px;
-  flex-shrink: 0;
-  accent-color: var(--color-accent);
+.catalog-filters__select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(199, 167, 90, 0.2);
 }
 
 .catalog-filters__count {

@@ -5,9 +5,22 @@
 Доступен по адресу /admin/ после создания суперпользователя.
 """
 
-from django.contrib import admin
+import logging
 
-from .models import CustomUser, ElectricBoiler, Delivery, OrderHistory, OrderHistoryItem
+from django.contrib import admin, messages
+
+from .question_email import resolve_question_recipient, send_user_question_answer_email
+
+from .models import (
+    CustomUser,
+    ElectricBoiler,
+    Delivery,
+    OrderHistory,
+    OrderHistoryItem,
+    UserQuestion,
+)
+
+logger = logging.getLogger(__name__)
 
 
 @admin.register(CustomUser)
@@ -332,3 +345,156 @@ class OrderHistoryAdmin(admin.ModelAdmin):
             },
         ),
     )
+
+
+@admin.register(UserQuestion)
+class UserQuestionAdmin(admin.ModelAdmin):
+    """Вопросы пользователей с сайта и ответы администратора."""
+
+    list_display = (
+        "id",
+        "user_name",
+        "email",
+        "phone",
+        "question_preview",
+        "has_admin_answer",
+        "answer_email_sent",
+        "created_at",
+    )
+    actions = ("send_answer_email_action",)
+    list_display_links = ("id", "user_name")
+    list_filter = (
+        "user_name",
+        "email",
+        "created_at",
+        "answer_email_sent_at",
+    )
+    search_fields = (
+        "user_name",
+        "email",
+        "phone",
+        "question",
+        "admin_answer",
+        "user__email",
+    )
+    readonly_fields = (
+        "user",
+        "user_name",
+        "email",
+        "phone",
+        "question",
+        "answer_email_sent_at",
+        "created_at",
+        "updated_at",
+    )
+    ordering = ("-created_at", "-id")
+    date_hierarchy = "created_at"
+
+    fieldsets = (
+        (
+            "Вопрос пользователя",
+            {
+                "fields": (
+                    "user",
+                    "user_name",
+                    "email",
+                    "phone",
+                    "question",
+                    "answer_email_sent_at",
+                    "created_at",
+                    "updated_at",
+                ),
+            },
+        ),
+        (
+            "Ответ администратора",
+            {
+                "fields": ("admin_answer",),
+                "description": (
+                    "Заполните ответ и сохраните — пользователь увидит его в личном "
+                    "кабинете на сайте и получит письмо на указанный e-mail."
+                ),
+            },
+        ),
+    )
+
+    def save_model(self, request, obj, form, change):
+        previous_answer = ""
+        had_email_sent = False
+        if change and obj.pk:
+            row = (
+                UserQuestion.objects.filter(pk=obj.pk)
+                .values("admin_answer", "answer_email_sent_at")
+                .first()
+            )
+            if row:
+                previous_answer = (row["admin_answer"] or "").strip()
+                had_email_sent = row["answer_email_sent_at"] is not None
+
+        super().save_model(request, obj, form, change)
+        obj.refresh_from_db()
+
+        current_answer = (obj.admin_answer or "").strip()
+        if not current_answer:
+            return
+
+        answer_changed = current_answer != previous_answer
+        needs_email = answer_changed or not had_email_sent
+        if not needs_email:
+            return
+
+        recipient = resolve_question_recipient(obj)
+        try:
+            send_user_question_answer_email(obj)
+        except Exception as exc:
+            logger.exception("Failed to send question answer email")
+            self.message_user(
+                request,
+                f"Ответ сохранён в личном кабинете. Не удалось отправить письмо "
+                f"на {recipient or '—'}: {exc}",
+                level=messages.WARNING,
+            )
+        else:
+            self.message_user(
+                request,
+                f"Ответ сохранён. Письмо отправлено на {recipient}.",
+                level=messages.SUCCESS,
+            )
+
+    @admin.action(description="Отправить ответ на e-mail")
+    def send_answer_email_action(self, request, queryset):
+        sent = 0
+        errors = []
+        for obj in queryset:
+            if not (obj.admin_answer or "").strip():
+                errors.append(f"№{obj.pk}: нет ответа администратора")
+                continue
+            recipient = resolve_question_recipient(obj)
+            try:
+                send_user_question_answer_email(obj)
+                sent += 1
+            except Exception as exc:
+                errors.append(f"№{obj.pk} ({recipient}): {exc}")
+        if sent:
+            self.message_user(
+                request,
+                f"Отправлено писем: {sent}.",
+                level=messages.SUCCESS,
+            )
+        for err in errors[:5]:
+            self.message_user(request, err, level=messages.ERROR)
+
+    @admin.display(description="Письмо", boolean=True)
+    def answer_email_sent(self, obj):
+        return obj.answer_email_sent_at is not None
+
+    @admin.display(description="Вопрос")
+    def question_preview(self, obj):
+        text = (obj.question or "").strip()
+        if len(text) <= 60:
+            return text
+        return f"{text[:60]}…"
+
+    @admin.display(description="Ответ", boolean=True)
+    def has_admin_answer(self, obj):
+        return bool((obj.admin_answer or "").strip())

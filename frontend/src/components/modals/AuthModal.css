@@ -117,3 +117,30 @@
     color: #ffffff !important;
 }
 
+.auth-modal-forgot {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.auth-modal-forgot .auth-link {
+    color: #9FB0B8;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.auth-modal-forgot .auth-link:hover {
+    color: #0db39e;
+}
+
+.auth-google-block {
+    margin-bottom: 8px;
+}
+
+.auth-modal-google-error {
+    margin: 0;
+    color: #f48fb1;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.4;
+}
+

@@ -1,0 +1,134 @@
+/**
+ * Страница «Мои заказы»
+ */
+
+.my-orders-page {
+  padding-bottom: var(--section-padding-y, 32px);
+}
+
+.my-orders-loading,
+.my-orders-empty {
+  color: var(--color-text-muted);
+}
+
+.my-orders-error {
+  color: var(--color-error, #ef4444);
+}
+
+.my-orders-toolbar {
+  margin-bottom: 8px;
+}
+
+.my-orders-back {
+  text-transform: none !important;
+  padding-left: 0 !important;
+}
+
+.my-orders-heading {
+  margin-top: 0;
+}
+
+.my-orders-empty-link {
+  color: var(--color-accent);
+}
+
+.my-orders-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.my-orders-card {
+  padding: 16px 18px;
+  border-radius: 10px;
+  background-color: var(--color-bg-card, #1e293b);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.my-orders-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin-bottom: 10px;
+}
+
+.my-orders-card-id-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.my-orders-card-id {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.my-orders-card-date {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.my-orders-card-status {
+  margin-left: auto;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.my-orders-card-status--canceled {
+  color: var(--color-text-muted);
+}
+
+.my-orders-cancel-btn {
+  text-transform: none !important;
+  flex-shrink: 0;
+}
+
+.my-orders-canceled-msg {
+  color: var(--color-text-muted);
+}
+
+.my-orders-card-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.my-orders-card-sub {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.my-orders-card-meta,
+.my-orders-card-address,
+.my-orders-card-phone,
+.my-orders-card-comment {
+  margin: 4px 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(241, 245, 249, 0.88);
+}
+
+.my-orders-items {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.my-orders-accepted-msg {
+  margin: 10px 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+

@@ -36,5 +36,13 @@ router.register("delivery", DeliveryView, basename="delivery")
 
 router.register("orders", OrderHistoryCreateView, basename="orders")
 
+router.register("user-questions", UserQuestionView, basename="user-questions")
+
+# POST /password-reset/request/ и POST /password-reset/confirm/
+router.register("password-reset", PasswordResetView, basename="password-reset")
+
+# POST /auth/google/ — вход / регистрация через Google
+router.register("auth/google", GoogleAuthView, basename="google-auth")
+
 # URL patterns, сгенерированные роутером
 urlpatterns = router.urls

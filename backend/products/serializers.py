@@ -41,6 +41,7 @@ class ElectricBoilerSerializer(serializers.ModelSerializer):
             "name",
             "price",
             "power",
+            "heating_area",
             "product_url",
             "image_1",
             "image_2",
@@ -150,6 +151,39 @@ class PasswordChangeSerializer(serializers.Serializer):
         if attrs["new_password"] != attrs["new_password2"]:
             raise serializers.ValidationError(
                 {"new_password2": "Новые пароли не совпадают"}
+            )
+        return attrs
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Запрос письма для восстановления пароля по email."""
+
+    email = serializers.CharField()
+
+    def validate_email(self, value):
+        if not value or "@" not in str(value):
+            raise serializers.ValidationError("Некорректный адрес электронной почты!")
+        return value.strip()
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    """Вход / регистрация через Google ID token (GIS)."""
+
+    id_token = serializers.CharField(write_only=True)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Установка нового пароля по ссылке из письма (uid + token)."""
+
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(required=True, min_length=8, write_only=True)
+    new_password2 = serializers.CharField(required=True, min_length=8, write_only=True)
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["new_password2"]:
+            raise serializers.ValidationError(
+                {"new_password2": "Пароли не совпадают"}
             )
         return attrs
 
@@ -512,3 +546,42 @@ class OrderHistoryReadSerializer(serializers.ModelSerializer):
             "apartment_number",
             "items",
         )
+
+
+class UserQuestionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserQuestion
+        fields = ("user_name", "email", "phone", "question")
+
+    def validate_user_name(self, value):
+        name = (value or "").strip()
+        if not name:
+            raise serializers.ValidationError("Укажите имя.")
+        return name
+
+    def validate_question(self, value):
+        text = (value or "").strip()
+        if not text:
+            raise serializers.ValidationError("Укажите текст вопроса.")
+        return text
+
+    def create(self, validated_data):
+        return UserQuestion.objects.create(
+            user=self.context["request"].user,
+            **validated_data,
+        )
+
+
+class UserQuestionReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserQuestion
+        fields = (
+            "id",
+            "user_name",
+            "email",
+            "phone",
+            "question",
+            "admin_answer",
+            "created_at",
+        )
+        read_only_fields = fields

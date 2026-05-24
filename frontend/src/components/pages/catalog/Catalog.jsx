@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import Card from "../../card/Card";
 import api from "../../../services/api";
+import { parsePrice } from "../../../utils/price";
 import "./Catalog.css";
 
 /** Интервал опроса API для обновления списка при изменении данных в БД (мс) */
@@ -18,6 +19,26 @@ function getManufacturerSlug(name) {
   return words.length >= 3 ? words[2].toLowerCase() : "";
 }
 
+/** Граница «от/до» из поля ввода; пусто или невалидно → null */
+function parseFilterBound(str) {
+  const t = String(str ?? "")
+    .trim()
+    .replace(/\s/g, "")
+    .replace(",", ".");
+  if (t === "") return null;
+  const n = Number.parseFloat(t);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Числовая цена для фильтра; текст без цифр («по запросу») → null */
+function getNumericCatalogPrice(product) {
+  const raw = product?.price;
+  if (raw == null || raw === "") return null;
+  const s = String(raw).trim();
+  if (!/\d/.test(s)) return null;
+  return parsePrice(raw);
+}
+
 const Catalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const manufacturerSlug = (searchParams.get("manufacturer") || "")
@@ -29,9 +50,23 @@ const Catalog = () => {
   const [manufacturers, setManufacturers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedPowers, setSelectedPowers] = useState(() => new Set());
+  const [selectedPower, setSelectedPower] = useState("");
+  const [selectedHeatingArea, setSelectedHeatingArea] = useState("");
+  const [priceFromInput, setPriceFromInput] = useState("");
+  const [priceToInput, setPriceToInput] = useState("");
 
   const [loadingManufacturers, setLoadingManufacturers] = useState(true);
+
+  const priceMinBound = useMemo(
+    () => parseFilterBound(priceFromInput),
+    [priceFromInput],
+  );
+  const priceMaxBound = useMemo(
+    () => parseFilterBound(priceToInput),
+    [priceToInput],
+  );
+  const priceFilterActive =
+    priceMinBound != null || priceMaxBound != null;
 
   const fetchManufacturers = useCallback(() => {
     setLoadingManufacturers(true);
@@ -59,19 +94,21 @@ const Catalog = () => {
     );
   }, [products]);
 
+  const heatingAreaOptions = useMemo(() => {
+    const s = new Set();
+    products.forEach((p) => {
+      const v = (p.heating_area || "").trim();
+      if (v) s.add(v);
+    });
+    return Array.from(s).sort((a, b) =>
+      a.localeCompare(b, "ru", { sensitivity: "base" }),
+    );
+  }, [products]);
+
   const manufacturerLabel = useMemo(() => {
     const m = manufacturers.find((x) => x.slug === manufacturerSlug);
     return m?.name || manufacturerSlug || "";
   }, [manufacturers, manufacturerSlug]);
-
-  const togglePower = useCallback((value) => {
-    setSelectedPowers((prev) => {
-      const next = new Set(prev);
-      if (next.has(value)) next.delete(value);
-      else next.add(value);
-      return next;
-    });
-  }, []);
 
   const setManufacturerFilter = useCallback(
     (slug) => {
@@ -87,7 +124,10 @@ const Catalog = () => {
   );
 
   const resetFilters = useCallback(() => {
-    setSelectedPowers(new Set());
+    setSelectedPower("");
+    setSelectedHeatingArea("");
+    setPriceFromInput("");
+    setPriceToInput("");
     setSearchParams(new URLSearchParams());
   }, [setSearchParams]);
 
@@ -108,29 +148,79 @@ const Catalog = () => {
         );
       });
     }
-    if (selectedPowers.size > 0) {
-      result = result.filter((p) => selectedPowers.has((p.power || "").trim()));
+    if (selectedPower) {
+      result = result.filter(
+        (p) => (p.power || "").trim() === selectedPower,
+      );
+    }
+    if (selectedHeatingArea) {
+      result = result.filter(
+        (p) => (p.heating_area || "").trim() === selectedHeatingArea,
+      );
+    }
+    if (priceFilterActive) {
+      result = result.filter((p) => {
+        const n = getNumericCatalogPrice(p);
+        if (n === null) return false;
+        if (priceMinBound != null && n < priceMinBound) return false;
+        if (priceMaxBound != null && n > priceMaxBound) return false;
+        return true;
+      });
     }
     return result;
-  }, [products, manufacturerSlug, searchQuery, selectedPowers]);
+  }, [
+    products,
+    manufacturerSlug,
+    searchQuery,
+    selectedPower,
+    selectedHeatingArea,
+    priceFilterActive,
+    priceMinBound,
+    priceMaxBound,
+  ]);
 
-  const fetchProducts = useCallback(() => {
+  const loadBoilers = useCallback(({ silent } = {}) => {
+    if (!silent) setLoading(true);
     api
       .get("boilers/")
       .then((res) => {
         setProducts(Array.isArray(res.data) ? res.data : []);
       })
       .catch(() => setProducts([]))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!silent) setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    loadBoilers();
+  }, [loadBoilers]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [manufacturerSlug, searchQuery, selectedPowers]);
+  }, [
+    manufacturerSlug,
+    searchQuery,
+    selectedPower,
+    selectedHeatingArea,
+    priceFromInput,
+    priceToInput,
+  ]);
+
+  useEffect(() => {
+    if (selectedPower && !powerOptions.includes(selectedPower)) {
+      setSelectedPower("");
+    }
+  }, [powerOptions, selectedPower]);
+
+  useEffect(() => {
+    if (
+      selectedHeatingArea &&
+      !heatingAreaOptions.includes(selectedHeatingArea)
+    ) {
+      setSelectedHeatingArea("");
+    }
+  }, [heatingAreaOptions, selectedHeatingArea]);
 
   useEffect(() => {
     setCurrentPage((p) => {
@@ -154,26 +244,21 @@ const Catalog = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      api
-        .get("boilers/")
-        .then((res) => {
-          setProducts(Array.isArray(res.data) ? res.data : []);
-        })
-        .catch(() => setProducts([]));
+      loadBoilers({ silent: true });
     }, REFRESH_INTERVAL_MS);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [loadBoilers]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        fetchProducts();
+        loadBoilers({ silent: true });
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [fetchProducts]);
+  }, [loadBoilers]);
 
   return (
     <main className="page-main catalog-page">
@@ -186,9 +271,9 @@ const Catalog = () => {
           <span className="section-number" aria-hidden>
             03
           </span>
-          <h1 id="catalog-heading" className="page-section-heading">
+          {/* <h1 id="catalog-heading" className="page-section-heading">
             Каталог
-          </h1>
+          </h1> */}
           <p className="page-section-text">
             Каталог отопительного оборудования: котлы, водонагреватели, насосы и
             сопутствующие товары.
@@ -250,35 +335,91 @@ const Catalog = () => {
                     )}
                   </fieldset>
 
+                  <fieldset className="catalog-filters__fieldset">
+                    <legend className="catalog-filters__legend">
+                      Цена, BYN
+                    </legend>
+                    <div className="catalog-filters__price-row">
+                      <div className="catalog-filters__price-field">
+                        <label
+                          className="catalog-filters__price-label"
+                          htmlFor="catalog-price-from"
+                        >
+                          От
+                        </label>
+                        <input
+                          id="catalog-price-from"
+                          type="text"
+                          inputMode="decimal"
+                          className="catalog-filters__number-input"
+                          placeholder="0"
+                          value={priceFromInput}
+                          onChange={(e) => setPriceFromInput(e.target.value)}
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="catalog-filters__price-field">
+                        <label
+                          className="catalog-filters__price-label"
+                          htmlFor="catalog-price-to"
+                        >
+                          До
+                        </label>
+                        <input
+                          id="catalog-price-to"
+                          type="text"
+                          inputMode="decimal"
+                          className="catalog-filters__number-input"
+                          placeholder=""
+                          value={priceToInput}
+                          onChange={(e) => setPriceToInput(e.target.value)}
+                          autoComplete="off"
+                        />
+                      </div>
+                    </div>
+                  </fieldset>
+
                   {powerOptions.length > 0 && (
                     <fieldset className="catalog-filters__fieldset">
                       <legend className="catalog-filters__legend">
-                        Мощность
+                        Мощность, KВт
                       </legend>
-                      <ul
-                        className="catalog-filters__power-list"
-                        role="list"
+                      <select
+                        id="catalog-power-select"
+                        className="catalog-filters__select"
+                        aria-label="Мощность, кВт"
+                        value={selectedPower}
+                        onChange={(e) => setSelectedPower(e.target.value)}
                       >
-                        {powerOptions.map((pw, idx) => {
-                          const id = `catalog-power-${idx}`;
-                          return (
-                            <li key={pw}>
-                              <label
-                                className="catalog-filters__check"
-                                htmlFor={id}
-                              >
-                                <input
-                                  id={id}
-                                  type="checkbox"
-                                  checked={selectedPowers.has(pw)}
-                                  onChange={() => togglePower(pw)}
-                                />
-                                <span>{pw}</span>
-                              </label>
-                            </li>
-                          );
-                        })}
-                      </ul>
+                        <option value="">Все значения</option>
+                        {powerOptions.map((pw) => (
+                          <option key={pw} value={pw}>
+                            {pw}
+                          </option>
+                        ))}
+                      </select>
+                    </fieldset>
+                  )}
+
+                  {heatingAreaOptions.length > 0 && (
+                    <fieldset className="catalog-filters__fieldset">
+                      <legend className="catalog-filters__legend">
+                        Отапливаемая площадь, м²
+                      </legend>
+                      <select
+                        id="catalog-heating-area-select"
+                        className="catalog-filters__select"
+                        aria-label="Отапливаемая площадь, м²"
+                        value={selectedHeatingArea}
+                        onChange={(e) => setSelectedHeatingArea(e.target.value)}
+                      >
+                        <option value="">Все значения</option>
+                        {heatingAreaOptions.map((area) => (
+                          <option key={area} value={area}>
+                            {area}
+                          </option>
+                        ))}
+                      </select>
                     </fieldset>
                   )}
 
@@ -296,7 +437,10 @@ const Catalog = () => {
                     disabled={
                       !manufacturerSlug &&
                       !searchQuery &&
-                      selectedPowers.size === 0
+                      !selectedPower &&
+                      !selectedHeatingArea &&
+                      !priceFromInput.trim() &&
+                      !priceToInput.trim()
                     }
                   >
                     Сбросить фильтры
@@ -304,7 +448,11 @@ const Catalog = () => {
                 </aside>
 
                 <div className="catalog-main">
-                  {(manufacturerSlug || searchQuery || selectedPowers.size > 0) && (
+                  {(manufacturerSlug ||
+                    searchQuery ||
+                    selectedPower ||
+                    selectedHeatingArea ||
+                    priceFilterActive) && (
                     <p className="catalog-filter-hint">
                       {manufacturerSlug && (
                         <>
@@ -315,7 +463,10 @@ const Catalog = () => {
                         </>
                       )}
                       {manufacturerSlug &&
-                        (searchQuery || selectedPowers.size > 0) &&
+                        (searchQuery ||
+                          selectedPower ||
+                          selectedHeatingArea ||
+                          priceFilterActive) &&
                         " · "}
                       {searchQuery && (
                         <>
@@ -325,12 +476,40 @@ const Catalog = () => {
                           </span>
                         </>
                       )}
-                      {searchQuery && selectedPowers.size > 0 && " · "}
-                      {selectedPowers.size > 0 && (
+                      {searchQuery &&
+                        (selectedPower ||
+                          selectedHeatingArea ||
+                          priceFilterActive) &&
+                        " · "}
+                      {selectedPower && (
                         <>
-                          Мощность:{" "}
+                          Мощность, кВт:{" "}
                           <span className="catalog-filter-hint__slug">
-                            {Array.from(selectedPowers).join(", ")}
+                            {selectedPower}
+                          </span>
+                        </>
+                      )}
+                      {selectedPower &&
+                        (selectedHeatingArea || priceFilterActive) &&
+                        " · "}
+                      {selectedHeatingArea && (
+                        <>
+                          Площадь, м²:{" "}
+                          <span className="catalog-filter-hint__slug">
+                            {selectedHeatingArea}
+                          </span>
+                        </>
+                      )}
+                      {selectedHeatingArea && priceFilterActive && " · "}
+                      {priceFilterActive && (
+                        <>
+                          Цена, BYN:{" "}
+                          <span className="catalog-filter-hint__slug">
+                            {priceMinBound != null ? `от ${priceMinBound}` : ""}
+                            {priceMinBound != null && priceMaxBound != null
+                              ? " "
+                              : ""}
+                            {priceMaxBound != null ? `до ${priceMaxBound}` : ""}
                           </span>
                         </>
                       )}

@@ -9,7 +9,9 @@ import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import iconDelivery from "../../../images/img_social/free-icon-fast-delivery-5465975.png";
-import iconPayment from "../../../images/img_social/free-icon-money-box-14022258.png";
+import iconPayment from "../../../images/img_social/free-icon-secure-payment-11338230.png";
+import iconPartners from "../../../images/img_social/free-icon-partner-11445175.png";
+import iconWarranty from "../../../images/img_social/9549528.png";
 import api from "../../../services/api";
 import "./About.css";
 
@@ -37,6 +39,7 @@ function finalizeDeliveryLine(body) {
 const About = () => {
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [warrantyModalOpen, setWarrantyModalOpen] = useState(false);
   const [deliveryItems, setDeliveryItems] = useState([]);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
   const [deliveryError, setDeliveryError] = useState(null);
@@ -68,7 +71,9 @@ const About = () => {
     const hasNumber = item.value_number != null && item.value_number !== "";
     const hasAmount = item.amount != null && item.amount !== "";
 
-    const numPhrase = hasNumber ? formatDeliveryMoneyPhrase(item.value_number) : "";
+    const numPhrase = hasNumber
+      ? formatDeliveryMoneyPhrase(item.value_number)
+      : "";
     const amtPhrase = hasAmount ? formatDeliveryMoneyPhrase(item.amount) : "";
 
     if (!title && !hasNumber && !hasAmount) {
@@ -105,32 +110,213 @@ const About = () => {
           <span className="section-number" aria-hidden>
             02
           </span>
-          <h1 id="about-heading" className="page-section-heading">
-            О нас
-          </h1>
-          <p className="page-section-text">
-            Это страница о Турковых. Мы занимаемся отопительным оборудованием в
-            Бресте — котлы, доставка, монтаж, гарантия и сервис.
-          </p>
-          <div className="about-page-buttons">
-            <button
-              type="button"
-              className="about-action-btn"
-              aria-label="Оплата"
-              onClick={() => setPaymentModalOpen(true)}
+          <div className="about-page-columns">
+            <div className="about-page-columns-main">
+              {/* <h1 id="about-heading" className="page-section-heading">
+                О нас
+              </h1> */}
+              <article className="about-page-article" lang="ru">
+            <p>
+              Электрическое отопление для частного дома — это современное,
+              экологичное и безопасное решение, которое завоевывает всё большую
+              популярность. Его ключевое преимущество — автономность и простота,
+              но главный фактор, который требует внимания — стоимость
+              эксплуатации.
+            </p>
+            <p>Давайте разберем все плюсы и особенности подробнее.</p>
+
+            <h2 className="about-page-article-heading">
+              ✅ Почему стоит рассмотреть электрическое отопление
+            </h2>
+            <p>
+              Электрические системы дают владельцу дома ряд важных преимуществ,
+              которые начинаются уже на этапе проектирования.
+            </p>
+            <div className="about-page-table-scroll">
+              <table className="about-page-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Преимущество</th>
+                    <th scope="col">Как это проявляется</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Низкий порог входа</td>
+                    <td>
+                      Подключение обходится значительно дешевле газификации. Вам
+                      не нужен дорогостоящий проект, разрешения и согласования.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Простота и скорость монтажа</td>
+                    <td>
+                      Установка электрокотла или теплых полов занимает минимум
+                      времени. Не нужны дымоход, вентиляция, отдельное помещение
+                      под котельную и емкость для хранения топлива.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Максимальная безопасность и экологичность
+                    </td>
+                    <td>
+                      Нет открытого огня, утечек газа, продуктов сгорания или
+                      запаха. Котлы и обогреватели не выделяют вредных веществ,
+                      полностью безопасны для здоровья и требуют минимального
+                      контроля.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Комфорт и гибкость управления</td>
+                    <td>
+                      Вы можете легко настроить комфортную температуру в каждом
+                      помещении, запрограммировать график работы (например,
+                      снижать нагрев на время отсутствия) и даже управлять
+                      системой удаленно со смартфона.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Надежность и низкие эксплуатационные расходы
+                    </td>
+                    <td>
+                      Система не требует регулярного технического обслуживания,
+                      чистки от сажи и нагара. Отсутствие труб и теплоносителя в
+                      электрических конвекторах или теплых полах исключает риск
+                      протечек и размораживания системы.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h2 className="about-page-article-heading">
+              💸 Главный нюанс: стоимость эксплуатации
+            </h2>
+            <p>
+              Несмотря на все перечисленные плюсы, электричество — самый
+              дорогой энергоноситель. Эксплуатационные расходы могут существенно
+              превышать затраты на газ или твердое топливо.
+            </p>
+            <ul className="about-page-list">
+              <li>
+                <strong>Зависимость от тарифов:</strong> Ежемесячные счета
+                напрямую зависят от вашего региона, выбранного тарифа и
+                выделенной мощности дома.
+              </li>
+              <li>
+                <strong>Важность теплоизоляции:</strong> Чтобы система была
+                экономичной, дом должен быть очень хорошо утеплен. Это ключевое
+                условие: в плохо утепленном доме электричество «вылетит в трубу».
+              </li>
+              <li>
+                <strong>Ограничения по мощности:</strong> В старых домах или
+                садовых товариществах выделенной электрической мощности может не
+                хватить для полноценного отопления.
+              </li>
+            </ul>
+
+            <h2 className="about-page-article-heading">
+              💡 Как выбрать тип электрического отопления?
+            </h2>
+            <p>
+              Чтобы найти оптимальное решение для дома, стоит рассмотреть разные
+              варианты. Электрические системы делятся на два основных типа:
+            </p>
+            <p>
+              <strong>Системы с водяным контуром (с электрокотлом):</strong>{" "}
+              Традиционное отопление с радиаторами и трубами. Теплоноситель
+              нагревается от электричества и циркулирует по дому. Это хороший
+              вариант, если в доме уже разведена система водяного отопления.
+              Котлы могут быть ТЭНовыми, индукционными или электродными.
+            </p>
+            <p>
+              <strong>
+                Прямые электрические системы обогрева (без труб и жидкости).
+              </strong>{" "}
+              К ним относятся:
+            </p>
+            <ul className="about-page-list">
+              <li>
+                <strong>Электрические теплые полы:</strong> Создают наиболее
+                комфортное распределение тепла (ноги в тепле, голова в
+                прохладе). Однако они инерционны — прогревают помещение не
+                сразу, зато долго сохраняют тепло.
+              </li>
+              <li>
+                <strong>Электрические конвекторы:</strong> Просты и дешевы,
+                быстро нагревают воздух, но могут его пересушивать.
+              </li>
+            </ul>
+            <p>
+              Достойной альтернативой также являются тепловые насосы. Они работают
+              от электричества, но используют его в 3–4 раза эффективнее: на 1 кВт
+              затраченной энергии они выдают 3–4 кВт тепла, забирая энергию с
+              улицы, земли или из воды. Однако их установка — более
+              дорогостоящий проект.
+            </p>
+
+            <h2 className="about-page-article-heading">💎 Вывод</h2>
+            <p>
+              Электрическое отопление — это идеальный выбор для хорошо
+              утепленных домов, особенно если подвести газ невозможно или
+              экономически нецелесообразно. Оно дарит вам независимость,
+              безопасность и комфорт. Чтобы минимизировать затраты, можно
+              использовать комбинированные схемы, например, отапливать дом
+              электрокотлом, но в каждой комнате установить programmable
+              thermostat (программируемые термостаты) для точного контроля
+              температуры в каждой зоне.
+            </p>
+            <p>
+              Если появятся вопросы на каком-то из этапов, спрашивайте — я
+              постараюсь помочь.
+            </p>
+              </article>
+            </div>
+            <div
+              className="about-page-buttons"
+              role="toolbar"
+              aria-label="Оплата, доставка, партнёры, гарантия"
             >
-              <img src={iconPayment} alt="" width={48} height={48} />
-              <span>Оплата</span>
-            </button>
-            <button
-              type="button"
-              className="about-action-btn"
-              aria-label="Доставка"
-              onClick={() => setDeliveryModalOpen(true)}
-            >
-              <img src={iconDelivery} alt="" width={48} height={48} />
-              <span>Доставка</span>
-            </button>
+              <button
+                type="button"
+                className="about-action-btn"
+                aria-label="Оплата"
+                onClick={() => setPaymentModalOpen(true)}
+              >
+                <img src={iconPayment} alt="" width={48} height={48} />
+                <span>Оплата</span>
+              </button>
+              <button
+                type="button"
+                className="about-action-btn"
+                aria-label="Доставка"
+                onClick={() => setDeliveryModalOpen(true)}
+              >
+                <img src={iconDelivery} alt="" width={48} height={48} />
+                <span>Доставка</span>
+              </button>
+              <a
+                className="about-action-btn about-action-btn--link"
+                href="https://kotelkov.by/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Партнеры — открыть сайт kotelkov.by"
+              >
+                <img src={iconPartners} alt="" width={48} height={48} />
+                <span>Партнеры</span>
+              </a>
+              <button
+                type="button"
+                className="about-action-btn"
+                aria-label="Гарантия"
+                onClick={() => setWarrantyModalOpen(true)}
+              >
+                <img src={iconWarranty} alt="" width={48} height={48} />
+                <span>Гарантия</span>
+              </button>
+            </div>
           </div>
         </section>
       </div>
@@ -298,6 +484,186 @@ const About = () => {
             для сверки с выпиской из карт-счёта с целью подтверждения
             совершённых операций в случае возникновения такой необходимости в
             спорных ситуациях.
+          </p>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={warrantyModalOpen}
+        onClose={() => setWarrantyModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        className="about-warranty-modal"
+        PaperProps={{ className: "about-warranty-modal-paper" }}
+      >
+        <DialogTitle className="about-warranty-modal-title">
+          Гарантия
+          <IconButton
+            aria-label="Закрыть"
+            onClick={() => setWarrantyModalOpen(false)}
+            className="about-warranty-modal-close"
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent className="about-warranty-modal-content">
+          <h2 className="about-warranty-doc-title">
+            Гарантийные обязательства при покупке электроотопительного
+            оборудования
+          </h2>
+
+          <h3 className="about-warranty-section-title">1. Гарантийный срок</h3>
+          <p className="about-warranty-modal-text">
+            <strong>1.1.</strong> Гарантийный срок на новое электроотопительное
+            оборудование составляет 24 (двадцать четыре) месяца со дня передачи
+            товара Покупателю, если иное не указано в документации к конкретному
+            изделию.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>1.2.</strong> В случае отсутствия документов,
+            подтверждающих дату приобретения, гарантийный срок исчисляется с
+            даты изготовления оборудования, указанной на заводской табличке
+            (шильдике).
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            2. Условия предоставления гарантии
+          </h3>
+          <p className="about-warranty-modal-text">
+            Гарантийные обязательства действительны при одновременном соблюдении
+            следующих условий:
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>2.1. Надлежащее оформление документов:</strong> Покупатель
+            имеет оригинал гарантийного талона установленного образца с
+            указанием модели, серийного номера, даты продажи и печати продавца,
+            а также товарный (кассовый) чек.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>2.2. Правильный монтаж:</strong> Установка оборудования
+            выполнена в строгом соответствии с требованиями завода-изготовителя
+            (указаны в руководстве по эксплуатации).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>2.3. Ввод в эксплуатацию:</strong> Первый пуск и наладка
+            оборудования произведены специализированной организацией
+            (сертифицированным специалистом), что подтверждается отметкой в
+            гарантийном талоне.
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            3. Что делает Продавец/Изготовитель
+          </h3>
+          <p className="about-warranty-modal-text">
+            <strong>3.1.</strong> В течение всего гарантийного срока
+            Продавец/Изготовитель обязуется своими силами и за свой счет
+            устранять производственные дефекты оборудования.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>3.2.</strong> В случае выявления заводского брака, не
+            позволяющего устранить неисправность, производится замена
+            оборудования на аналогичное (если модель снята с производства, на
+            равноценное по характеристикам).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>3.3.</strong> Ремонт осуществляется авторизованным сервисным
+            центром.
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            4. Гарантия не распространяется
+          </h3>
+          <p className="about-warranty-modal-text">
+            <strong>4.1.</strong> На расходные материалы и быстроизнашивающиеся
+            детали (при наличии таковых в конструкции, например: уплотнители,
+            если они есть).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>4.2.</strong> При нарушении правил эксплуатации, указанных в
+            руководстве пользователя (подключение к сети с несоответствующим
+            напряжением, попадание жидкости, перегрев, работа без
+            теплоносителя, использование некачественной воды, если это
+            предусмотрено конструкцией).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>4.3.</strong> При наличии механических повреждений, следов
+            самостоятельного ремонта, вскрытия или изменения конструкции
+            оборудования.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>4.4.</strong> При неквалифицированном монтаже, если
+            оборудование требует профессиональной установки.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>4.5.</strong> В случае форс-мажорных обстоятельств
+            (стихийные бедствия, скачки напряжения в электросети свыше
+            допустимых норм — при отсутствии стабилизатора, если это
+            предусмотрено инструкцией).
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            5. Порядок действий при наступлении гарантийного случая
+          </h3>
+          <p className="about-warranty-modal-text">
+            <strong>5.1.</strong> Покупатель уведомляет Продавца или напрямую
+            обращается в авторизованный сервисный центр (контакты указаны в
+            документации).
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>5.2.</strong> При себе необходимо иметь:
+          </p>
+          <ul className="about-warranty-modal-list">
+            <li>заполненный гарантийный талон;</li>
+            <li>документ, подтверждающий покупку (чек);</li>
+            <li>
+              акт ввода в эксплуатацию (если требуется инструкцией).
+            </li>
+          </ul>
+          <p className="about-warranty-modal-text">
+            <strong>5.3.</strong> Оборудование передается в сервисный центр в
+            чистом виде и в комплектации, соответствующей заводской (если
+            требуется).
+          </p>
+
+          <h3 className="about-warranty-section-title">6. Особые условия</h3>
+          <p className="about-warranty-modal-text">
+            <strong>6.1.</strong> Срок гарантии на замененные компоненты
+            составляет 6 месяцев, но не более оставшегося гарантийного срока на
+            само оборудование.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>6.2.</strong> Проведение планового технического обслуживания
+            (чистка, проверка контактов, замена фильтров, если они есть) не
+            входит в гарантийные обязательства и оплачивается отдельно.
+          </p>
+          <p className="about-warranty-modal-text">
+            <strong>6.3.</strong> Изготовитель не несет ответственности за
+            неудобства, вызванные невозможностью использовать оборудование в
+            период его ремонта.
+          </p>
+
+          <h3 className="about-warranty-section-title">
+            Рекомендации по использованию
+          </h3>
+          <ul className="about-warranty-modal-list">
+            <li>
+              <strong>Адаптация:</strong> указывайте точные сроки гарантии на
+              конкретную модель (например: «Электрокотел мощностью 9 кВт — 3
+              года»).
+            </li>
+            <li>
+              <strong>Сервисная сеть:</strong> желательно приложить список адресов
+              сервисных центров.
+            </li>
+            <li>
+              <strong>Требования к монтажу:</strong> если установка критична —
+              продублируйте требование о наличии лицензии у монтажников.
+            </li>
+          </ul>
+          <p className="about-warranty-modal-note">
+            Этот текст составлен на основе обобщения российской и международной
+            практики производителей климатического и отопительного оборудования
+            и соответствует стандартам, принятым в отрасли.
           </p>
         </DialogContent>
       </Dialog>

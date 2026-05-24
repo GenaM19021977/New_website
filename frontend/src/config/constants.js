@@ -12,6 +12,9 @@ export const STORAGE_KEYS = {
     CURRENCY: 'turiki_currency',
 };
 
+/** Имя события window: смена access/refresh токена в этой вкладке (вход/выход). */
+export const AUTH_CHANGED_EVENT = "turiki-auth-changed";
+
 // Доступные валюты
 export const CURRENCIES = ['BYN', 'RUB', 'USD', 'EUR'];
 
@@ -21,13 +24,21 @@ export const ROUTES = {
     ABOUT: '/about',
     LOGIN: '/login',
     REGISTER: '/register',
+    /** Страница входа и регистрации (вкладки, как в модальном окне) */
+    AUTH: '/auth',
+    authWithTab: (tab) => (tab === 'register' ? '/auth?tab=register' : '/auth'),
+    FORGOT_PASSWORD: '/forgot-password',
+    RESET_PASSWORD: '/reset-password',
     CATALOG: '/catalog',
     PRODUCT: '/catalog/:id',
     productById: (id) => `/catalog/${id}`,
-    PARTNERS: '/partners',
     BRANDS: '/brands',
+    BRAND: '/brands/:slug',
+    brandBySlug: (slug) => `/brands/${slug}`,
     CONTACTS: '/contacts',
     CABINET: '/cabinet',
+    /** История заказов (из личного кабинета) */
+    MY_ORDERS: '/cabinet/orders',
     CART: '/cart',
     CHECKOUT: '/checkout',
     FAVORITES: '/favorites',
@@ -38,6 +49,14 @@ export const AUTH_REQUIRED_PURCHASE = "Для совершения покупк�
 
 // Сообщение для неавторизованных при просмотре избранного
 export const AUTH_REQUIRED_FAVORITES = "Для просмотра избранного зарегистрируйтесь или авторизуйтесь!";
+
+// Сообщение для неавторизованных при переходе в историю заказов
+export const AUTH_REQUIRED_ORDERS =
+  "Для перехода в историю заказов зарегистрируйтесь или авторизуйтесь!";
+
+// Сообщение для неавторизованных в блоке «Задайте Ваш вопрос»
+export const AUTH_REQUIRED_QUESTION =
+  "Чтобы задать вопрос, зарегистрируйтесь или авторизуйтесь!";
 
 // Валидация телефона: + и ровно 12 цифр
 export const PHONE_REGEX = /^\+[0-9]{12}$/;
